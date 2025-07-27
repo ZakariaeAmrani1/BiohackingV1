@@ -180,7 +180,7 @@ export default function AppointmentCalendar() {
               {timeSlots.map((time) => (
                 <div
                   key={time}
-                  className="h-16 border-b border-border px-2 py-1 text-xs text-muted-foreground"
+                  className="h-20 border-b border-border px-2 py-1 text-xs text-muted-foreground"
                 >
                   {time}
                 </div>
@@ -227,7 +227,7 @@ export default function AppointmentCalendar() {
                   return (
                     <div
                       key={timeIndex}
-                      className="h-16 border-b border-border p-1 relative"
+                      className="h-20 border-b border-border p-1 relative"
                     >
                       {timeAppointments.map((appointment) => (
                         <div
