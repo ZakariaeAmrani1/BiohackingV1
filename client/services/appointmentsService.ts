@@ -12,11 +12,10 @@ export interface RendezVous {
 
 // Create/Update form data interface
 export interface AppointmentFormData {
-  CIN: string;
+  client_id: number;
   sujet: string;
   date_rendez_vous: string;
   Cree_par: string;
-  patient_nom: string;
   status: "programmé" | "confirmé" | "terminé" | "annulé";
 }
 
