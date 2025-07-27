@@ -203,18 +203,38 @@ export default function Appointments() {
   };
 
   const openEditModal = (appointment: RendezVous) => {
-    setSelectedAppointment(appointment);
-    setIsFormModalOpen(true);
+    // Close any open modals first
+    closeModals();
+    setTimeout(() => {
+      setSelectedAppointment(appointment);
+      setIsFormModalOpen(true);
+    }, 100);
   };
 
   const openDetailsModal = (appointment: RendezVous) => {
-    setSelectedAppointment(appointment);
-    setIsDetailsModalOpen(true);
+    closeModals();
+    setTimeout(() => {
+      setSelectedAppointment(appointment);
+      setIsDetailsModalOpen(true);
+    }, 100);
   };
 
   const openDeleteModal = (appointment: RendezVous) => {
-    setSelectedAppointment(appointment);
-    setIsDeleteModalOpen(true);
+    closeModals();
+    setTimeout(() => {
+      setSelectedAppointment(appointment);
+      setIsDeleteModalOpen(true);
+    }, 100);
+  };
+
+  // Force close all modals - can be used as emergency escape
+  const forceCloseAllModals = () => {
+    setIsFormModalOpen(false);
+    setIsDetailsModalOpen(false);
+    setIsDeleteModalOpen(false);
+    setSelectedAppointment(null);
+    setIsSubmitting(false);
+    setErrors([]);
   };
 
   const closeModals = () => {
