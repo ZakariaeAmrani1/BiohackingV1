@@ -4,8 +4,8 @@ import PlaceholderPage from "@/components/PlaceholderPage";
 export default function Metrics() {
   return (
     <PlaceholderPage
-      title="Health Metrics"
-      description="Track patient health metrics, biomarkers, and performance indicators."
+      title="Métriques de Santé"
+      description="Suivre les métriques de santé des patients, biomarqueurs et indicateurs de performance."
       icon={Activity}
     />
   );
