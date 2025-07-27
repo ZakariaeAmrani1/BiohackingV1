@@ -50,8 +50,42 @@ export default function Appointments() {
   const [dateFilter, setDateFilter] = useState<string>("tous");
   const [viewMode, setViewMode] = useState<"table" | "cards">("table");
 
+  // Data state
+  const [appointments, setAppointments] = useState<RendezVous[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Modal states
+  const [isFormModalOpen, setIsFormModalOpen] = useState(false);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [selectedAppointment, setSelectedAppointment] = useState<RendezVous | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const { toast } = useToast();
+
   // Get unique creators for filter dropdown
-  const creators = Array.from(new Set(mockAppointments.map(apt => apt.Cree_par)));
+  const creators = Array.from(new Set(appointments.map(apt => apt.Cree_par)));
+
+  // Load appointments on component mount
+  useEffect(() => {
+    loadAppointments();
+  }, []);
+
+  const loadAppointments = async () => {
+    try {
+      setIsLoading(true);
+      const data = await AppointmentsService.getAll();
+      setAppointments(data);
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: "Impossible de charger les rendez-vous",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // Filter and search logic
   const filteredAppointments = useMemo(() => {
@@ -232,7 +266,7 @@ export default function Appointments() {
                       <TableHead>Date & Heure</TableHead>
                       <TableHead>Statut</TableHead>
                       <TableHead>Créé par</TableHead>
-                      <TableHead>Créé le</TableHead>
+                      <TableHead>Cr��é le</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
