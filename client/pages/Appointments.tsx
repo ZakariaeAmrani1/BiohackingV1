@@ -252,7 +252,7 @@ export default function Appointments() {
               Gestion et planification des rendez-vous patients
             </p>
           </div>
-          <Button className="gap-2">
+          <Button className="gap-2" onClick={openCreateModal}>
             <Plus className="h-4 w-4" />
             Nouveau Rendez-vous
           </Button>
