@@ -4,8 +4,8 @@ import PlaceholderPage from "@/components/PlaceholderPage";
 export default function Treatments() {
   return (
     <PlaceholderPage
-      title="Treatments"
-      description="Manage treatment protocols, procedures, and therapy sessions."
+      title="Traitements"
+      description="Gérer les protocoles de traitement, procédures et séances de thérapie."
       icon={Stethoscope}
     />
   );
