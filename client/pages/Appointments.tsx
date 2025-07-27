@@ -155,6 +155,7 @@ export default function Appointments() {
       setIsSubmitting(true);
       await AppointmentsService.update(selectedAppointment.id, data);
       await loadAppointments();
+      closeFormModal();
       toast({
         title: "Succès",
         description: "Le rendez-vous a été modifié avec succès",
@@ -178,6 +179,7 @@ export default function Appointments() {
       setIsSubmitting(true);
       await AppointmentsService.delete(selectedAppointment.id);
       await loadAppointments();
+      closeDeleteModal();
       toast({
         title: "Succès",
         description: "Le rendez-vous a été supprimé avec succès",
