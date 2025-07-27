@@ -17,8 +17,8 @@ export default function Dashboard() {
 
         <StatsCards />
 
-        <div className="grid gap-6 lg:grid-cols-3">
-          <div className="lg:col-span-2">
+        <div className="grid gap-6 xl:grid-cols-3 lg:grid-cols-1">
+          <div className="xl:col-span-2">
             <AppointmentCalendar />
           </div>
           <div className="space-y-6">
