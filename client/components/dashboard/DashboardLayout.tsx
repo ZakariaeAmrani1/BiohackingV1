@@ -8,7 +8,8 @@ interface DashboardLayoutProps {
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   return (
-    <div className="h-screen flex bg-background">
+    <div className="h-screen flex flex-col lg:flex-row bg-background">
+      <MobileNav />
       <div className="hidden lg:block">
         <Sidebar />
       </div>
