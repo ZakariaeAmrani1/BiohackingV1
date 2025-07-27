@@ -324,7 +324,7 @@ export default function Appointments() {
         {/* Results Summary and View Toggle */}
         <div className="flex items-center justify-between">
           <p className="text-sm text-muted-foreground">
-            {filteredAppointments.length} rendez-vous trouvé(s)
+            {isLoading ? "Chargement..." : `${filteredAppointments.length} rendez-vous trouvé(s)`}
           </p>
           <div className="flex rounded-lg border border-border p-1">
             <Button
