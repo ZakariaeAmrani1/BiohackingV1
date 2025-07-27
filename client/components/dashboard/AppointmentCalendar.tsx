@@ -119,11 +119,11 @@ export default function AppointmentCalendar() {
                 variant="outline"
                 size="icon"
                 onClick={() => navigateWeek("prev")}
-                className="h-8 w-8"
+                className="h-8 w-8 flex-shrink-0"
               >
                 <ChevronLeft className="h-4 w-4" />
               </Button>
-              <span className="min-w-[120px] text-center text-sm font-medium">
+              <span className="min-w-[120px] text-center text-sm font-medium px-2">
                 {currentDate.toLocaleDateString("en-US", {
                   month: "long",
                   year: "numeric",
@@ -133,7 +133,7 @@ export default function AppointmentCalendar() {
                 variant="outline"
                 size="icon"
                 onClick={() => navigateWeek("next")}
-                className="h-8 w-8"
+                className="h-8 w-8 flex-shrink-0"
               >
                 <ChevronRight className="h-4 w-4" />
               </Button>
