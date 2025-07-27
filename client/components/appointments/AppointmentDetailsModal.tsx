@@ -124,7 +124,7 @@ export default function AppointmentDetailsModal({
               <User className="h-5 w-5" />
               Informations Patient
             </h3>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pl-7">
               <div>
                 <Label>Nom du patient</Label>
@@ -145,13 +145,13 @@ export default function AppointmentDetailsModal({
               <Stethoscope className="h-5 w-5" />
               Détails du Rendez-vous
             </h3>
-            
+
             <div className="space-y-3 pl-7">
               <div>
                 <Label>Type de consultation</Label>
                 <Value>{appointment.sujet}</Value>
               </div>
-              
+
               <div>
                 <Label className="flex items-center gap-2">
                   <Calendar className="h-4 w-4" />
@@ -172,7 +172,7 @@ export default function AppointmentDetailsModal({
               <FileText className="h-5 w-5" />
               Informations Administratives
             </h3>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pl-7">
               <div>
                 <Label>Créé par</Label>
@@ -196,7 +196,8 @@ export default function AppointmentDetailsModal({
             <div className="flex items-center justify-between text-sm text-muted-foreground">
               <span>ID du rendez-vous: #{appointment.id}</span>
               <span>
-                Créé le {new Date(appointment.created_at).toLocaleDateString("fr-FR")}
+                Créé le{" "}
+                {new Date(appointment.created_at).toLocaleDateString("fr-FR")}
               </span>
             </div>
           </div>
@@ -206,16 +207,20 @@ export default function AppointmentDetailsModal({
           <Button variant="outline" onClick={onClose}>
             Fermer
           </Button>
-          
+
           {onEdit && (
             <Button variant="outline" onClick={handleEdit} className="gap-2">
               <Edit className="h-4 w-4" />
               Modifier
             </Button>
           )}
-          
+
           {onDelete && (
-            <Button variant="destructive" onClick={handleDelete} className="gap-2">
+            <Button
+              variant="destructive"
+              onClick={handleDelete}
+              className="gap-2"
+            >
               <Trash2 className="h-4 w-4" />
               Supprimer
             </Button>
@@ -227,7 +232,13 @@ export default function AppointmentDetailsModal({
 }
 
 // Helper components for consistent styling
-function Label({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+function Label({
+  children,
+  className = "",
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
   return (
     <div className={`text-sm font-medium text-muted-foreground ${className}`}>
       {children}
@@ -235,7 +246,13 @@ function Label({ children, className = "" }: { children: React.ReactNode; classN
   );
 }
 
-function Value({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+function Value({
+  children,
+  className = "",
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
   return (
     <div className={`text-sm text-foreground mt-1 ${className}`}>
       {children}

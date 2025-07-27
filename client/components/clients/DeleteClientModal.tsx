@@ -51,13 +51,16 @@ export default function DeleteClientModal({
           <AlertDialogDescription asChild>
             <div className="space-y-4">
               <p>
-                Êtes-vous sûr de vouloir supprimer ce patient ? Cette action est irréversible et supprimera également tous les rendez-vous associés.
+                Êtes-vous sûr de vouloir supprimer ce patient ? Cette action est
+                irréversible et supprimera également tous les rendez-vous
+                associés.
               </p>
-              
+
               <div className="bg-muted p-3 rounded-lg">
                 <div className="space-y-1 text-sm">
                   <div>
-                    <span className="font-medium">Patient:</span> {client.prenom} {client.nom}
+                    <span className="font-medium">Patient:</span>{" "}
+                    {client.prenom} {client.nom}
                   </div>
                   <div>
                     <span className="font-medium">CIN:</span> {client.CIN}
@@ -69,7 +72,8 @@ export default function DeleteClientModal({
                     <span className="font-medium">Email:</span> {client.email}
                   </div>
                   <div>
-                    <span className="font-medium">Téléphone:</span> {client.numero_telephone}
+                    <span className="font-medium">Téléphone:</span>{" "}
+                    {client.numero_telephone}
                   </div>
                 </div>
               </div>
@@ -87,11 +91,9 @@ export default function DeleteClientModal({
             </div>
           </AlertDialogDescription>
         </AlertDialogHeader>
-        
+
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isLoading}>
-            Annuler
-          </AlertDialogCancel>
+          <AlertDialogCancel disabled={isLoading}>Annuler</AlertDialogCancel>
           <AlertDialogAction
             onClick={handleConfirm}
             disabled={isLoading}

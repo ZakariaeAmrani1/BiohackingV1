@@ -1,5 +1,13 @@
 import { useState, useEffect } from "react";
-import { CalendarDays, Search, FileText, Clock, Stethoscope, User, Users } from "lucide-react";
+import {
+  CalendarDays,
+  Search,
+  FileText,
+  Clock,
+  Stethoscope,
+  User,
+  Users,
+} from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -40,7 +48,11 @@ import {
   getAvailableDoctors,
   getAppointmentTypes,
 } from "@/services/appointmentsService";
-import { ClientsService, Client, calculateAge } from "@/services/clientsService";
+import {
+  ClientsService,
+  Client,
+  calculateAge,
+} from "@/services/clientsService";
 
 interface AppointmentFormModalProps {
   isOpen: boolean;
@@ -135,8 +147,11 @@ export default function AppointmentFormModal({
     }
   };
 
-  const handleInputChange = (field: keyof AppointmentFormData, value: string | number) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+  const handleInputChange = (
+    field: keyof AppointmentFormData,
+    value: string | number,
+  ) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
     // Clear errors when user starts typing
     if (errors.length > 0) {
       setErrors([]);
@@ -145,7 +160,7 @@ export default function AppointmentFormModal({
 
   const handleClientSelect = (client: Client) => {
     setSelectedClient(client);
-    setFormData(prev => ({ ...prev, client_id: client.id }));
+    setFormData((prev) => ({ ...prev, client_id: client.id }));
     setIsClientSelectorOpen(false);
     setClientSearchQuery("");
     // Clear errors when client is selected
@@ -154,7 +169,7 @@ export default function AppointmentFormModal({
     }
   };
 
-  const filteredClients = clients.filter(client => {
+  const filteredClients = clients.filter((client) => {
     const searchTerm = clientSearchQuery.toLowerCase();
     return (
       client.nom.toLowerCase().includes(searchTerm) ||
@@ -166,7 +181,7 @@ export default function AppointmentFormModal({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Validate form data
     const validationErrors = validateAppointmentData(formData);
     if (validationErrors.length > 0) {
@@ -229,8 +244,12 @@ export default function AppointmentFormModal({
               <Users className="h-4 w-4" />
               Sélectionner un patient
             </Label>
-            
-            <Popover open={isClientSelectorOpen} onOpenChange={setIsClientSelectorOpen} modal={true}>
+
+            <Popover
+              open={isClientSelectorOpen}
+              onOpenChange={setIsClientSelectorOpen}
+              modal={true}
+            >
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
@@ -241,7 +260,9 @@ export default function AppointmentFormModal({
                 >
                   {selectedClient ? (
                     <div className="flex items-center gap-2">
-                      <span>{selectedClient.prenom} {selectedClient.nom}</span>
+                      <span>
+                        {selectedClient.prenom} {selectedClient.nom}
+                      </span>
                       <Badge variant="outline" className="text-xs">
                         {selectedClient.CIN}
                       </Badge>
@@ -258,7 +279,7 @@ export default function AppointmentFormModal({
                 align="start"
               >
                 <Command>
-                  <CommandInput 
+                  <CommandInput
                     placeholder="Rechercher par nom, prénom, CIN, email..."
                     value={clientSearchQuery}
                     onValueChange={setClientSearchQuery}
@@ -278,7 +299,9 @@ export default function AppointmentFormModal({
                               {client.prenom} {client.nom}
                             </div>
                             <div className="text-sm text-muted-foreground">
-                              {client.CIN} • {calculateAge(client.date_naissance)} ans • {client.email}
+                              {client.CIN} •{" "}
+                              {calculateAge(client.date_naissance)} ans •{" "}
+                              {client.email}
                             </div>
                           </div>
                           <Badge variant="outline">
@@ -300,10 +323,12 @@ export default function AppointmentFormModal({
                       {selectedClient.prenom} {selectedClient.nom}
                     </div>
                     <div className="text-sm text-muted-foreground">
-                      CIN: {selectedClient.CIN} • Âge: {calculateAge(selectedClient.date_naissance)} ans
+                      CIN: {selectedClient.CIN} • Âge:{" "}
+                      {calculateAge(selectedClient.date_naissance)} ans
                     </div>
                     <div className="text-sm text-muted-foreground">
-                      Email: {selectedClient.email} • Tél: {selectedClient.numero_telephone}
+                      Email: {selectedClient.email} • Tél:{" "}
+                      {selectedClient.numero_telephone}
                     </div>
                   </div>
                   <Badge variant="outline" className="gap-1">
@@ -341,7 +366,10 @@ export default function AppointmentFormModal({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Date and Time */}
             <div className="space-y-2">
-              <Label htmlFor="date_rendez_vous" className="flex items-center gap-2">
+              <Label
+                htmlFor="date_rendez_vous"
+                className="flex items-center gap-2"
+              >
                 <Clock className="h-4 w-4" />
                 Date et heure
               </Label>
@@ -349,7 +377,9 @@ export default function AppointmentFormModal({
                 id="date_rendez_vous"
                 type="datetime-local"
                 value={formData.date_rendez_vous}
-                onChange={(e) => handleInputChange("date_rendez_vous", e.target.value)}
+                onChange={(e) =>
+                  handleInputChange("date_rendez_vous", e.target.value)
+                }
                 disabled={isSubmitting}
                 min={new Date().toISOString().slice(0, 16)}
               />
@@ -386,7 +416,12 @@ export default function AppointmentFormModal({
               <Label htmlFor="status">Statut</Label>
               <Select
                 value={formData.status}
-                onValueChange={(value) => handleInputChange("status", value as AppointmentFormData["status"])}
+                onValueChange={(value) =>
+                  handleInputChange(
+                    "status",
+                    value as AppointmentFormData["status"],
+                  )
+                }
                 disabled={isSubmitting}
               >
                 <SelectTrigger>
@@ -421,8 +456,10 @@ export default function AppointmentFormModal({
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
                   {isEditMode ? "Modification..." : "Création..."}
                 </div>
+              ) : isEditMode ? (
+                "Modifier"
               ) : (
-                isEditMode ? "Modifier" : "Créer"
+                "Créer"
               )}
             </Button>
           </DialogFooter>

@@ -115,7 +115,7 @@ let mockAppointments: RendezVous[] = [
 ];
 
 // Simulate API delay
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export class AppointmentsService {
   // Get all appointments
@@ -127,7 +127,7 @@ export class AppointmentsService {
   // Get appointment by ID
   static async getById(id: number): Promise<RendezVous | null> {
     await delay(300);
-    const appointment = mockAppointments.find(apt => apt.id === id);
+    const appointment = mockAppointments.find((apt) => apt.id === id);
     return appointment || null;
   }
 
@@ -142,7 +142,7 @@ export class AppointmentsService {
     }
 
     const newAppointment: RendezVous = {
-      id: Math.max(...mockAppointments.map(apt => apt.id)) + 1,
+      id: Math.max(...mockAppointments.map((apt) => apt.id)) + 1,
       CIN: client.CIN,
       patient_nom: `${client.prenom} ${client.nom}`,
       sujet: data.sujet,
@@ -158,10 +158,13 @@ export class AppointmentsService {
   }
 
   // Update existing appointment
-  static async update(id: number, data: AppointmentFormData): Promise<RendezVous | null> {
+  static async update(
+    id: number,
+    data: AppointmentFormData,
+  ): Promise<RendezVous | null> {
     await delay(800);
 
-    const index = mockAppointments.findIndex(apt => apt.id === id);
+    const index = mockAppointments.findIndex((apt) => apt.id === id);
     if (index === -1) return null;
 
     // Get client information from client_id
@@ -188,8 +191,8 @@ export class AppointmentsService {
   // Delete appointment
   static async delete(id: number): Promise<boolean> {
     await delay(500);
-    
-    const index = mockAppointments.findIndex(apt => apt.id === id);
+
+    const index = mockAppointments.findIndex((apt) => apt.id === id);
     if (index === -1) return false;
 
     mockAppointments.splice(index, 1);
@@ -199,12 +202,13 @@ export class AppointmentsService {
   // Search appointments
   static async search(query: string): Promise<RendezVous[]> {
     await delay(300);
-    
+
     const lowerQuery = query.toLowerCase();
-    return mockAppointments.filter(appointment =>
-      appointment.patient_nom?.toLowerCase().includes(lowerQuery) ||
-      appointment.CIN.toLowerCase().includes(lowerQuery) ||
-      appointment.sujet.toLowerCase().includes(lowerQuery)
+    return mockAppointments.filter(
+      (appointment) =>
+        appointment.patient_nom?.toLowerCase().includes(lowerQuery) ||
+        appointment.CIN.toLowerCase().includes(lowerQuery) ||
+        appointment.sujet.toLowerCase().includes(lowerQuery),
     );
   }
 
@@ -215,25 +219,35 @@ export class AppointmentsService {
     dateRange?: string;
   }): Promise<RendezVous[]> {
     await delay(300);
-    
-    return mockAppointments.filter(appointment => {
-      if (filters.status && filters.status !== "tous" && appointment.status !== filters.status) {
+
+    return mockAppointments.filter((appointment) => {
+      if (
+        filters.status &&
+        filters.status !== "tous" &&
+        appointment.status !== filters.status
+      ) {
         return false;
       }
-      
-      if (filters.creator && filters.creator !== "tous" && appointment.Cree_par !== filters.creator) {
+
+      if (
+        filters.creator &&
+        filters.creator !== "tous" &&
+        appointment.Cree_par !== filters.creator
+      ) {
         return false;
       }
-      
+
       // Add date filtering logic if needed
-      
+
       return true;
     });
   }
 }
 
 // Utility functions for validation
-export const validateAppointmentData = (data: AppointmentFormData): string[] => {
+export const validateAppointmentData = (
+  data: AppointmentFormData,
+): string[] => {
   const errors: string[] = [];
 
   if (!data.client_id || data.client_id <= 0) {

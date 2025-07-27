@@ -165,7 +165,7 @@ let mockClients: Client[] = [
 ];
 
 // Simulate API delay
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export class ClientsService {
   // Get all clients
@@ -177,16 +177,16 @@ export class ClientsService {
   // Get client by ID
   static async getById(id: number): Promise<Client | null> {
     await delay(300);
-    const client = mockClients.find(client => client.id === id);
+    const client = mockClients.find((client) => client.id === id);
     return client || null;
   }
 
   // Create new client
   static async create(data: ClientFormData): Promise<Client> {
     await delay(800);
-    
+
     const newClient: Client = {
-      id: Math.max(...mockClients.map(client => client.id)) + 1,
+      id: Math.max(...mockClients.map((client) => client.id)) + 1,
       ...data,
       created_at: new Date().toISOString(),
     };
@@ -196,10 +196,13 @@ export class ClientsService {
   }
 
   // Update existing client
-  static async update(id: number, data: ClientFormData): Promise<Client | null> {
+  static async update(
+    id: number,
+    data: ClientFormData,
+  ): Promise<Client | null> {
     await delay(800);
-    
-    const index = mockClients.findIndex(client => client.id === id);
+
+    const index = mockClients.findIndex((client) => client.id === id);
     if (index === -1) return null;
 
     const updatedClient: Client = {
@@ -214,8 +217,8 @@ export class ClientsService {
   // Delete client
   static async delete(id: number): Promise<boolean> {
     await delay(500);
-    
-    const index = mockClients.findIndex(client => client.id === id);
+
+    const index = mockClients.findIndex((client) => client.id === id);
     if (index === -1) return false;
 
     mockClients.splice(index, 1);
@@ -225,14 +228,15 @@ export class ClientsService {
   // Search clients
   static async search(query: string): Promise<Client[]> {
     await delay(300);
-    
+
     const lowerQuery = query.toLowerCase();
-    return mockClients.filter(client =>
-      client.nom.toLowerCase().includes(lowerQuery) ||
-      client.prenom.toLowerCase().includes(lowerQuery) ||
-      client.CIN.toLowerCase().includes(lowerQuery) ||
-      client.email.toLowerCase().includes(lowerQuery) ||
-      client.numero_telephone.includes(query)
+    return mockClients.filter(
+      (client) =>
+        client.nom.toLowerCase().includes(lowerQuery) ||
+        client.prenom.toLowerCase().includes(lowerQuery) ||
+        client.CIN.toLowerCase().includes(lowerQuery) ||
+        client.email.toLowerCase().includes(lowerQuery) ||
+        client.numero_telephone.includes(query),
     );
   }
 
@@ -243,18 +247,26 @@ export class ClientsService {
     ageRange?: string;
   }): Promise<Client[]> {
     await delay(300);
-    
-    return mockClients.filter(client => {
-      if (filters.groupeSanguin && filters.groupeSanguin !== "tous" && client.groupe_sanguin !== filters.groupeSanguin) {
+
+    return mockClients.filter((client) => {
+      if (
+        filters.groupeSanguin &&
+        filters.groupeSanguin !== "tous" &&
+        client.groupe_sanguin !== filters.groupeSanguin
+      ) {
         return false;
       }
-      
-      if (filters.creator && filters.creator !== "tous" && client.Cree_par !== filters.creator) {
+
+      if (
+        filters.creator &&
+        filters.creator !== "tous" &&
+        client.Cree_par !== filters.creator
+      ) {
         return false;
       }
-      
+
       // Add age filtering logic if needed
-      
+
       return true;
     });
   }
@@ -295,7 +307,9 @@ export const validateClientData = (data: ClientFormData): string[] => {
 
   if (!data.numero_telephone.trim()) {
     errors.push("Le numéro de téléphone est obligatoire");
-  } else if (!/^(\+32|0)[1-9]\d{7,8}$/.test(data.numero_telephone.replace(/\s/g, ''))) {
+  } else if (
+    !/^(\+32|0)[1-9]\d{7,8}$/.test(data.numero_telephone.replace(/\s/g, ""))
+  ) {
     errors.push("Le numéro de téléphone n'est pas au format belge valide");
   }
 
@@ -332,10 +346,10 @@ export const calculateAge = (birthDate: string): number => {
   const now = new Date();
   let age = now.getFullYear() - birth.getFullYear();
   const monthDiff = now.getMonth() - birth.getMonth();
-  
+
   if (monthDiff < 0 || (monthDiff === 0 && now.getDate() < birth.getDate())) {
     age--;
   }
-  
+
   return age;
 };

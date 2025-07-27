@@ -1,5 +1,19 @@
 import { useState, useMemo, useEffect } from "react";
-import { Calendar, Search, Filter, Plus, Eye, Edit, Trash2, ChevronDown, LayoutGrid, Table as TableIcon, Clock, User, MapPin } from "lucide-react";
+import {
+  Calendar,
+  Search,
+  Filter,
+  Plus,
+  Eye,
+  Edit,
+  Trash2,
+  ChevronDown,
+  LayoutGrid,
+  Table as TableIcon,
+  Clock,
+  User,
+  MapPin,
+} from "lucide-react";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -58,13 +72,14 @@ export default function Appointments() {
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [selectedAppointment, setSelectedAppointment] = useState<RendezVous | null>(null);
+  const [selectedAppointment, setSelectedAppointment] =
+    useState<RendezVous | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { toast } = useToast();
 
   // Get unique creators for filter dropdown
-  const creators = Array.from(new Set(appointments.map(apt => apt.Cree_par)));
+  const creators = Array.from(new Set(appointments.map((apt) => apt.Cree_par)));
 
   // Load appointments on component mount
   useEffect(() => {
@@ -74,15 +89,15 @@ export default function Appointments() {
   // Add escape key handler to force close modals if stuck
   useEffect(() => {
     const handleEscapeKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && event.ctrlKey) {
+      if (event.key === "Escape" && event.ctrlKey) {
         // Ctrl+Escape force closes all modals
         forceCloseAllModals();
       }
     };
 
-    document.addEventListener('keydown', handleEscapeKey);
+    document.addEventListener("keydown", handleEscapeKey);
     return () => {
-      document.removeEventListener('keydown', handleEscapeKey);
+      document.removeEventListener("keydown", handleEscapeKey);
     };
   }, []);
 
@@ -105,15 +120,19 @@ export default function Appointments() {
   // Filter and search logic
   const filteredAppointments = useMemo(() => {
     return appointments.filter((appointment) => {
-      const matchesSearch = 
-        appointment.patient_nom?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      const matchesSearch =
+        appointment.patient_nom
+          ?.toLowerCase()
+          .includes(searchTerm.toLowerCase()) ||
         appointment.CIN.toLowerCase().includes(searchTerm.toLowerCase()) ||
         appointment.sujet.toLowerCase().includes(searchTerm.toLowerCase());
 
-      const matchesStatus = statusFilter === "tous" || appointment.status === statusFilter;
-      
-      const matchesCreator = creatorFilter === "tous" || appointment.Cree_par === creatorFilter;
-      
+      const matchesStatus =
+        statusFilter === "tous" || appointment.status === statusFilter;
+
+      const matchesCreator =
+        creatorFilter === "tous" || appointment.Cree_par === creatorFilter;
+
       let matchesDate = true;
       if (dateFilter !== "tous") {
         const appointmentDate = new Date(appointment.date_rendez_vous);
@@ -125,13 +144,16 @@ export default function Appointments() {
 
         switch (dateFilter) {
           case "aujourd'hui":
-            matchesDate = appointmentDate.toDateString() === today.toDateString();
+            matchesDate =
+              appointmentDate.toDateString() === today.toDateString();
             break;
           case "demain":
-            matchesDate = appointmentDate.toDateString() === tomorrow.toDateString();
+            matchesDate =
+              appointmentDate.toDateString() === tomorrow.toDateString();
             break;
           case "cette-semaine":
-            matchesDate = appointmentDate >= today && appointmentDate <= thisWeek;
+            matchesDate =
+              appointmentDate >= today && appointmentDate <= thisWeek;
             break;
         }
       }
@@ -379,7 +401,9 @@ export default function Appointments() {
         {/* Results Summary and View Toggle */}
         <div className="flex items-center justify-between">
           <p className="text-sm text-muted-foreground">
-            {isLoading ? "Chargement..." : `${filteredAppointments.length} rendez-vous trouvé(s)`}
+            {isLoading
+              ? "Chargement..."
+              : `${filteredAppointments.length} rendez-vous trouvé(s)`}
           </p>
           <div className="flex rounded-lg border border-border p-1">
             <Button
@@ -424,7 +448,10 @@ export default function Appointments() {
                   <TableBody>
                     {filteredAppointments.length > 0 ? (
                       filteredAppointments.map((appointment) => (
-                        <TableRow key={appointment.id} className="hover:bg-muted/50">
+                        <TableRow
+                          key={appointment.id}
+                          className="hover:bg-muted/50"
+                        >
                           <TableCell className="font-medium">
                             {appointment.patient_nom}
                           </TableCell>
@@ -432,17 +459,25 @@ export default function Appointments() {
                             {appointment.CIN}
                           </TableCell>
                           <TableCell>{appointment.sujet}</TableCell>
-                          <TableCell>{formatDateTime(appointment.date_rendez_vous)}</TableCell>
+                          <TableCell>
+                            {formatDateTime(appointment.date_rendez_vous)}
+                          </TableCell>
                           <TableCell>
                             <Badge
                               variant="secondary"
-                              className={statusColors[appointment.status as keyof typeof statusColors]}
+                              className={
+                                statusColors[
+                                  appointment.status as keyof typeof statusColors
+                                ]
+                              }
                             >
                               {appointment.status}
                             </Badge>
                           </TableCell>
                           <TableCell>{appointment.Cree_par}</TableCell>
-                          <TableCell>{formatDate(appointment.created_at)}</TableCell>
+                          <TableCell>
+                            {formatDate(appointment.created_at)}
+                          </TableCell>
                           <TableCell className="text-right">
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
@@ -483,7 +518,8 @@ export default function Appointments() {
                           <div className="flex flex-col items-center gap-2">
                             <Calendar className="h-8 w-8 text-muted-foreground" />
                             <p className="text-muted-foreground">
-                              Aucun rendez-vous trouvé avec les critères sélectionnés
+                              Aucun rendez-vous trouvé avec les critères
+                              sélectionnés
                             </p>
                           </div>
                         </TableCell>
@@ -500,18 +536,27 @@ export default function Appointments() {
             {filteredAppointments.length > 0 ? (
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {filteredAppointments.map((appointment) => (
-                  <Card key={appointment.id} className="hover:shadow-md transition-shadow">
+                  <Card
+                    key={appointment.id}
+                    className="hover:shadow-md transition-shadow"
+                  >
                     <CardHeader className="pb-3">
                       <div className="flex items-start justify-between">
                         <div className="space-y-1">
-                          <CardTitle className="text-lg">{appointment.patient_nom}</CardTitle>
+                          <CardTitle className="text-lg">
+                            {appointment.patient_nom}
+                          </CardTitle>
                           <p className="text-sm text-muted-foreground font-mono">
                             CIN: {appointment.CIN}
                           </p>
                         </div>
                         <Badge
                           variant="secondary"
-                          className={statusColors[appointment.status as keyof typeof statusColors]}
+                          className={
+                            statusColors[
+                              appointment.status as keyof typeof statusColors
+                            ]
+                          }
                         >
                           {appointment.status}
                         </Badge>
@@ -527,7 +572,9 @@ export default function Appointments() {
                         <div className="flex items-center gap-2 text-sm">
                           <Clock className="h-4 w-4 text-muted-foreground" />
                           <span className="font-medium">Date:</span>
-                          <span>{formatDateTime(appointment.date_rendez_vous)}</span>
+                          <span>
+                            {formatDateTime(appointment.date_rendez_vous)}
+                          </span>
                         </div>
                         <div className="flex items-center gap-2 text-sm">
                           <User className="h-4 w-4 text-muted-foreground" />
@@ -543,7 +590,11 @@ export default function Appointments() {
                           </p>
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-8 w-8 p-0"
+                              >
                                 <ChevronDown className="h-4 w-4" />
                               </Button>
                             </DropdownMenuTrigger>
@@ -583,9 +634,12 @@ export default function Appointments() {
                   <div className="flex flex-col items-center gap-4">
                     <Calendar className="h-12 w-12 text-muted-foreground" />
                     <div>
-                      <h3 className="text-lg font-medium">Aucun rendez-vous trouvé</h3>
+                      <h3 className="text-lg font-medium">
+                        Aucun rendez-vous trouvé
+                      </h3>
                       <p className="text-muted-foreground">
-                        Aucun rendez-vous ne correspond aux critères sélectionnés
+                        Aucun rendez-vous ne correspond aux critères
+                        sélectionnés
                       </p>
                     </div>
                   </div>
@@ -599,7 +653,11 @@ export default function Appointments() {
         <AppointmentFormModal
           isOpen={isFormModalOpen}
           onClose={closeFormModal}
-          onSubmit={selectedAppointment ? handleUpdateAppointment : handleCreateAppointment}
+          onSubmit={
+            selectedAppointment
+              ? handleUpdateAppointment
+              : handleCreateAppointment
+          }
           appointment={selectedAppointment}
           isLoading={isSubmitting}
         />

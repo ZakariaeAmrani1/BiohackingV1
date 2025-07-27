@@ -1,5 +1,16 @@
 import { useState, useEffect } from "react";
-import { Users, User, FileText, Clock, Mail, Phone, MapPin, Heart, Stethoscope, AlertTriangle } from "lucide-react";
+import {
+  Users,
+  User,
+  FileText,
+  Clock,
+  Mail,
+  Phone,
+  MapPin,
+  Heart,
+  Stethoscope,
+  AlertTriangle,
+} from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -108,7 +119,7 @@ export default function ClientFormModal({
   }, [client, isOpen]);
 
   const handleInputChange = (field: keyof ClientFormData, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
     // Clear errors when user starts typing
     if (errors.length > 0) {
       setErrors([]);
@@ -117,7 +128,7 @@ export default function ClientFormModal({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Validate form data
     const validationErrors = validateClientData(formData);
     if (validationErrors.length > 0) {
@@ -179,7 +190,7 @@ export default function ClientFormModal({
               <User className="h-5 w-5" />
               Informations Personnelles
             </h3>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {/* CIN */}
               <div className="space-y-2">
@@ -190,7 +201,9 @@ export default function ClientFormModal({
                 <Input
                   id="CIN"
                   value={formData.CIN}
-                  onChange={(e) => handleInputChange("CIN", e.target.value.toUpperCase())}
+                  onChange={(e) =>
+                    handleInputChange("CIN", e.target.value.toUpperCase())
+                  }
                   placeholder="BE123456"
                   pattern="[A-Z]{2}\d{6}"
                   disabled={isSubmitting}
@@ -225,7 +238,10 @@ export default function ClientFormModal({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Birth Date */}
               <div className="space-y-2">
-                <Label htmlFor="date_naissance" className="flex items-center gap-2">
+                <Label
+                  htmlFor="date_naissance"
+                  className="flex items-center gap-2"
+                >
                   <Clock className="h-4 w-4" />
                   Date de naissance
                 </Label>
@@ -233,7 +249,9 @@ export default function ClientFormModal({
                   id="date_naissance"
                   type="date"
                   value={formData.date_naissance}
-                  onChange={(e) => handleInputChange("date_naissance", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("date_naissance", e.target.value)
+                  }
                   disabled={isSubmitting}
                   max={new Date().toISOString().slice(0, 10)}
                 />
@@ -241,13 +259,18 @@ export default function ClientFormModal({
 
               {/* Blood Group */}
               <div className="space-y-2">
-                <Label htmlFor="groupe_sanguin" className="flex items-center gap-2">
+                <Label
+                  htmlFor="groupe_sanguin"
+                  className="flex items-center gap-2"
+                >
                   <Heart className="h-4 w-4" />
                   Groupe sanguin
                 </Label>
                 <Select
                   value={formData.groupe_sanguin}
-                  onValueChange={(value) => handleInputChange("groupe_sanguin", value)}
+                  onValueChange={(value) =>
+                    handleInputChange("groupe_sanguin", value)
+                  }
                   disabled={isSubmitting}
                 >
                   <SelectTrigger>
@@ -295,7 +318,9 @@ export default function ClientFormModal({
                   <Input
                     id="numero_telephone"
                     value={formData.numero_telephone}
-                    onChange={(e) => handleInputChange("numero_telephone", e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("numero_telephone", e.target.value)
+                    }
                     placeholder="+32 2 123 45 67"
                     disabled={isSubmitting}
                   />
@@ -334,7 +359,9 @@ export default function ClientFormModal({
                 <Textarea
                   id="antecedents"
                   value={formData.antecedents}
-                  onChange={(e) => handleInputChange("antecedents", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("antecedents", e.target.value)
+                  }
                   placeholder="Historique médical du patient..."
                   disabled={isSubmitting}
                   rows={3}
@@ -347,7 +374,9 @@ export default function ClientFormModal({
                 <Textarea
                   id="allergies"
                   value={formData.allergies}
-                  onChange={(e) => handleInputChange("allergies", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("allergies", e.target.value)
+                  }
                   placeholder="Allergies connues..."
                   disabled={isSubmitting}
                   rows={3}
@@ -361,7 +390,9 @@ export default function ClientFormModal({
               <Textarea
                 id="commentaire"
                 value={formData.commentaire}
-                onChange={(e) => handleInputChange("commentaire", e.target.value)}
+                onChange={(e) =>
+                  handleInputChange("commentaire", e.target.value)
+                }
                 placeholder="Notes supplémentaires..."
                 disabled={isSubmitting}
                 rows={2}
@@ -372,7 +403,7 @@ export default function ClientFormModal({
           {/* Administrative */}
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">Administration</h3>
-            
+
             <div className="space-y-2">
               <Label htmlFor="Cree_par" className="flex items-center gap-2">
                 <User className="h-4 w-4" />
@@ -416,8 +447,10 @@ export default function ClientFormModal({
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
                   {isEditMode ? "Modification..." : "Création..."}
                 </div>
+              ) : isEditMode ? (
+                "Modifier"
               ) : (
-                isEditMode ? "Modifier" : "Créer"
+                "Créer"
               )}
             </Button>
           </DialogFooter>

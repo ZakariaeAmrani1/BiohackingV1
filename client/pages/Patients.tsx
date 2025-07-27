@@ -1,5 +1,20 @@
 import { useState, useMemo, useEffect } from "react";
-import { Users, Search, Plus, Eye, Edit, Trash2, ChevronDown, LayoutGrid, Table as TableIcon, Clock, User, Mail, Phone, Heart } from "lucide-react";
+import {
+  Users,
+  Search,
+  Plus,
+  Eye,
+  Edit,
+  Trash2,
+  ChevronDown,
+  LayoutGrid,
+  Table as TableIcon,
+  Clock,
+  User,
+  Mail,
+  Phone,
+  Heart,
+} from "lucide-react";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -44,11 +59,11 @@ export default function Patients() {
   const [creatorFilter, setCreatorFilter] = useState<string>("tous");
   const [ageFilter, setAgeFilter] = useState<string>("tous");
   const [viewMode, setViewMode] = useState<"table" | "cards">("table");
-  
+
   // Data state
   const [clients, setClients] = useState<Client[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  
+
   // Modal states
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
@@ -59,7 +74,9 @@ export default function Patients() {
   const { toast } = useToast();
 
   // Get unique creators and blood groups for filter dropdowns
-  const creators = Array.from(new Set(clients.map(client => client.Cree_par)));
+  const creators = Array.from(
+    new Set(clients.map((client) => client.Cree_par)),
+  );
   const bloodGroups = getBloodGroups();
 
   // Load clients on component mount
@@ -70,15 +87,15 @@ export default function Patients() {
   // Add escape key handler to force close modals if stuck
   useEffect(() => {
     const handleEscapeKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && event.ctrlKey) {
+      if (event.key === "Escape" && event.ctrlKey) {
         // Ctrl+Escape force closes all modals
         forceCloseAllModals();
       }
     };
 
-    document.addEventListener('keydown', handleEscapeKey);
+    document.addEventListener("keydown", handleEscapeKey);
     return () => {
-      document.removeEventListener('keydown', handleEscapeKey);
+      document.removeEventListener("keydown", handleEscapeKey);
     };
   }, []);
 
@@ -101,17 +118,20 @@ export default function Patients() {
   // Filter and search logic
   const filteredClients = useMemo(() => {
     return clients.filter((client) => {
-      const matchesSearch = 
+      const matchesSearch =
         client.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
         client.prenom.toLowerCase().includes(searchTerm.toLowerCase()) ||
         client.CIN.toLowerCase().includes(searchTerm.toLowerCase()) ||
         client.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
         client.numero_telephone.includes(searchTerm);
 
-      const matchesBloodGroup = bloodGroupFilter === "tous" || client.groupe_sanguin === bloodGroupFilter;
-      
-      const matchesCreator = creatorFilter === "tous" || client.Cree_par === creatorFilter;
-      
+      const matchesBloodGroup =
+        bloodGroupFilter === "tous" ||
+        client.groupe_sanguin === bloodGroupFilter;
+
+      const matchesCreator =
+        creatorFilter === "tous" || client.Cree_par === creatorFilter;
+
       let matchesAge = true;
       if (ageFilter !== "tous") {
         const age = calculateAge(client.date_naissance);
@@ -157,7 +177,7 @@ export default function Patients() {
 
   const handleUpdateClient = async (data: ClientFormData) => {
     if (!selectedClient) return;
-    
+
     try {
       setIsSubmitting(true);
       await ClientsService.update(selectedClient.id, data);
@@ -181,7 +201,7 @@ export default function Patients() {
 
   const handleDeleteClient = async () => {
     if (!selectedClient) return;
-    
+
     try {
       setIsSubmitting(true);
       await ClientsService.delete(selectedClient.id);
@@ -324,7 +344,10 @@ export default function Patients() {
               </div>
 
               {/* Blood Group Filter */}
-              <Select value={bloodGroupFilter} onValueChange={setBloodGroupFilter}>
+              <Select
+                value={bloodGroupFilter}
+                onValueChange={setBloodGroupFilter}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Groupe sanguin" />
                 </SelectTrigger>
@@ -372,7 +395,9 @@ export default function Patients() {
         {/* Results Summary and View Toggle */}
         <div className="flex items-center justify-between">
           <p className="text-sm text-muted-foreground">
-            {isLoading ? "Chargement..." : `${filteredClients.length} patient(s) trouvé(s)`}
+            {isLoading
+              ? "Chargement..."
+              : `${filteredClients.length} patient(s) trouvé(s)`}
           </p>
           <div className="flex rounded-lg border border-border p-1">
             <Button
@@ -431,7 +456,9 @@ export default function Patients() {
                           <TableCell className="font-mono text-sm">
                             {client.CIN}
                           </TableCell>
-                          <TableCell>{calculateAge(client.date_naissance)} ans</TableCell>
+                          <TableCell>
+                            {calculateAge(client.date_naissance)} ans
+                          </TableCell>
                           <TableCell>
                             <Badge variant="outline" className="gap-1">
                               <Heart className="h-3 w-3" />
@@ -453,21 +480,21 @@ export default function Patients() {
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
-                                <DropdownMenuItem 
+                                <DropdownMenuItem
                                   className="gap-2"
                                   onClick={() => openDetailsModal(client)}
                                 >
                                   <Eye className="h-4 w-4" />
                                   Voir dossier
                                 </DropdownMenuItem>
-                                <DropdownMenuItem 
+                                <DropdownMenuItem
                                   className="gap-2"
                                   onClick={() => openEditModal(client)}
                                 >
                                   <Edit className="h-4 w-4" />
                                   Modifier
                                 </DropdownMenuItem>
-                                <DropdownMenuItem 
+                                <DropdownMenuItem
                                   className="gap-2 text-red-600"
                                   onClick={() => openDeleteModal(client)}
                                 >
@@ -485,7 +512,8 @@ export default function Patients() {
                           <div className="flex flex-col items-center gap-2">
                             <Users className="h-8 w-8 text-muted-foreground" />
                             <p className="text-muted-foreground">
-                              Aucun patient trouvé avec les critères sélectionnés
+                              Aucun patient trouvé avec les critères
+                              sélectionnés
                             </p>
                           </div>
                         </TableCell>
@@ -502,7 +530,10 @@ export default function Patients() {
             {filteredClients.length > 0 ? (
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {filteredClients.map((client) => (
-                  <Card key={client.id} className="hover:shadow-md transition-shadow">
+                  <Card
+                    key={client.id}
+                    className="hover:shadow-md transition-shadow"
+                  >
                     <CardHeader className="pb-3">
                       <div className="flex items-start justify-between">
                         <div className="space-y-1">
@@ -542,7 +573,7 @@ export default function Patients() {
                           <span>{client.Cree_par}</span>
                         </div>
                       </div>
-                      
+
                       <div className="border-t pt-3">
                         <div className="flex items-center justify-between">
                           <p className="text-xs text-muted-foreground">
@@ -550,26 +581,30 @@ export default function Patients() {
                           </p>
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-8 w-8 p-0"
+                              >
                                 <ChevronDown className="h-4 w-4" />
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                              <DropdownMenuItem 
+                              <DropdownMenuItem
                                 className="gap-2"
                                 onClick={() => openDetailsModal(client)}
                               >
                                 <Eye className="h-4 w-4" />
                                 Voir dossier
                               </DropdownMenuItem>
-                              <DropdownMenuItem 
+                              <DropdownMenuItem
                                 className="gap-2"
                                 onClick={() => openEditModal(client)}
                               >
                                 <Edit className="h-4 w-4" />
                                 Modifier
                               </DropdownMenuItem>
-                              <DropdownMenuItem 
+                              <DropdownMenuItem
                                 className="gap-2 text-red-600"
                                 onClick={() => openDeleteModal(client)}
                               >
@@ -590,7 +625,9 @@ export default function Patients() {
                   <div className="flex flex-col items-center gap-4">
                     <Users className="h-12 w-12 text-muted-foreground" />
                     <div>
-                      <h3 className="text-lg font-medium">Aucun patient trouvé</h3>
+                      <h3 className="text-lg font-medium">
+                        Aucun patient trouvé
+                      </h3>
                       <p className="text-muted-foreground">
                         Aucun patient ne correspond aux critères sélectionnés
                       </p>
