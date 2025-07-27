@@ -5,7 +5,7 @@ export default function Patients() {
   return (
     <PlaceholderPage
       title="Patients"
-      description="Manage patient records, medical history, and personal information."
+      description="Gérer les dossiers patients, l'historique médical et les informations personnelles."
       icon={Users}
     />
   );
