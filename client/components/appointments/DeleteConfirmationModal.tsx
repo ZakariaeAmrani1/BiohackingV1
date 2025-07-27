@@ -40,8 +40,13 @@ export default function DeleteConfirmationModal({
   };
 
   const handleConfirm = async () => {
-    await onConfirm();
-    onClose();
+    try {
+      await onConfirm();
+      // Don't call onClose here - let the parent handle it
+    } catch (error) {
+      // If there's an error, we can handle it here if needed
+      console.error("Delete confirmation error:", error);
+    }
   };
 
   return (
