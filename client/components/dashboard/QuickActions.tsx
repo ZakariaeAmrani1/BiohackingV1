@@ -54,7 +54,7 @@ export default function QuickActions() {
         <CardTitle className="text-lg font-semibold">Quick Actions</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid gap-3">
+        <div className="grid gap-3 sm:grid-cols-1">
           {quickActions.map((action, index) => (
             <Button
               key={index}
