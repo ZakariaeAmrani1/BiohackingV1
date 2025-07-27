@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { CalendarDays, User, FileText, Clock, Stethoscope } from "lucide-react";
+import { CalendarDays, Search, FileText, Clock, Stethoscope, User, Users } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -11,7 +11,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -19,7 +18,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
 import {
   AppointmentFormData,
   RendezVous,
@@ -27,6 +40,7 @@ import {
   getAvailableDoctors,
   getAppointmentTypes,
 } from "@/services/appointmentsService";
+import { ClientsService, Client, calculateAge } from "@/services/clientsService";
 
 interface AppointmentFormModalProps {
   isOpen: boolean;
@@ -44,8 +58,7 @@ export default function AppointmentFormModal({
   isLoading = false,
 }: AppointmentFormModalProps) {
   const [formData, setFormData] = useState<AppointmentFormData>({
-    CIN: "",
-    patient_nom: "",
+    client_id: 0,
     sujet: "",
     date_rendez_vous: "",
     Cree_par: "",
@@ -54,10 +67,21 @@ export default function AppointmentFormModal({
 
   const [errors, setErrors] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [clients, setClients] = useState<Client[]>([]);
+  const [selectedClient, setSelectedClient] = useState<Client | null>(null);
+  const [isClientSelectorOpen, setIsClientSelectorOpen] = useState(false);
+  const [clientSearchQuery, setClientSearchQuery] = useState("");
 
   const isEditMode = !!appointment;
   const availableDoctors = getAvailableDoctors();
   const appointmentTypes = getAppointmentTypes();
+
+  // Load clients when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      loadClients();
+    }
+  }, [isOpen]);
 
   // Initialize form data when appointment changes
   useEffect(() => {
@@ -68,28 +92,50 @@ export default function AppointmentFormModal({
         : "";
 
       setFormData({
-        CIN: appointment.CIN || "",
-        patient_nom: appointment.patient_nom || "",
+        client_id: appointment.client_id || 0,
         sujet: appointment.sujet || "",
         date_rendez_vous: dateTime,
         Cree_par: appointment.Cree_par || "",
         status: appointment.status || "programmé",
       });
+
+      // Find and set the selected client if we have a client_id
+      if (appointment.client_id) {
+        findClientById(appointment.client_id);
+      }
     } else {
       // Reset form for new appointment
       setFormData({
-        CIN: "",
-        patient_nom: "",
+        client_id: 0,
         sujet: "",
         date_rendez_vous: "",
         Cree_par: "",
         status: "programmé",
       });
+      setSelectedClient(null);
     }
     setErrors([]);
   }, [appointment, isOpen]);
 
-  const handleInputChange = (field: keyof AppointmentFormData, value: string) => {
+  const loadClients = async () => {
+    try {
+      const clientsData = await ClientsService.getAll();
+      setClients(clientsData);
+    } catch (error) {
+      setErrors(["Erreur lors du chargement des patients"]);
+    }
+  };
+
+  const findClientById = async (clientId: number) => {
+    try {
+      const client = await ClientsService.getById(clientId);
+      setSelectedClient(client);
+    } catch (error) {
+      console.error("Error finding client:", error);
+    }
+  };
+
+  const handleInputChange = (field: keyof AppointmentFormData, value: string | number) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     // Clear errors when user starts typing
     if (errors.length > 0) {
@@ -97,9 +143,30 @@ export default function AppointmentFormModal({
     }
   };
 
+  const handleClientSelect = (client: Client) => {
+    setSelectedClient(client);
+    setFormData(prev => ({ ...prev, client_id: client.id }));
+    setIsClientSelectorOpen(false);
+    setClientSearchQuery("");
+    // Clear errors when client is selected
+    if (errors.length > 0) {
+      setErrors([]);
+    }
+  };
+
+  const filteredClients = clients.filter(client => {
+    const searchTerm = clientSearchQuery.toLowerCase();
+    return (
+      client.nom.toLowerCase().includes(searchTerm) ||
+      client.prenom.toLowerCase().includes(searchTerm) ||
+      client.CIN.toLowerCase().includes(searchTerm) ||
+      client.email.toLowerCase().includes(searchTerm)
+    );
+  });
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
+    
     // Validate form data
     const validationErrors = validateAppointmentData(formData);
     if (validationErrors.length > 0) {
@@ -122,6 +189,8 @@ export default function AppointmentFormModal({
     if (!isSubmitting) {
       // Reset form and errors when closing
       setErrors([]);
+      setSelectedClient(null);
+      setClientSearchQuery("");
       onClose();
     }
   };
@@ -137,7 +206,7 @@ export default function AppointmentFormModal({
           <DialogDescription>
             {isEditMode
               ? "Modifiez les informations du rendez-vous"
-              : "Créez un nouveau rendez-vous en remplissant les informations ci-dessous"}
+              : "Créez un nouveau rendez-vous en sélectionnant un patient et en remplissant les informations"}
           </DialogDescription>
         </DialogHeader>
 
@@ -154,43 +223,94 @@ export default function AppointmentFormModal({
         )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Patient Name */}
-            <div className="space-y-2">
-              <Label htmlFor="patient_nom" className="flex items-center gap-2">
-                <User className="h-4 w-4" />
-                Nom du patient
-              </Label>
-              <Input
-                id="patient_nom"
-                value={formData.patient_nom}
-                onChange={(e) => handleInputChange("patient_nom", e.target.value)}
-                placeholder="Nom complet du patient"
-                disabled={isSubmitting}
-              />
-            </div>
+          {/* Patient Selection */}
+          <div className="space-y-2">
+            <Label className="flex items-center gap-2">
+              <Users className="h-4 w-4" />
+              Sélectionner un patient
+            </Label>
+            
+            <Popover open={isClientSelectorOpen} onOpenChange={setIsClientSelectorOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  aria-expanded={isClientSelectorOpen}
+                  className="w-full justify-between"
+                  disabled={isSubmitting}
+                >
+                  {selectedClient ? (
+                    <div className="flex items-center gap-2">
+                      <span>{selectedClient.prenom} {selectedClient.nom}</span>
+                      <Badge variant="outline" className="text-xs">
+                        {selectedClient.CIN}
+                      </Badge>
+                    </div>
+                  ) : (
+                    "Rechercher et sélectionner un patient..."
+                  )}
+                  <Search className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[500px] p-0">
+                <Command>
+                  <CommandInput 
+                    placeholder="Rechercher par nom, prénom, CIN, email..."
+                    value={clientSearchQuery}
+                    onValueChange={setClientSearchQuery}
+                  />
+                  <CommandList>
+                    <CommandEmpty>Aucun patient trouvé.</CommandEmpty>
+                    <CommandGroup>
+                      {filteredClients.map((client) => (
+                        <CommandItem
+                          key={client.id}
+                          value={`${client.prenom} ${client.nom} ${client.CIN} ${client.email}`}
+                          onSelect={() => handleClientSelect(client)}
+                          className="flex items-center justify-between p-3"
+                        >
+                          <div className="flex flex-col">
+                            <div className="font-medium">
+                              {client.prenom} {client.nom}
+                            </div>
+                            <div className="text-sm text-muted-foreground">
+                              {client.CIN} • {calculateAge(client.date_naissance)} ans • {client.email}
+                            </div>
+                          </div>
+                          <Badge variant="outline">
+                            {client.groupe_sanguin}
+                          </Badge>
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
 
-            {/* CIN */}
-            <div className="space-y-2">
-              <Label htmlFor="CIN" className="flex items-center gap-2">
-                <FileText className="h-4 w-4" />
-                CIN
-              </Label>
-              <Input
-                id="CIN"
-                value={formData.CIN}
-                onChange={(e) => handleInputChange("CIN", e.target.value.toUpperCase())}
-                placeholder="BE123456"
-                pattern="[A-Z]{2}\d{6}"
-                disabled={isSubmitting}
-              />
-              <p className="text-xs text-muted-foreground">
-                Format: 2 lettres suivies de 6 chiffres (ex: BE123456)
-              </p>
-            </div>
+            {selectedClient && (
+              <div className="p-3 bg-muted/50 rounded-lg">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-1">
+                    <div className="font-medium">
+                      {selectedClient.prenom} {selectedClient.nom}
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      CIN: {selectedClient.CIN} • Âge: {calculateAge(selectedClient.date_naissance)} ans
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      Email: {selectedClient.email} • Tél: {selectedClient.numero_telephone}
+                    </div>
+                  </div>
+                  <Badge variant="outline" className="gap-1">
+                    {selectedClient.groupe_sanguin}
+                  </Badge>
+                </div>
+              </div>
+            )}
           </div>
 
-          {/* Subject */}
+          {/* Appointment Type */}
           <div className="space-y-2">
             <Label htmlFor="sujet" className="flex items-center gap-2">
               <Stethoscope className="h-4 w-4" />
