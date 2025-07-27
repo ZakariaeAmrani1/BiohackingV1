@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Calendar, Search, Filter, Plus, Eye, Edit, Trash2, ChevronDown } from "lucide-react";
+import { Calendar, Search, Filter, Plus, Eye, Edit, Trash2, ChevronDown, LayoutGrid, Table as TableIcon, Clock, User, MapPin } from "lucide-react";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
