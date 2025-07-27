@@ -539,6 +539,31 @@ export default function Appointments() {
             )}
           </div>
         )}
+
+        {/* Modals */}
+        <AppointmentFormModal
+          isOpen={isFormModalOpen}
+          onClose={closeModals}
+          onSubmit={selectedAppointment ? handleUpdateAppointment : handleCreateAppointment}
+          appointment={selectedAppointment}
+          isLoading={isSubmitting}
+        />
+
+        <AppointmentDetailsModal
+          isOpen={isDetailsModalOpen}
+          onClose={closeModals}
+          appointment={selectedAppointment}
+          onEdit={openEditModal}
+          onDelete={openDeleteModal}
+        />
+
+        <DeleteConfirmationModal
+          isOpen={isDeleteModalOpen}
+          onClose={closeModals}
+          onConfirm={handleDeleteAppointment}
+          appointment={selectedAppointment}
+          isLoading={isSubmitting}
+        />
       </div>
     </DashboardLayout>
   );
