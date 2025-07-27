@@ -4,8 +4,8 @@ import PlaceholderPage from "@/components/PlaceholderPage";
 export default function Reports() {
   return (
     <PlaceholderPage
-      title="Reports"
-      description="Generate comprehensive reports on patients, treatments, and clinic performance."
+      title="Rapports"
+      description="Générer des rapports complets sur les patients, traitements et performances de la clinique."
       icon={FileText}
     />
   );
