@@ -5,7 +5,7 @@ export default function Biohacking() {
   return (
     <PlaceholderPage
       title="Biohacking"
-      description="Specialized biohacking protocols, optimization plans, and experimental treatments."
+      description="Protocoles de biohacking spécialisés, plans d'optimisation et traitements expérimentaux."
       icon={TestTube}
     />
   );

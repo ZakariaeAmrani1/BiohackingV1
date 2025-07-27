@@ -17,14 +17,14 @@ import {
 } from "lucide-react";
 
 const navigation = [
-  { name: "Dashboard", href: "/", icon: Home },
-  { name: "Appointments", href: "/appointments", icon: Calendar },
+  { name: "Tableau de Bord", href: "/", icon: Home },
+  { name: "Rendez-vous", href: "/appointments", icon: Calendar },
   { name: "Patients", href: "/patients", icon: Users },
-  { name: "Treatments", href: "/treatments", icon: Stethoscope },
+  { name: "Traitements", href: "/treatments", icon: Stethoscope },
   { name: "Biohacking", href: "/biohacking", icon: TestTube },
-  { name: "Health Metrics", href: "/metrics", icon: Activity },
-  { name: "Reports", href: "/reports", icon: FileText },
-  { name: "Settings", href: "/settings", icon: Settings },
+  { name: "Métriques de Santé", href: "/metrics", icon: Activity },
+  { name: "Rapports", href: "/reports", icon: FileText },
+  { name: "Paramètres", href: "/settings", icon: Settings },
 ];
 
 export default function MobileNav() {
@@ -60,7 +60,7 @@ export default function MobileNav() {
                       Biohacking
                     </h1>
                     <p className="text-xs text-muted-foreground">
-                      Clinic Management
+                      Gestion de Clinique
                     </p>
                   </div>
                 </div>
@@ -100,7 +100,7 @@ export default function MobileNav() {
                       Dr. Smith
                     </p>
                     <p className="text-xs text-muted-foreground truncate">
-                      Administrator
+                      Administrateur
                     </p>
                   </div>
                 </div>

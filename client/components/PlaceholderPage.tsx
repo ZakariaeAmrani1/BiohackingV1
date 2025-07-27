@@ -29,13 +29,14 @@ export default function PlaceholderPage({
                 <p className="text-muted-foreground mt-2">{description}</p>
               </div>
               <div className="text-sm text-muted-foreground">
-                This page is under development. Continue prompting to have me
-                build out the specific functionality you need for this section.
+                Cette page est en cours de développement. Continuez à me donner
+                des instructions pour que je crée les fonctionnalités
+                spécifiques dont vous avez besoin pour cette section.
               </div>
               <Button asChild variant="outline" className="gap-2">
                 <Link to="/">
                   <ArrowLeft className="h-4 w-4" />
-                  Back to Dashboard
+                  Retour au Tableau de Bord
                 </Link>
               </Button>
             </div>

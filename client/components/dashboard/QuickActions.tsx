@@ -11,36 +11,36 @@ import { Button } from "@/components/ui/button";
 
 const quickActions = [
   {
-    title: "New Appointment",
-    description: "Schedule a patient appointment",
+    title: "Nouveau Rendez-vous",
+    description: "Planifier un rendez-vous patient",
     icon: Calendar,
     color: "bg-blue-500",
     action: () => console.log("New appointment"),
   },
   {
-    title: "Add Patient",
-    description: "Register a new patient",
+    title: "Ajouter Patient",
+    description: "Enregistrer un nouveau patient",
     icon: Users,
     color: "bg-green-500",
     action: () => console.log("Add patient"),
   },
   {
-    title: "Order Lab Test",
-    description: "Request laboratory tests",
+    title: "Commander Test Labo",
+    description: "Demander des tests de laboratoire",
     icon: TestTube,
     color: "bg-purple-500",
     action: () => console.log("Order lab test"),
   },
   {
-    title: "New Treatment",
-    description: "Start a new treatment plan",
+    title: "Nouveau Traitement",
+    description: "Démarrer un nouveau plan de traitement",
     icon: Stethoscope,
     color: "bg-orange-500",
     action: () => console.log("New treatment"),
   },
   {
-    title: "Generate Report",
-    description: "Create patient or clinic report",
+    title: "Générer Rapport",
+    description: "Créer un rapport patient ou clinique",
     icon: FileText,
     color: "bg-teal-500",
     action: () => console.log("Generate report"),
@@ -51,7 +51,7 @@ export default function QuickActions() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-lg font-semibold">Quick Actions</CardTitle>
+        <CardTitle className="text-lg font-semibold">Actions Rapides</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="grid gap-3 sm:grid-cols-1">
