@@ -128,7 +128,7 @@ export default function AppointmentCalendar() {
                 <ChevronRight className="h-4 w-4" />
               </Button>
             </div>
-            <Button size="sm" className="gap-2">
+            <Button size="sm" className="gap-2 bg-primary hover:bg-primary/90 text-primary-foreground">
               <Plus className="h-4 w-4" />
               New Appointment
             </Button>
