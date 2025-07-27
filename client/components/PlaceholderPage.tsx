@@ -30,7 +30,8 @@ export default function PlaceholderPage({
               </div>
               <div className="text-sm text-muted-foreground">
                 Cette page est en cours de développement. Continuez à me donner
-                des instructions pour que je crée les fonctionnalités spécifiques dont vous avez besoin pour cette section.
+                des instructions pour que je crée les fonctionnalités
+                spécifiques dont vous avez besoin pour cette section.
               </div>
               <Button asChild variant="outline" className="gap-2">
                 <Link to="/">

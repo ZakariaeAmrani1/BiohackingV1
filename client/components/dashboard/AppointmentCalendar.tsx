@@ -250,7 +250,11 @@ export default function AppointmentCalendar() {
                             variant="secondary"
                             className={`text-xs mt-1 ${statusColors[appointment.status as keyof typeof statusColors]}`}
                           >
-                            {statusTranslations[appointment.status as keyof typeof statusTranslations]}
+                            {
+                              statusTranslations[
+                                appointment.status as keyof typeof statusTranslations
+                              ]
+                            }
                           </Badge>
                         </div>
                       ))}
@@ -289,7 +293,11 @@ export default function AppointmentCalendar() {
                       ]
                     }
                   >
-                    {statusTranslations[appointment.status as keyof typeof statusTranslations]}
+                    {
+                      statusTranslations[
+                        appointment.status as keyof typeof statusTranslations
+                      ]
+                    }
                   </Badge>
                 </div>
               ))}
