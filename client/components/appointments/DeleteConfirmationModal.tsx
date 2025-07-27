@@ -52,24 +52,26 @@ export default function DeleteConfirmationModal({
             <AlertTriangle className="h-5 w-5 text-destructive" />
             Confirmer la suppression
           </AlertDialogTitle>
-          <AlertDialogDescription className="space-y-2">
-            <p>
-              Êtes-vous sûr de vouloir supprimer ce rendez-vous ? Cette action est irréversible.
-            </p>
-            
-            <div className="bg-muted p-3 rounded-lg mt-4">
-              <div className="space-y-1 text-sm">
-                <div>
-                  <span className="font-medium">Patient:</span> {appointment.patient_nom}
-                </div>
-                <div>
-                  <span className="font-medium">CIN:</span> {appointment.CIN}
-                </div>
-                <div>
-                  <span className="font-medium">Type:</span> {appointment.sujet}
-                </div>
-                <div>
-                  <span className="font-medium">Date:</span> {formatDateTime(appointment.date_rendez_vous)}
+          <AlertDialogDescription asChild>
+            <div className="space-y-4">
+              <p>
+                Êtes-vous sûr de vouloir supprimer ce rendez-vous ? Cette action est irréversible.
+              </p>
+
+              <div className="bg-muted p-3 rounded-lg">
+                <div className="space-y-1 text-sm">
+                  <div>
+                    <span className="font-medium">Patient:</span> {appointment.patient_nom}
+                  </div>
+                  <div>
+                    <span className="font-medium">CIN:</span> {appointment.CIN}
+                  </div>
+                  <div>
+                    <span className="font-medium">Type:</span> {appointment.sujet}
+                  </div>
+                  <div>
+                    <span className="font-medium">Date:</span> {formatDateTime(appointment.date_rendez_vous)}
+                  </div>
                 </div>
               </div>
             </div>
