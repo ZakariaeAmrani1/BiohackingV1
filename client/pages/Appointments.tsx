@@ -71,6 +71,21 @@ export default function Appointments() {
     loadAppointments();
   }, []);
 
+  // Add escape key handler to force close modals if stuck
+  useEffect(() => {
+    const handleEscapeKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && event.ctrlKey) {
+        // Ctrl+Escape force closes all modals
+        forceCloseAllModals();
+      }
+    };
+
+    document.addEventListener('keydown', handleEscapeKey);
+    return () => {
+      document.removeEventListener('keydown', handleEscapeKey);
+    };
+  }, []);
+
   const loadAppointments = async () => {
     try {
       setIsLoading(true);
