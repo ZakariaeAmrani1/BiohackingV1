@@ -192,20 +192,26 @@ export default function AppointmentCalendar() {
               <div
                 key={dayIndex}
                 className={`border-r border-border last:border-r-0 ${
-                  isToday(date) ? 'bg-primary/5' : ''
+                  isToday(date) ? "bg-primary/5" : ""
                 }`}
               >
-                <div className={`h-12 border-b border-border px-2 py-2 text-center ${
-                  isToday(date) ? 'bg-primary/10 border-primary/20' : ''
-                }`}>
-                  <div className={`text-xs font-medium ${
-                    isToday(date) ? 'text-primary' : 'text-muted-foreground'
-                  }`}>
+                <div
+                  className={`h-12 border-b border-border px-2 py-2 text-center ${
+                    isToday(date) ? "bg-primary/10 border-primary/20" : ""
+                  }`}
+                >
+                  <div
+                    className={`text-xs font-medium ${
+                      isToday(date) ? "text-primary" : "text-muted-foreground"
+                    }`}
+                  >
                     {weekDays[dayIndex]}
                   </div>
-                  <div className={`text-sm font-semibold ${
-                    isToday(date) ? 'text-primary' : 'text-foreground'
-                  }`}>
+                  <div
+                    className={`text-sm font-semibold ${
+                      isToday(date) ? "text-primary" : "text-foreground"
+                    }`}
+                  >
                     {formatDate(date)}
                     {isToday(date) && (
                       <span className="ml-1 inline-flex h-2 w-2 rounded-full bg-primary"></span>

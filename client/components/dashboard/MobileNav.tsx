@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { 
+import {
   Calendar,
   Users,
   Activity,
@@ -13,7 +13,7 @@ import {
   Stethoscope,
   Heart,
   TestTube,
-  Menu
+  Menu,
 } from "lucide-react";
 
 const navigation = [
@@ -40,7 +40,7 @@ export default function MobileNav() {
           </div>
           <h1 className="text-lg font-semibold text-foreground">Biohacking</h1>
         </div>
-        
+
         <Sheet open={open} onOpenChange={setOpen}>
           <SheetTrigger asChild>
             <Button variant="outline" size="icon">
@@ -56,8 +56,12 @@ export default function MobileNav() {
                     <Heart className="h-6 w-6 text-primary-foreground" />
                   </div>
                   <div>
-                    <h1 className="text-lg font-semibold text-foreground">Biohacking</h1>
-                    <p className="text-xs text-muted-foreground">Clinic Management</p>
+                    <h1 className="text-lg font-semibold text-foreground">
+                      Biohacking
+                    </h1>
+                    <p className="text-xs text-muted-foreground">
+                      Clinic Management
+                    </p>
                   </div>
                 </div>
               </div>
@@ -75,7 +79,7 @@ export default function MobileNav() {
                         "group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
                         isActive
                           ? "bg-primary text-primary-foreground"
-                          : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                          : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
                       )}
                     >
                       <item.icon className="h-5 w-5" />
@@ -92,8 +96,12 @@ export default function MobileNav() {
                     <span className="text-xs font-medium text-primary">DR</span>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-foreground truncate">Dr. Smith</p>
-                    <p className="text-xs text-muted-foreground truncate">Administrator</p>
+                    <p className="text-sm font-medium text-foreground truncate">
+                      Dr. Smith
+                    </p>
+                    <p className="text-xs text-muted-foreground truncate">
+                      Administrator
+                    </p>
                   </div>
                 </div>
               </div>
