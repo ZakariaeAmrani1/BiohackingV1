@@ -9,9 +9,9 @@ export default function Dashboard() {
     <DashboardLayout>
       <div className="flex-1 space-y-6 p-4 md:p-6">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Tableau de Bord</h1>
           <p className="text-muted-foreground">
-            Welcome back to Biohacking Clinic Management System
+            Bienvenue dans le Système de Gestion de Clinique Biohacking
           </p>
         </div>
 
