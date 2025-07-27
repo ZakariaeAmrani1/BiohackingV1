@@ -53,6 +53,7 @@ let mockAppointments: RendezVous[] = [
     Cree_par: "Dr. Smith",
     status: "confirmé",
     patient_nom: "Pierre Martin",
+    client_id: 3,
   },
   {
     id: 4,
@@ -63,6 +64,7 @@ let mockAppointments: RendezVous[] = [
     Cree_par: "Dr. Dubois",
     status: "terminé",
     patient_nom: "Sophie Wilson",
+    client_id: 4,
   },
   {
     id: 5,
@@ -73,6 +75,7 @@ let mockAppointments: RendezVous[] = [
     Cree_par: "Dr. Martin",
     status: "programmé",
     patient_nom: "Luc Chen",
+    client_id: 5,
   },
   {
     id: 6,
