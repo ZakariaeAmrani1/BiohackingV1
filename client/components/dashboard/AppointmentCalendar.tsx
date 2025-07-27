@@ -88,6 +88,11 @@ export default function AppointmentCalendar() {
     );
   };
 
+  const isToday = (date: Date) => {
+    const today = new Date();
+    return date.toDateString() === today.toDateString();
+  };
+
   return (
     <Card className="h-full">
       <CardHeader className="pb-4">
