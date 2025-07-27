@@ -1,3 +1,5 @@
+import { ClientsService, Client } from "./clientsService";
+
 // Type matching your database structure
 export interface RendezVous {
   id: number;
