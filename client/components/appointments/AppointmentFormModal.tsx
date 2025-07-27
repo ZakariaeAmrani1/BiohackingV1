@@ -99,7 +99,7 @@ export default function AppointmentFormModal({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Validate form data
     const validationErrors = validateAppointmentData(formData);
     if (validationErrors.length > 0) {
@@ -110,7 +110,7 @@ export default function AppointmentFormModal({
     setIsSubmitting(true);
     try {
       await onSubmit(formData);
-      onClose();
+      // Don't call onClose here - let the parent handle it
     } catch (error) {
       setErrors(["Une erreur s'est produite lors de l'enregistrement"]);
     } finally {
@@ -120,6 +120,8 @@ export default function AppointmentFormModal({
 
   const handleClose = () => {
     if (!isSubmitting) {
+      // Reset form and errors when closing
+      setErrors([]);
       onClose();
     }
   };
