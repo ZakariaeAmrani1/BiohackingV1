@@ -131,6 +131,7 @@ export default function Appointments() {
       setIsSubmitting(true);
       await AppointmentsService.create(data);
       await loadAppointments();
+      closeFormModal();
       toast({
         title: "Succès",
         description: "Le rendez-vous a été créé avec succès",
