@@ -148,7 +148,7 @@ export default function AppointmentCalendar() {
           </div>
         </div>
       </CardHeader>
-      <CardContent className="p-0 overflow-x-auto">
+      <CardContent className="p-0">
         {view === "week" ? (
           <div className="grid grid-cols-8 border-t border-border min-w-[700px]">
             {/* Time column */}
