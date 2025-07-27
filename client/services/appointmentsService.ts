@@ -160,13 +160,25 @@ export class AppointmentsService {
   // Update existing appointment
   static async update(id: number, data: AppointmentFormData): Promise<RendezVous | null> {
     await delay(800);
-    
+
     const index = mockAppointments.findIndex(apt => apt.id === id);
     if (index === -1) return null;
 
+    // Get client information from client_id
+    const client = await ClientsService.getById(data.client_id);
+    if (!client) {
+      throw new Error("Client non trouvé");
+    }
+
     const updatedAppointment: RendezVous = {
       ...mockAppointments[index],
-      ...data,
+      CIN: client.CIN,
+      patient_nom: `${client.prenom} ${client.nom}`,
+      sujet: data.sujet,
+      date_rendez_vous: data.date_rendez_vous,
+      Cree_par: data.Cree_par,
+      status: data.status,
+      client_id: data.client_id,
     };
 
     mockAppointments[index] = updatedAppointment;
