@@ -90,12 +90,12 @@ export default function AppointmentCalendar() {
 
   return (
     <Card className="h-full">
-      <CardHeader>
-        <div className="flex items-center justify-between">
+      <CardHeader className="pb-4">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <CardTitle className="text-xl font-semibold">
             Appointment Calendar
           </CardTitle>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
             <div className="flex rounded-lg border border-border p-1">
               <Button
                 variant={view === "week" ? "default" : "ghost"}
