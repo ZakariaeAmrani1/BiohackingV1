@@ -134,10 +134,22 @@ export class AppointmentsService {
   // Create new appointment
   static async create(data: AppointmentFormData): Promise<RendezVous> {
     await delay(800);
-    
+
+    // Get client information from client_id
+    const client = await ClientsService.getById(data.client_id);
+    if (!client) {
+      throw new Error("Client non trouvé");
+    }
+
     const newAppointment: RendezVous = {
       id: Math.max(...mockAppointments.map(apt => apt.id)) + 1,
-      ...data,
+      CIN: client.CIN,
+      patient_nom: `${client.prenom} ${client.nom}`,
+      sujet: data.sujet,
+      date_rendez_vous: data.date_rendez_vous,
+      Cree_par: data.Cree_par,
+      status: data.status,
+      client_id: data.client_id,
       created_at: new Date().toISOString(),
     };
 
