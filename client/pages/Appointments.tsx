@@ -278,11 +278,31 @@ export default function Appointments() {
           </CardContent>
         </Card>
 
-        {/* Results Summary */}
+        {/* Results Summary and View Toggle */}
         <div className="flex items-center justify-between">
           <p className="text-sm text-muted-foreground">
             {filteredAppointments.length} rendez-vous trouvé(s)
           </p>
+          <div className="flex rounded-lg border border-border p-1">
+            <Button
+              variant={viewMode === "table" ? "default" : "ghost"}
+              size="sm"
+              onClick={() => setViewMode("table")}
+              className="h-8 gap-2"
+            >
+              <TableIcon className="h-4 w-4" />
+              Tableau
+            </Button>
+            <Button
+              variant={viewMode === "cards" ? "default" : "ghost"}
+              size="sm"
+              onClick={() => setViewMode("cards")}
+              className="h-8 gap-2"
+            >
+              <LayoutGrid className="h-4 w-4" />
+              Cartes
+            </Button>
+          </div>
         </div>
 
         {/* Appointments Table */}
