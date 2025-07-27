@@ -6,45 +6,45 @@ const activities = [
   {
     id: 1,
     type: "appointment",
-    title: "New appointment scheduled",
-    description: "John Smith - Biohacking Consultation",
-    time: "2 minutes ago",
+    title: "Nouveau rendez-vous programmé",
+    description: "John Smith - Consultation Biohacking",
+    time: "il y a 2 minutes",
     icon: Calendar,
     color: "text-blue-500",
   },
   {
     id: 2,
     type: "treatment",
-    title: "Treatment completed",
-    description: "Sarah Johnson - IV Therapy Session",
-    time: "15 minutes ago",
+    title: "Traitement terminé",
+    description: "Sarah Johnson - Séance de Thérapie IV",
+    time: "il y a 15 minutes",
     icon: Stethoscope,
     color: "text-green-500",
   },
   {
     id: 3,
     type: "patient",
-    title: "New patient registered",
-    description: "Mike Davis added to system",
-    time: "1 hour ago",
+    title: "Nouveau patient enregistré",
+    description: "Mike Davis ajouté au système",
+    time: "il y a 1 heure",
     icon: User,
     color: "text-purple-500",
   },
   {
     id: 4,
     type: "test",
-    title: "Lab results available",
-    description: "Blood panel results for Emma Wilson",
-    time: "2 hours ago",
+    title: "Résultats de laboratoire disponibles",
+    description: "Résultats du bilan sanguin pour Emma Wilson",
+    time: "il y a 2 heures",
     icon: TestTube,
     color: "text-orange-500",
   },
   {
     id: 5,
     type: "appointment",
-    title: "Appointment cancelled",
-    description: "David Brown - Cryotherapy Session",
-    time: "3 hours ago",
+    title: "Rendez-vous annulé",
+    description: "David Brown - Séance de Cryothérapie",
+    time: "il y a 3 heures",
     icon: Calendar,
     color: "text-red-500",
   },
@@ -55,7 +55,7 @@ export default function RecentActivities() {
     <Card>
       <CardHeader>
         <CardTitle className="text-lg font-semibold">
-          Recent Activities
+          Activités Récentes
         </CardTitle>
       </CardHeader>
       <CardContent>
