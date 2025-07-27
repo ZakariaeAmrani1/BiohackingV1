@@ -7,7 +7,7 @@ import QuickActions from "@/components/dashboard/QuickActions";
 export default function Dashboard() {
   return (
     <DashboardLayout>
-      <div className="flex-1 space-y-6 p-6">
+      <div className="flex-1 space-y-6 p-4 md:p-6">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
           <p className="text-muted-foreground">
