@@ -4,8 +4,8 @@ import PlaceholderPage from "@/components/PlaceholderPage";
 export default function Appointments() {
   return (
     <PlaceholderPage
-      title="Appointments"
-      description="Advanced appointment management, scheduling, and calendar views."
+      title="Rendez-vous"
+      description="Gestion avancée des rendez-vous, planification et vues de calendrier."
       icon={Calendar}
     />
   );
