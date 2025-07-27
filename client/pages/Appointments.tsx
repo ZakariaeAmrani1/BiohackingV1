@@ -135,6 +135,7 @@ export default function Appointments() {
   const [statusFilter, setStatusFilter] = useState<string>("tous");
   const [creatorFilter, setCreatorFilter] = useState<string>("tous");
   const [dateFilter, setDateFilter] = useState<string>("tous");
+  const [viewMode, setViewMode] = useState<"table" | "cards">("table");
 
   // Get unique creators for filter dropdown
   const creators = Array.from(new Set(mockAppointments.map(apt => apt.Cree_par)));
