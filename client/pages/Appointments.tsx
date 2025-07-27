@@ -234,7 +234,6 @@ export default function Appointments() {
     setIsDeleteModalOpen(false);
     setSelectedAppointment(null);
     setIsSubmitting(false);
-    setErrors([]);
   };
 
   const closeModals = () => {
