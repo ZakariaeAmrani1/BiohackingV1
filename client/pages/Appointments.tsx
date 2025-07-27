@@ -493,15 +493,24 @@ export default function Appointments() {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                              <DropdownMenuItem className="gap-2">
+                              <DropdownMenuItem
+                                className="gap-2"
+                                onClick={() => openDetailsModal(appointment)}
+                              >
                                 <Eye className="h-4 w-4" />
                                 Voir détails
                               </DropdownMenuItem>
-                              <DropdownMenuItem className="gap-2">
+                              <DropdownMenuItem
+                                className="gap-2"
+                                onClick={() => openEditModal(appointment)}
+                              >
                                 <Edit className="h-4 w-4" />
                                 Modifier
                               </DropdownMenuItem>
-                              <DropdownMenuItem className="gap-2 text-red-600">
+                              <DropdownMenuItem
+                                className="gap-2 text-red-600"
+                                onClick={() => openDeleteModal(appointment)}
+                              >
                                 <Trash2 className="h-4 w-4" />
                                 Supprimer
                               </DropdownMenuItem>
