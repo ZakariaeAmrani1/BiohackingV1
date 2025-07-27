@@ -89,7 +89,7 @@ export default function Appointments() {
 
   // Filter and search logic
   const filteredAppointments = useMemo(() => {
-    return mockAppointments.filter((appointment) => {
+    return appointments.filter((appointment) => {
       const matchesSearch = 
         appointment.patient_nom?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         appointment.CIN.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -266,7 +266,7 @@ export default function Appointments() {
                       <TableHead>Date & Heure</TableHead>
                       <TableHead>Statut</TableHead>
                       <TableHead>Créé par</TableHead>
-                      <TableHead>Cr��é le</TableHead>
+                      <TableHead>Créé le</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
