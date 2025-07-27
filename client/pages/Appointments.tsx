@@ -123,7 +123,103 @@ export default function Appointments() {
 
       return matchesSearch && matchesStatus && matchesCreator && matchesDate;
     });
-  }, [searchTerm, statusFilter, creatorFilter, dateFilter]);
+  }, [searchTerm, statusFilter, creatorFilter, dateFilter, appointments]);
+
+  // CRUD Operations
+  const handleCreateAppointment = async (data: AppointmentFormData) => {
+    try {
+      setIsSubmitting(true);
+      await AppointmentsService.create(data);
+      await loadAppointments();
+      toast({
+        title: "Succès",
+        description: "Le rendez-vous a été créé avec succès",
+      });
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: "Impossible de créer le rendez-vous",
+        variant: "destructive",
+      });
+      throw error;
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleUpdateAppointment = async (data: AppointmentFormData) => {
+    if (!selectedAppointment) return;
+
+    try {
+      setIsSubmitting(true);
+      await AppointmentsService.update(selectedAppointment.id, data);
+      await loadAppointments();
+      toast({
+        title: "Succès",
+        description: "Le rendez-vous a été modifié avec succès",
+      });
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: "Impossible de modifier le rendez-vous",
+        variant: "destructive",
+      });
+      throw error;
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDeleteAppointment = async () => {
+    if (!selectedAppointment) return;
+
+    try {
+      setIsSubmitting(true);
+      await AppointmentsService.delete(selectedAppointment.id);
+      await loadAppointments();
+      toast({
+        title: "Succès",
+        description: "Le rendez-vous a été supprimé avec succès",
+      });
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: "Impossible de supprimer le rendez-vous",
+        variant: "destructive",
+      });
+      throw error;
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Modal handlers
+  const openCreateModal = () => {
+    setSelectedAppointment(null);
+    setIsFormModalOpen(true);
+  };
+
+  const openEditModal = (appointment: RendezVous) => {
+    setSelectedAppointment(appointment);
+    setIsFormModalOpen(true);
+  };
+
+  const openDetailsModal = (appointment: RendezVous) => {
+    setSelectedAppointment(appointment);
+    setIsDetailsModalOpen(true);
+  };
+
+  const openDeleteModal = (appointment: RendezVous) => {
+    setSelectedAppointment(appointment);
+    setIsDeleteModalOpen(true);
+  };
+
+  const closeModals = () => {
+    setIsFormModalOpen(false);
+    setIsDetailsModalOpen(false);
+    setIsDeleteModalOpen(false);
+    setSelectedAppointment(null);
+  };
 
   const formatDateTime = (dateString: string) => {
     const date = new Date(dateString);
