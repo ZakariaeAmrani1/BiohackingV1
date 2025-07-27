@@ -236,14 +236,8 @@ export class AppointmentsService {
 export const validateAppointmentData = (data: AppointmentFormData): string[] => {
   const errors: string[] = [];
 
-  if (!data.CIN.trim()) {
-    errors.push("Le CIN est obligatoire");
-  } else if (!/^[A-Z]{2}\d{6}$/.test(data.CIN)) {
-    errors.push("Le CIN doit suivre le format BE123456");
-  }
-
-  if (!data.patient_nom.trim()) {
-    errors.push("Le nom du patient est obligatoire");
+  if (!data.client_id || data.client_id <= 0) {
+    errors.push("Veuillez sélectionner un patient");
   }
 
   if (!data.sujet.trim()) {
