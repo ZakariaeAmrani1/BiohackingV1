@@ -173,7 +173,9 @@ export default function AppointmentCalendar() {
             {getWeekDates().map((date, dayIndex) => (
               <div
                 key={dayIndex}
-                className="border-r border-border last:border-r-0"
+                className={`border-r border-border last:border-r-0 ${
+                  isToday(date) ? 'bg-primary/5' : ''
+                }`}
               >
                 <div className={`h-12 border-b border-border px-2 py-2 text-center ${
                   isToday(date) ? 'bg-primary/10 border-primary/20' : ''
