@@ -230,7 +230,7 @@ export default function AppointmentFormModal({
               Sélectionner un patient
             </Label>
             
-            <Popover open={isClientSelectorOpen} onOpenChange={setIsClientSelectorOpen}>
+            <Popover open={isClientSelectorOpen} onOpenChange={setIsClientSelectorOpen} modal={true}>
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
