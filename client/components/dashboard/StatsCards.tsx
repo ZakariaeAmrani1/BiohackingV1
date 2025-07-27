@@ -1,4 +1,11 @@
-import { TrendingUp, TrendingDown, Users, Calendar, Activity, DollarSign } from "lucide-react";
+import {
+  TrendingUp,
+  TrendingDown,
+  Users,
+  Calendar,
+  Activity,
+  DollarSign,
+} from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const stats = [
@@ -8,7 +15,7 @@ const stats = [
     change: "+12.5%",
     trend: "up",
     icon: Users,
-    description: "Active patients this month"
+    description: "Active patients this month",
   },
   {
     title: "Today's Appointments",
@@ -16,7 +23,7 @@ const stats = [
     change: "+3",
     trend: "up",
     icon: Calendar,
-    description: "Scheduled for today"
+    description: "Scheduled for today",
   },
   {
     title: "Monthly Revenue",
@@ -24,7 +31,7 @@ const stats = [
     change: "+8.2%",
     trend: "up",
     icon: DollarSign,
-    description: "Compared to last month"
+    description: "Compared to last month",
   },
   {
     title: "Treatment Success Rate",
@@ -32,7 +39,7 @@ const stats = [
     change: "+2.1%",
     trend: "up",
     icon: Activity,
-    description: "Patient satisfaction rate"
+    description: "Patient satisfaction rate",
   },
 ];
 
@@ -55,7 +62,11 @@ export default function StatsCards() {
               ) : (
                 <TrendingDown className="mr-1 h-3 w-3 text-red-500" />
               )}
-              <span className={stat.trend === "up" ? "text-green-500" : "text-red-500"}>
+              <span
+                className={
+                  stat.trend === "up" ? "text-green-500" : "text-red-500"
+                }
+              >
                 {stat.change}
               </span>
               <span className="ml-1">{stat.description}</span>

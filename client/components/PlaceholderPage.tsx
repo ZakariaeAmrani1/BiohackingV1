@@ -10,10 +10,10 @@ interface PlaceholderPageProps {
   icon?: React.ComponentType<{ className?: string }>;
 }
 
-export default function PlaceholderPage({ 
-  title, 
-  description, 
-  icon: Icon = Construction 
+export default function PlaceholderPage({
+  title,
+  description,
+  icon: Icon = Construction,
 }: PlaceholderPageProps) {
   return (
     <DashboardLayout>
@@ -29,7 +29,8 @@ export default function PlaceholderPage({
                 <p className="text-muted-foreground mt-2">{description}</p>
               </div>
               <div className="text-sm text-muted-foreground">
-                This page is under development. Continue prompting to have me build out the specific functionality you need for this section.
+                This page is under development. Continue prompting to have me
+                build out the specific functionality you need for this section.
               </div>
               <Button asChild variant="outline" className="gap-2">
                 <Link to="/">

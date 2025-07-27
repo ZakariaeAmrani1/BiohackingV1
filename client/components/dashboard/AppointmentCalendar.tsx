@@ -13,7 +13,7 @@ const mockAppointments = [
     patient: "John Smith",
     treatment: "Biohacking Consultation",
     status: "confirmed",
-    date: new Date(2024, 1, 15)
+    date: new Date(2024, 1, 15),
   },
   {
     id: 2,
@@ -22,7 +22,7 @@ const mockAppointments = [
     patient: "Sarah Johnson",
     treatment: "IV Therapy",
     status: "pending",
-    date: new Date(2024, 1, 15)
+    date: new Date(2024, 1, 15),
   },
   {
     id: 3,
@@ -31,7 +31,7 @@ const mockAppointments = [
     patient: "Mike Davis",
     treatment: "Cryotherapy Session",
     status: "confirmed",
-    date: new Date(2024, 1, 16)
+    date: new Date(2024, 1, 16),
   },
 ];
 
@@ -43,14 +43,22 @@ const statusColors = {
 
 export default function AppointmentCalendar() {
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [view, setView] = useState<'week' | 'day'>('week');
+  const [view, setView] = useState<"week" | "day">("week");
 
-  const weekDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+  const weekDays = [
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+    "Sunday",
+  ];
   const timeSlots = Array.from({ length: 12 }, (_, i) => `${8 + i}:00`);
 
-  const navigateWeek = (direction: 'prev' | 'next') => {
+  const navigateWeek = (direction: "prev" | "next") => {
     const newDate = new Date(currentDate);
-    newDate.setDate(newDate.getDate() + (direction === 'next' ? 7 : -7));
+    newDate.setDate(newDate.getDate() + (direction === "next" ? 7 : -7));
     setCurrentDate(newDate);
   };
 
@@ -68,15 +76,15 @@ export default function AppointmentCalendar() {
   };
 
   const formatDate = (date: Date) => {
-    return date.toLocaleDateString('en-US', { 
-      month: 'short', 
-      day: 'numeric' 
+    return date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
     });
   };
 
   const getAppointmentsForDate = (date: Date) => {
-    return mockAppointments.filter(apt => 
-      apt.date.toDateString() === date.toDateString()
+    return mockAppointments.filter(
+      (apt) => apt.date.toDateString() === date.toDateString(),
     );
   };
 
@@ -84,21 +92,23 @@ export default function AppointmentCalendar() {
     <Card className="h-full">
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle className="text-xl font-semibold">Appointment Calendar</CardTitle>
+          <CardTitle className="text-xl font-semibold">
+            Appointment Calendar
+          </CardTitle>
           <div className="flex items-center gap-2">
             <div className="flex rounded-lg border border-border p-1">
               <Button
-                variant={view === 'week' ? 'default' : 'ghost'}
+                variant={view === "week" ? "default" : "ghost"}
                 size="sm"
-                onClick={() => setView('week')}
+                onClick={() => setView("week")}
                 className="h-8"
               >
                 Week
               </Button>
               <Button
-                variant={view === 'day' ? 'default' : 'ghost'}
+                variant={view === "day" ? "default" : "ghost"}
                 size="sm"
-                onClick={() => setView('day')}
+                onClick={() => setView("day")}
                 className="h-8"
               >
                 Day
@@ -108,27 +118,30 @@ export default function AppointmentCalendar() {
               <Button
                 variant="outline"
                 size="icon"
-                onClick={() => navigateWeek('prev')}
+                onClick={() => navigateWeek("prev")}
                 className="h-8 w-8"
               >
                 <ChevronLeft className="h-4 w-4" />
               </Button>
               <span className="min-w-[120px] text-center text-sm font-medium">
-                {currentDate.toLocaleDateString('en-US', { 
-                  month: 'long', 
-                  year: 'numeric' 
+                {currentDate.toLocaleDateString("en-US", {
+                  month: "long",
+                  year: "numeric",
                 })}
               </span>
               <Button
                 variant="outline"
                 size="icon"
-                onClick={() => navigateWeek('next')}
+                onClick={() => navigateWeek("next")}
                 className="h-8 w-8"
               >
                 <ChevronRight className="h-4 w-4" />
               </Button>
             </div>
-            <Button size="sm" className="gap-2 bg-primary hover:bg-primary/90 text-primary-foreground">
+            <Button
+              size="sm"
+              className="gap-2 bg-primary hover:bg-primary/90 text-primary-foreground"
+            >
               <Plus className="h-4 w-4" />
               New Appointment
             </Button>
@@ -136,7 +149,7 @@ export default function AppointmentCalendar() {
         </div>
       </CardHeader>
       <CardContent className="p-0">
-        {view === 'week' ? (
+        {view === "week" ? (
           <div className="grid grid-cols-8 border-t border-border">
             {/* Time column */}
             <div className="border-r border-border">
@@ -153,7 +166,10 @@ export default function AppointmentCalendar() {
 
             {/* Day columns */}
             {getWeekDates().map((date, dayIndex) => (
-              <div key={dayIndex} className="border-r border-border last:border-r-0">
+              <div
+                key={dayIndex}
+                className="border-r border-border last:border-r-0"
+              >
                 <div className="h-12 border-b border-border px-2 py-2 text-center">
                   <div className="text-xs font-medium text-muted-foreground">
                     {weekDays[dayIndex]}
@@ -164,8 +180,10 @@ export default function AppointmentCalendar() {
                 </div>
                 {timeSlots.map((time, timeIndex) => {
                   const dayAppointments = getAppointmentsForDate(date);
-                  const timeAppointments = dayAppointments.filter(apt => apt.time === time);
-                  
+                  const timeAppointments = dayAppointments.filter(
+                    (apt) => apt.time === time,
+                  );
+
                   return (
                     <div
                       key={timeIndex}
@@ -182,8 +200,8 @@ export default function AppointmentCalendar() {
                           <div className="text-muted-foreground truncate">
                             {appointment.treatment}
                           </div>
-                          <Badge 
-                            variant="secondary" 
+                          <Badge
+                            variant="secondary"
                             className={`text-xs mt-1 ${statusColors[appointment.status as keyof typeof statusColors]}`}
                           >
                             {appointment.status}
@@ -213,11 +231,17 @@ export default function AppointmentCalendar() {
                       <User className="h-4 w-4 text-muted-foreground" />
                       <span className="font-medium">{appointment.patient}</span>
                     </div>
-                    <p className="text-sm text-muted-foreground">{appointment.treatment}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {appointment.treatment}
+                    </p>
                   </div>
-                  <Badge 
-                    variant="secondary" 
-                    className={statusColors[appointment.status as keyof typeof statusColors]}
+                  <Badge
+                    variant="secondary"
+                    className={
+                      statusColors[
+                        appointment.status as keyof typeof statusColors
+                      ]
+                    }
                   >
                     {appointment.status}
                   </Badge>

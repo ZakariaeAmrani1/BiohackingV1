@@ -14,9 +14,9 @@ export default function Dashboard() {
             Welcome back to Biohacking Clinic Management System
           </p>
         </div>
-        
+
         <StatsCards />
-        
+
         <div className="grid gap-6 lg:grid-cols-3">
           <div className="lg:col-span-2">
             <AppointmentCalendar />

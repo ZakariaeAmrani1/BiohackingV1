@@ -10,7 +10,7 @@ const activities = [
     description: "John Smith - Biohacking Consultation",
     time: "2 minutes ago",
     icon: Calendar,
-    color: "text-blue-500"
+    color: "text-blue-500",
   },
   {
     id: 2,
@@ -19,7 +19,7 @@ const activities = [
     description: "Sarah Johnson - IV Therapy Session",
     time: "15 minutes ago",
     icon: Stethoscope,
-    color: "text-green-500"
+    color: "text-green-500",
   },
   {
     id: 3,
@@ -28,7 +28,7 @@ const activities = [
     description: "Mike Davis added to system",
     time: "1 hour ago",
     icon: User,
-    color: "text-purple-500"
+    color: "text-purple-500",
   },
   {
     id: 4,
@@ -37,7 +37,7 @@ const activities = [
     description: "Blood panel results for Emma Wilson",
     time: "2 hours ago",
     icon: TestTube,
-    color: "text-orange-500"
+    color: "text-orange-500",
   },
   {
     id: 5,
@@ -46,7 +46,7 @@ const activities = [
     description: "David Brown - Cryotherapy Session",
     time: "3 hours ago",
     icon: Calendar,
-    color: "text-red-500"
+    color: "text-red-500",
   },
 ];
 
@@ -54,7 +54,9 @@ export default function RecentActivities() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-lg font-semibold">Recent Activities</CardTitle>
+        <CardTitle className="text-lg font-semibold">
+          Recent Activities
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">

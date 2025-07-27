@@ -1,4 +1,11 @@
-import { Plus, Calendar, Users, FileText, TestTube, Stethoscope } from "lucide-react";
+import {
+  Plus,
+  Calendar,
+  Users,
+  FileText,
+  TestTube,
+  Stethoscope,
+} from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
@@ -8,35 +15,35 @@ const quickActions = [
     description: "Schedule a patient appointment",
     icon: Calendar,
     color: "bg-blue-500",
-    action: () => console.log("New appointment")
+    action: () => console.log("New appointment"),
   },
   {
     title: "Add Patient",
     description: "Register a new patient",
     icon: Users,
     color: "bg-green-500",
-    action: () => console.log("Add patient")
+    action: () => console.log("Add patient"),
   },
   {
     title: "Order Lab Test",
     description: "Request laboratory tests",
     icon: TestTube,
     color: "bg-purple-500",
-    action: () => console.log("Order lab test")
+    action: () => console.log("Order lab test"),
   },
   {
     title: "New Treatment",
     description: "Start a new treatment plan",
     icon: Stethoscope,
     color: "bg-orange-500",
-    action: () => console.log("New treatment")
+    action: () => console.log("New treatment"),
   },
   {
     title: "Generate Report",
     description: "Create patient or clinic report",
     icon: FileText,
     color: "bg-teal-500",
-    action: () => console.log("Generate report")
+    action: () => console.log("Generate report"),
   },
 ];
 

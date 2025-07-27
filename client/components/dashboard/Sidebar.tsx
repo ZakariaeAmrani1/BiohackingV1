@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { 
+import {
   Calendar,
   Users,
   Activity,
@@ -9,7 +9,7 @@ import {
   Home,
   Stethoscope,
   Heart,
-  TestTube
+  TestTube,
 } from "lucide-react";
 
 const navigation = [
@@ -35,7 +35,9 @@ export default function Sidebar() {
             <Heart className="h-6 w-6 text-primary-foreground" />
           </div>
           <div>
-            <h1 className="text-lg font-semibold text-foreground">Biohacking</h1>
+            <h1 className="text-lg font-semibold text-foreground">
+              Biohacking
+            </h1>
             <p className="text-xs text-muted-foreground">Clinic Management</p>
           </div>
         </div>
@@ -53,7 +55,7 @@ export default function Sidebar() {
                 "group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
                 isActive
                   ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                  : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
               )}
             >
               <item.icon className="h-5 w-5" />
@@ -70,8 +72,12 @@ export default function Sidebar() {
             <span className="text-xs font-medium text-primary">DR</span>
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-foreground truncate">Dr. Smith</p>
-            <p className="text-xs text-muted-foreground truncate">Administrator</p>
+            <p className="text-sm font-medium text-foreground truncate">
+              Dr. Smith
+            </p>
+            <p className="text-xs text-muted-foreground truncate">
+              Administrator
+            </p>
           </div>
         </div>
       </div>
