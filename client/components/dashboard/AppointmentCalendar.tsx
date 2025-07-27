@@ -8,21 +8,21 @@ import { Badge } from "@/components/ui/badge";
 const mockAppointments = [
   {
     id: 1,
-    time: "09:00",
+    time: "9:00",
     duration: 60,
     patient: "John Smith",
     treatment: "Biohacking Consultation",
     status: "confirmed",
-    date: new Date(2024, 1, 15),
+    date: new Date(), // Today
   },
   {
     id: 2,
-    time: "10:30",
+    time: "10:00",
     duration: 45,
     patient: "Sarah Johnson",
     treatment: "IV Therapy",
     status: "pending",
-    date: new Date(2024, 1, 15),
+    date: new Date(), // Today
   },
   {
     id: 3,
@@ -31,7 +31,25 @@ const mockAppointments = [
     patient: "Mike Davis",
     treatment: "Cryotherapy Session",
     status: "confirmed",
-    date: new Date(2024, 1, 16),
+    date: new Date(Date.now() + 86400000), // Tomorrow
+  },
+  {
+    id: 4,
+    time: "11:00",
+    duration: 30,
+    patient: "Emma Wilson",
+    treatment: "Blood Panel Analysis",
+    status: "confirmed",
+    date: new Date(Date.now() - 86400000), // Yesterday
+  },
+  {
+    id: 5,
+    time: "15:00",
+    duration: 60,
+    patient: "Alex Chen",
+    treatment: "Wellness Consultation",
+    status: "pending",
+    date: new Date(Date.now() + 2 * 86400000), // Day after tomorrow
   },
 ];
 
