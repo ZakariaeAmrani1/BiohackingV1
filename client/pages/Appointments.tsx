@@ -215,8 +215,26 @@ export default function Appointments() {
   };
 
   const closeModals = () => {
+    // Use setTimeout to ensure proper cleanup order
+    setTimeout(() => {
+      setIsFormModalOpen(false);
+      setIsDetailsModalOpen(false);
+      setIsDeleteModalOpen(false);
+      setSelectedAppointment(null);
+    }, 0);
+  };
+
+  const closeFormModal = () => {
     setIsFormModalOpen(false);
+    setSelectedAppointment(null);
+  };
+
+  const closeDetailsModal = () => {
     setIsDetailsModalOpen(false);
+    setSelectedAppointment(null);
+  };
+
+  const closeDeleteModal = () => {
     setIsDeleteModalOpen(false);
     setSelectedAppointment(null);
   };
