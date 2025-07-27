@@ -252,7 +252,11 @@ export default function AppointmentFormModal({
                   <Search className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-[500px] p-0 z-[60]">
+              <PopoverContent
+                className="w-[500px] p-0 z-[60] shadow-lg border-2"
+                sideOffset={5}
+                align="start"
+              >
                 <Command>
                   <CommandInput 
                     placeholder="Rechercher par nom, prénom, CIN, email..."
