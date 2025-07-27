@@ -11,7 +11,7 @@ const mockAppointments = [
     time: "9:00",
     duration: 60,
     patient: "John Smith",
-    treatment: "Biohacking Consultation",
+    treatment: "Consultation Biohacking",
     status: "confirmed",
     date: new Date(), // Today
   },
@@ -20,7 +20,7 @@ const mockAppointments = [
     time: "10:00",
     duration: 45,
     patient: "Sarah Johnson",
-    treatment: "IV Therapy",
+    treatment: "Thérapie IV",
     status: "pending",
     date: new Date(), // Today
   },
@@ -29,7 +29,7 @@ const mockAppointments = [
     time: "14:00",
     duration: 90,
     patient: "Mike Davis",
-    treatment: "Cryotherapy Session",
+    treatment: "Séance de Cryothérapie",
     status: "confirmed",
     date: new Date(Date.now() + 86400000), // Tomorrow
   },
@@ -38,7 +38,7 @@ const mockAppointments = [
     time: "11:00",
     duration: 30,
     patient: "Emma Wilson",
-    treatment: "Blood Panel Analysis",
+    treatment: "Analyse du Bilan Sanguin",
     status: "confirmed",
     date: new Date(Date.now() - 86400000), // Yesterday
   },
@@ -47,7 +47,7 @@ const mockAppointments = [
     time: "15:00",
     duration: 60,
     patient: "Alex Chen",
-    treatment: "Wellness Consultation",
+    treatment: "Consultation Bien-être",
     status: "pending",
     date: new Date(Date.now() + 2 * 86400000), // Day after tomorrow
   },
@@ -59,18 +59,24 @@ const statusColors = {
   cancelled: "bg-red-100 text-red-700 border-red-200",
 };
 
+const statusTranslations = {
+  confirmed: "confirmé",
+  pending: "en attente",
+  cancelled: "annulé",
+};
+
 export default function AppointmentCalendar() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [view, setView] = useState<"week" | "day">("week");
 
   const weekDays = [
-    "Monday",
-    "Tuesday",
-    "Wednesday",
-    "Thursday",
-    "Friday",
-    "Saturday",
-    "Sunday",
+    "Lundi",
+    "Mardi",
+    "Mercredi",
+    "Jeudi",
+    "Vendredi",
+    "Samedi",
+    "Dimanche",
   ];
   const timeSlots = Array.from({ length: 12 }, (_, i) => `${8 + i}:00`);
 
@@ -94,7 +100,7 @@ export default function AppointmentCalendar() {
   };
 
   const formatDate = (date: Date) => {
-    return date.toLocaleDateString("en-US", {
+    return date.toLocaleDateString("fr-FR", {
       month: "short",
       day: "numeric",
     });
@@ -116,7 +122,7 @@ export default function AppointmentCalendar() {
       <CardHeader className="pb-4">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <CardTitle className="text-xl font-semibold">
-            Appointment Calendar
+            Calendrier des Rendez-vous
           </CardTitle>
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
             <div className="flex rounded-lg border border-border p-1">
@@ -126,7 +132,7 @@ export default function AppointmentCalendar() {
                 onClick={() => setView("week")}
                 className="h-8"
               >
-                Week
+                Semaine
               </Button>
               <Button
                 variant={view === "day" ? "default" : "ghost"}
@@ -134,7 +140,7 @@ export default function AppointmentCalendar() {
                 onClick={() => setView("day")}
                 className="h-8"
               >
-                Day
+                Journée
               </Button>
             </div>
             <div className="flex items-center gap-1">
@@ -147,7 +153,7 @@ export default function AppointmentCalendar() {
                 <ChevronLeft className="h-4 w-4" />
               </Button>
               <span className="min-w-[120px] text-center text-sm font-medium px-2">
-                {currentDate.toLocaleDateString("en-US", {
+                {currentDate.toLocaleDateString("fr-FR", {
                   month: "long",
                   year: "numeric",
                 })}
@@ -166,7 +172,7 @@ export default function AppointmentCalendar() {
               className="gap-2 bg-primary hover:bg-primary/90 text-primary-foreground"
             >
               <Plus className="h-4 w-4" />
-              New Appointment
+              Nouveau Rendez-vous
             </Button>
           </div>
         </div>
@@ -244,7 +250,7 @@ export default function AppointmentCalendar() {
                             variant="secondary"
                             className={`text-xs mt-1 ${statusColors[appointment.status as keyof typeof statusColors]}`}
                           >
-                            {appointment.status}
+                            {statusTranslations[appointment.status as keyof typeof statusTranslations]}
                           </Badge>
                         </div>
                       ))}
@@ -283,7 +289,7 @@ export default function AppointmentCalendar() {
                       ]
                     }
                   >
-                    {appointment.status}
+                    {statusTranslations[appointment.status as keyof typeof statusTranslations]}
                   </Badge>
                 </div>
               ))}
