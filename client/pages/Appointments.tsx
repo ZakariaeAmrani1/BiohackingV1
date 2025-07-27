@@ -305,49 +305,138 @@ export default function Appointments() {
           </div>
         </div>
 
-        {/* Appointments Table */}
-        <Card>
-          <CardContent className="p-0">
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Patient</TableHead>
-                    <TableHead>CIN</TableHead>
-                    <TableHead>Sujet</TableHead>
-                    <TableHead>Date & Heure</TableHead>
-                    <TableHead>Statut</TableHead>
-                    <TableHead>Créé par</TableHead>
-                    <TableHead>Créé le</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredAppointments.length > 0 ? (
-                    filteredAppointments.map((appointment) => (
-                      <TableRow key={appointment.id} className="hover:bg-muted/50">
-                        <TableCell className="font-medium">
-                          {appointment.patient_nom}
+        {/* Appointments Display - Table or Cards */}
+        {viewMode === "table" ? (
+          <Card>
+            <CardContent className="p-0">
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Patient</TableHead>
+                      <TableHead>CIN</TableHead>
+                      <TableHead>Sujet</TableHead>
+                      <TableHead>Date & Heure</TableHead>
+                      <TableHead>Statut</TableHead>
+                      <TableHead>Créé par</TableHead>
+                      <TableHead>Créé le</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredAppointments.length > 0 ? (
+                      filteredAppointments.map((appointment) => (
+                        <TableRow key={appointment.id} className="hover:bg-muted/50">
+                          <TableCell className="font-medium">
+                            {appointment.patient_nom}
+                          </TableCell>
+                          <TableCell className="font-mono text-sm">
+                            {appointment.CIN}
+                          </TableCell>
+                          <TableCell>{appointment.sujet}</TableCell>
+                          <TableCell>{formatDateTime(appointment.date_rendez_vous)}</TableCell>
+                          <TableCell>
+                            <Badge
+                              variant="secondary"
+                              className={statusColors[appointment.status as keyof typeof statusColors]}
+                            >
+                              {appointment.status}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>{appointment.Cree_par}</TableCell>
+                          <TableCell>{formatDate(appointment.created_at)}</TableCell>
+                          <TableCell className="text-right">
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" className="h-8 w-8 p-0">
+                                  <ChevronDown className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem className="gap-2">
+                                  <Eye className="h-4 w-4" />
+                                  Voir détails
+                                </DropdownMenuItem>
+                                <DropdownMenuItem className="gap-2">
+                                  <Edit className="h-4 w-4" />
+                                  Modifier
+                                </DropdownMenuItem>
+                                <DropdownMenuItem className="gap-2 text-red-600">
+                                  <Trash2 className="h-4 w-4" />
+                                  Supprimer
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={8} className="text-center py-8">
+                          <div className="flex flex-col items-center gap-2">
+                            <Calendar className="h-8 w-8 text-muted-foreground" />
+                            <p className="text-muted-foreground">
+                              Aucun rendez-vous trouvé avec les critères sélectionnés
+                            </p>
+                          </div>
                         </TableCell>
-                        <TableCell className="font-mono text-sm">
-                          {appointment.CIN}
-                        </TableCell>
-                        <TableCell>{appointment.sujet}</TableCell>
-                        <TableCell>{formatDateTime(appointment.date_rendez_vous)}</TableCell>
-                        <TableCell>
-                          <Badge
-                            variant="secondary"
-                            className={statusColors[appointment.status as keyof typeof statusColors]}
-                          >
-                            {appointment.status}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>{appointment.Cree_par}</TableCell>
-                        <TableCell>{formatDate(appointment.created_at)}</TableCell>
-                        <TableCell className="text-right">
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+            </CardContent>
+          </Card>
+        ) : (
+          /* Cards View */
+          <div className="space-y-6">
+            {filteredAppointments.length > 0 ? (
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {filteredAppointments.map((appointment) => (
+                  <Card key={appointment.id} className="hover:shadow-md transition-shadow">
+                    <CardHeader className="pb-3">
+                      <div className="flex items-start justify-between">
+                        <div className="space-y-1">
+                          <CardTitle className="text-lg">{appointment.patient_nom}</CardTitle>
+                          <p className="text-sm text-muted-foreground font-mono">
+                            CIN: {appointment.CIN}
+                          </p>
+                        </div>
+                        <Badge
+                          variant="secondary"
+                          className={statusColors[appointment.status as keyof typeof statusColors]}
+                        >
+                          {appointment.status}
+                        </Badge>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2 text-sm">
+                          <Calendar className="h-4 w-4 text-muted-foreground" />
+                          <span className="font-medium">Sujet:</span>
+                          <span>{appointment.sujet}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm">
+                          <Clock className="h-4 w-4 text-muted-foreground" />
+                          <span className="font-medium">Date:</span>
+                          <span>{formatDateTime(appointment.date_rendez_vous)}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm">
+                          <User className="h-4 w-4 text-muted-foreground" />
+                          <span className="font-medium">Créé par:</span>
+                          <span>{appointment.Cree_par}</span>
+                        </div>
+                      </div>
+
+                      <div className="border-t pt-3">
+                        <div className="flex items-center justify-between">
+                          <p className="text-xs text-muted-foreground">
+                            Créé le {formatDate(appointment.created_at)}
+                          </p>
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" className="h-8 w-8 p-0">
+                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
                                 <ChevronDown className="h-4 w-4" />
                               </Button>
                             </DropdownMenuTrigger>
@@ -366,26 +455,29 @@ export default function Appointments() {
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  ) : (
-                    <TableRow>
-                      <TableCell colSpan={8} className="text-center py-8">
-                        <div className="flex flex-col items-center gap-2">
-                          <Calendar className="h-8 w-8 text-muted-foreground" />
-                          <p className="text-muted-foreground">
-                            Aucun rendez-vous trouvé avec les critères sélectionnés
-                          </p>
                         </div>
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </div>
-          </CardContent>
-        </Card>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <Card>
+                <CardContent className="text-center py-12">
+                  <div className="flex flex-col items-center gap-4">
+                    <Calendar className="h-12 w-12 text-muted-foreground" />
+                    <div>
+                      <h3 className="text-lg font-medium">Aucun rendez-vous trouvé</h3>
+                      <p className="text-muted-foreground">
+                        Aucun rendez-vous ne correspond aux critères sélectionnés
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        )}
       </div>
     </DashboardLayout>
   );
