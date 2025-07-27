@@ -8,6 +8,7 @@ export interface RendezVous {
   Cree_par: string;
   status?: "programmé" | "confirmé" | "terminé" | "annulé";
   patient_nom?: string; // Additional field for display
+  client_id?: number; // Reference to client table
 }
 
 // Create/Update form data interface
