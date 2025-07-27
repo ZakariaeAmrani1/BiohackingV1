@@ -59,7 +59,7 @@ export default function QuickActions() {
             <Button
               key={index}
               variant="outline"
-              className="h-auto p-4 justify-start gap-3 hover:bg-accent"
+              className="h-auto p-4 justify-start gap-3 hover:bg-accent w-full"
               onClick={action.action}
             >
               <div className={`rounded-lg p-2 ${action.color} text-white`}>
