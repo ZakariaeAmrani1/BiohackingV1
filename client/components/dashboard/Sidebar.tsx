@@ -101,7 +101,9 @@ export default function Sidebar() {
             >
               <img
                 src={
-                  isDark
+                  isCollapsed && isDark
+                    ? "https://cdn.builder.io/api/v1/image/assets%2Fd10fa76c4c4f4ba5b5e5c227a43b88a3%2F3f9200fdbe85411c888de06f4fddabc4?format=webp&width=800"
+                    : isDark
                     ? "https://cdn.builder.io/api/v1/image/assets%2Fd10fa76c4c4f4ba5b5e5c227a43b88a3%2F0959c370406340f6bd9464107f56613b?format=webp&width=800"
                     : isCollapsed
                     ? "https://cdn.builder.io/api/v1/image/assets%2F7aa559df90fe4ddaa64a743a97acfd66%2F0e48021fb78c480987c1e833adc83cec?format=webp&width=800"
