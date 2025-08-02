@@ -77,7 +77,7 @@ export default function Register() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 p-4 relative">
       {/* Logo centered at top */}
-      <div className="flex justify-center pt-8 pb-8">
+      <div className="flex justify-center">
         <div className="flex h-40 w-80 items-center justify-center">
           <img
             src="https://cdn.builder.io/api/v1/image/assets%2F7fd7290220b94e06a6f7cd5d150de493%2Fce1def9ea6774ec0bb2758b12ced93f9?format=webp&width=600"
