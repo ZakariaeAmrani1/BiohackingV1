@@ -10,6 +10,7 @@ import {
   Stethoscope,
   Heart,
   TestTube,
+  FolderOpen,
 } from "lucide-react";
 
 const navigation = [
