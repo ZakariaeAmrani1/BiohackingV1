@@ -4,13 +4,11 @@ import { useState, useEffect } from "react";
 import {
   Calendar,
   Users,
-  Activity,
   FileText,
   Settings,
   Home,
   Stethoscope,
   Heart,
-  TestTube,
   FolderOpen,
   Package,
   ChevronDown,
