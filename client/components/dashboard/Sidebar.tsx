@@ -80,7 +80,7 @@ export default function Sidebar() {
           "flex h-16 items-center border-b border-border transition-all duration-300",
           isCollapsed ? "px-3 justify-center" : "px-6 justify-between"
         )}>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white">
               <img
                 src="https://cdn.builder.io/api/v1/image/assets%2F7fd7290220b94e06a6f7cd5d150de493%2Fce1def9ea6774ec0bb2758b12ced93f9?format=webp&width=100"
@@ -88,14 +88,6 @@ export default function Sidebar() {
                 className="h-8 w-8 object-contain"
               />
             </div>
-            {!isCollapsed && (
-              <div>
-                <h1 className="text-lg font-semibold text-foreground">
-                  Biohacking
-                </h1>
-                <p className="text-xs text-muted-foreground">Gestion de Clinique</p>
-              </div>
-            )}
           </div>
           {!isCollapsed && (
             <Button

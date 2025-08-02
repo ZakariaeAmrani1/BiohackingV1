@@ -37,7 +37,7 @@ export default function MobileNav() {
   return (
     <div className="lg:hidden border-b border-border bg-card">
       <div className="flex h-16 items-center justify-between px-4">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white">
             <img
               src="https://cdn.builder.io/api/v1/image/assets%2F7fd7290220b94e06a6f7cd5d150de493%2Fce1def9ea6774ec0bb2758b12ced93f9?format=webp&width=100"
@@ -45,7 +45,6 @@ export default function MobileNav() {
               className="h-6 w-6 object-contain"
             />
           </div>
-          <h1 className="text-lg font-semibold text-foreground">Biohacking</h1>
         </div>
 
         <Sheet open={open} onOpenChange={setOpen}>
@@ -58,21 +57,13 @@ export default function MobileNav() {
             <div className="flex h-full w-full flex-col bg-card">
               {/* Logo */}
               <div className="flex h-16 items-center border-b border-border px-6">
-                <div className="flex items-center gap-3">
+                <div className="flex items-center justify-center w-full">
                   <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white">
                     <img
                       src="https://cdn.builder.io/api/v1/image/assets%2F7fd7290220b94e06a6f7cd5d150de493%2Fce1def9ea6774ec0bb2758b12ced93f9?format=webp&width=100"
                       alt="BioHacking Logo"
                       className="h-8 w-8 object-contain"
                     />
-                  </div>
-                  <div>
-                    <h1 className="text-lg font-semibold text-foreground">
-                      Biohacking
-                    </h1>
-                    <p className="text-xs text-muted-foreground">
-                      Gestion de Clinique
-                    </p>
                   </div>
                 </div>
               </div>
