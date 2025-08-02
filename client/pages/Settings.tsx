@@ -87,6 +87,7 @@ export default function Settings() {
     compactMode: false,
     showAnimations: true,
     language: 'fr',
+    currency: 'DH',
     autoSave: true,
     notifications: {
       desktop: true,
@@ -932,7 +933,7 @@ export default function Settings() {
                 onClick={handleResetSettings}
                 disabled={isLoading}
               >
-                {isLoading ? "Réinitialisation..." : "Réinitialiser"}
+                {isLoading ? "R��initialisation..." : "Réinitialiser"}
               </Button>
             </DialogFooter>
           </DialogContent>
