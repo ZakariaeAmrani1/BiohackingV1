@@ -29,7 +29,7 @@ import { ProductFormData, ProductsService } from "@/services/productsService";
 import { SoinFormData, SoinsService } from "@/services/soinsService";
 import { InvoiceFormData, InvoicesService } from "@/services/invoicesService";
 import { DocumentFormData, DocumentsService } from "@/services/documentsService";
-import { DocumentTemplateFormData, DocumentTemplatesService } from "@/services/documentTemplatesService";
+import { DocumentTemplateFormData, DocumentTemplatesService, DocumentTemplate } from "@/services/documentTemplatesService";
 
 interface QuickAction {
   title: string;
@@ -54,6 +54,21 @@ export default function QuickActions() {
   });
 
   const [isSubmitting, setIsSubmitting] = useState<Record<string, boolean>>({});
+  const [documentTemplates, setDocumentTemplates] = useState<DocumentTemplate[]>([]);
+
+  // Load document templates when component mounts
+  useEffect(() => {
+    loadDocumentTemplates();
+  }, []);
+
+  const loadDocumentTemplates = async () => {
+    try {
+      const templates = await DocumentTemplatesService.getAll();
+      setDocumentTemplates(templates);
+    } catch (error) {
+      console.error("Error loading document templates:", error);
+    }
+  };
 
   const quickActions: QuickAction[] = [
     {
@@ -335,6 +350,8 @@ export default function QuickActions() {
         onClose={() => closeModal("document")}
         onSubmit={handleCreateDocument}
         isLoading={isSubmitting.document}
+        patient={null}
+        templates={documentTemplates}
       />
 
       <DocumentTemplateFormModal
