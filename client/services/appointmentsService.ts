@@ -297,3 +297,107 @@ export const getAppointmentTypes = (): string[] => {
     "Séance de Récupération",
   ];
 };
+
+// Time slot interface
+export interface TimeSlot {
+  datetime: string;
+  time: string;
+  available: boolean;
+}
+
+// Working hours configuration
+const WORKING_HOURS = {
+  start: 8, // 8 AM
+  end: 18, // 6 PM
+  appointmentDuration: 60, // 1 hour in minutes
+};
+
+// Generate time slots for a specific date
+export const generateTimeSlotsForDate = (
+  date: Date,
+  excludeAppointmentId?: number
+): TimeSlot[] => {
+  const slots: TimeSlot[] = [];
+  const dateStr = date.toISOString().split('T')[0]; // YYYY-MM-DD format
+
+  // Get existing appointments for this date (excluding the one being edited if applicable)
+  const existingAppointments = mockAppointments.filter(
+    (apt) => {
+      const aptDate = new Date(apt.date_rendez_vous).toISOString().split('T')[0];
+      const isOnSameDate = aptDate === dateStr;
+      const isNotExcluded = !excludeAppointmentId || apt.id !== excludeAppointmentId;
+      return isOnSameDate && isNotExcluded;
+    }
+  );
+
+  // Generate slots from working hours
+  for (let hour = WORKING_HOURS.start; hour < WORKING_HOURS.end; hour++) {
+    const slotDate = new Date(date);
+    slotDate.setHours(hour, 0, 0, 0);
+
+    // Check if this slot conflicts with existing appointments
+    const slotEnd = new Date(slotDate.getTime() + WORKING_HOURS.appointmentDuration * 60000);
+
+    const isAvailable = !existingAppointments.some((apt) => {
+      const aptStart = new Date(apt.date_rendez_vous);
+      const aptEnd = new Date(aptStart.getTime() + WORKING_HOURS.appointmentDuration * 60000);
+
+      // Check for overlap: slot overlaps with appointment if:
+      // slot starts before appointment ends AND slot ends after appointment starts
+      return slotDate < aptEnd && slotEnd > aptStart;
+    });
+
+    slots.push({
+      datetime: slotDate.toISOString().slice(0, 16), // YYYY-MM-DDTHH:MM format
+      time: slotDate.toLocaleTimeString('fr-FR', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+      }),
+      available: isAvailable,
+    });
+  }
+
+  return slots;
+};
+
+// Get available dates within a date range (next 30 days by default)
+export const getAvailableDates = (
+  startDate: Date = new Date(),
+  daysAhead: number = 30,
+  excludeAppointmentId?: number
+): { date: Date; hasAvailableSlots: boolean }[] => {
+  const dates: { date: Date; hasAvailableSlots: boolean }[] = [];
+
+  for (let i = 0; i < daysAhead; i++) {
+    const date = new Date(startDate);
+    date.setDate(startDate.getDate() + i);
+
+    // Skip weekends (optional - can be configured)
+    const dayOfWeek = date.getDay();
+    if (dayOfWeek === 0 || dayOfWeek === 6) {
+      continue; // Skip Sunday (0) and Saturday (6)
+    }
+
+    const slots = generateTimeSlotsForDate(date, excludeAppointmentId);
+    const hasAvailableSlots = slots.some(slot => slot.available);
+
+    dates.push({
+      date,
+      hasAvailableSlots,
+    });
+  }
+
+  return dates;
+};
+
+// Check if a specific datetime is available
+export const isTimeSlotAvailable = (
+  datetime: string,
+  excludeAppointmentId?: number
+): boolean => {
+  const slotDate = new Date(datetime);
+  const slots = generateTimeSlotsForDate(slotDate, excludeAppointmentId);
+  const slot = slots.find(s => s.datetime === datetime);
+  return slot?.available ?? false;
+};
