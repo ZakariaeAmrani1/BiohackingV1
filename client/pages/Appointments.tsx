@@ -41,6 +41,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/components/ui/use-toast";
+import { TableLoader, GridLoader } from "@/components/ui/table-loader";
 import AppointmentFormModal from "@/components/appointments/AppointmentFormModal";
 import AppointmentDetailsModal from "@/components/appointments/AppointmentDetailsModal";
 import DeleteConfirmationModal from "@/components/appointments/DeleteConfirmationModal";
