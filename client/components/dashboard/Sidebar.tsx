@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Calendar,
   Users,
@@ -57,7 +57,10 @@ const navigation = [
 export default function Sidebar() {
   const location = useLocation();
   const { user, logout } = useAuth();
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(() => {
+    const saved = localStorage.getItem('sidebar-collapsed');
+    return saved ? JSON.parse(saved) : false;
+  });
   const [expandedDropdowns, setExpandedDropdowns] = useState<string[]>([
     "Biens",
   ]);
@@ -92,7 +95,7 @@ export default function Sidebar() {
           <div className="flex items-center justify-start">
             <div className={cn(
               "flex items-center justify-center",
-              isCollapsed ? "h-10 w-10" : "h-16 w-40"
+              isCollapsed ? "h-12 w-12" : "h-20 w-48"
             )}>
               <img
                 src={isCollapsed
