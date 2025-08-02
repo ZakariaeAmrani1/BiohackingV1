@@ -44,6 +44,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/components/ui/use-toast";
+import { TableLoader, GridLoader } from "@/components/ui/table-loader";
 import SoinFormModal from "@/components/soins/SoinFormModal";
 import SoinDetailsModal from "@/components/soins/SoinDetailsModal";
 import DeleteSoinModal from "@/components/soins/DeleteSoinModal";
