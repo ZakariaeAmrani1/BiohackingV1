@@ -247,6 +247,7 @@ export class AppointmentsService {
 // Utility functions for validation
 export const validateAppointmentData = (
   data: AppointmentFormData,
+  excludeAppointmentId?: number
 ): string[] => {
   const errors: string[] = [];
 
@@ -265,6 +266,11 @@ export const validateAppointmentData = (
     const now = new Date();
     if (appointmentDate < now) {
       errors.push("La date du rendez-vous ne peut pas être dans le passé");
+    }
+
+    // Check if the selected time slot is available
+    if (!isTimeSlotAvailable(data.date_rendez_vous, excludeAppointmentId)) {
+      errors.push("Ce créneau horaire n'est plus disponible. Veuillez sélectionner un autre créneau.");
     }
   }
 
