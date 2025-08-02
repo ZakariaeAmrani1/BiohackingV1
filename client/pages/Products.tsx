@@ -576,7 +576,9 @@ export default function Products() {
         ) : (
           /* Cards View */
           <div className="space-y-6">
-            {filteredProducts.length > 0 ? (
+            {isLoading ? (
+              <GridLoader items={6} />
+            ) : filteredProducts.length > 0 ? (
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {filteredProducts.map((product) => {
                   const stockStatus = getStockStatus(product.stock);
