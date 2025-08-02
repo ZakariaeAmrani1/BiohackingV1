@@ -1,3 +1,5 @@
+import { CurrencyService } from "./currencyService";
+
 // Payment types
 export interface Payment {
   id: number;
