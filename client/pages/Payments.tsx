@@ -144,8 +144,8 @@ export default function Payments() {
     return filtered.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   }, [searchTerm, doctorFilter, dateFilter, payments]);
 
-  // Get statistics from all payments (not filtered)
-  const statistics = getPaymentStatistics(payments.map(p => ({
+  // Get statistics from filtered payments
+  const statistics = getPaymentStatistics(filteredPayments.map(p => ({
     id: p.id,
     id_facture: p.id_facture,
     date: p.date,
