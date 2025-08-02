@@ -395,37 +395,7 @@ export default function Payments() {
           </CardContent>
         </Card>
 
-        {/* Summary by Doctor */}
-        {Object.keys(statistics.doctorStats).length > 0 && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <BarChart3 className="h-5 w-5" />
-                Résumé par Médecin
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {Object.entries(statistics.doctorStats)
-                  .sort((a, b) => b[1].revenue - a[1].revenue)
-                  .map(([doctor, stats]) => (
-                    <div key={doctor} className="p-4 border rounded-lg">
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="font-medium">{doctor}</div>
-                        <Badge variant="outline">{stats.count} paiement(s)</Badge>
-                      </div>
-                      <div className="text-2xl font-bold text-primary">
-                        {formatPrice(stats.revenue)}
-                      </div>
-                      <div className="text-sm text-muted-foreground">
-                        Moyenne: {formatPrice(stats.count > 0 ? stats.revenue / stats.count : 0)}
-                      </div>
-                    </div>
-                  ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
+
       </div>
     </DashboardLayout>
   );
