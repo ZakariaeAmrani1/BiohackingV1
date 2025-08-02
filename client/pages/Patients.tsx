@@ -56,6 +56,7 @@ import {
 } from "@/services/clientsService";
 
 export default function Patients() {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [bloodGroupFilter, setBloodGroupFilter] = useState<string>("tous");
   const [creatorFilter, setCreatorFilter] = useState<string>("tous");
