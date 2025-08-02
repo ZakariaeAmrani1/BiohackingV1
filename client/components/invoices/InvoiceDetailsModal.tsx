@@ -195,20 +195,32 @@ export default function InvoiceDetailsModal({
                   </Card>
                 ))}
                 
-                {/* Total Section */}
+                {/* Total Section with TVA breakdown */}
                 <Card className="bg-primary/5 border-primary/20">
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between">
-                      <div className="space-y-1">
-                        <div className="text-sm text-muted-foreground">
-                          Total ({invoice.items.length} article{invoice.items.length > 1 ? 's' : ''})
-                        </div>
-                        <div className="text-lg font-semibold">
-                          Montant total de la facture
-                        </div>
+                  <CardContent className="p-4 space-y-3">
+                    <div className="text-sm text-muted-foreground">
+                      Total ({invoice.items.length} article{invoice.items.length > 1 ? 's' : ''})
+                    </div>
+
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between text-sm">
+                        <span>Sous-total (HT):</span>
+                        <span className="font-mono font-medium">
+                          {formatPrice(invoice.prix_ht || invoice.prix_total / 1.2)}
+                        </span>
                       </div>
-                      <div className="text-right">
-                        <div className="text-3xl font-bold text-primary">
+                      <div className="flex items-center justify-between text-sm">
+                        <span>TVA ({invoice.tva_rate || 20}%):</span>
+                        <span className="font-mono font-medium">
+                          {formatPrice(invoice.tva_amount || (invoice.prix_total - (invoice.prix_total / 1.2)))}
+                        </span>
+                      </div>
+                      <Separator />
+                      <div className="flex items-center justify-between">
+                        <div className="text-lg font-semibold">
+                          Total TTC:
+                        </div>
+                        <div className="text-3xl font-bold text-primary font-mono">
                           {formatPrice(invoice.prix_total)}
                         </div>
                       </div>
