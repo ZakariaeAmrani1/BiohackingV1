@@ -152,6 +152,7 @@ export default function TimeSlotPicker({
             </CardTitle>
             <div className="flex items-center gap-2">
               <Button
+                type="button"
                 variant="outline"
                 size="sm"
                 onClick={() => navigateWeek("prev")}
@@ -163,6 +164,7 @@ export default function TimeSlotPicker({
                 {formatWeekRange()}
               </span>
               <Button
+                type="button"
                 variant="outline"
                 size="sm"
                 onClick={() => navigateWeek("next")}
@@ -192,6 +194,7 @@ export default function TimeSlotPicker({
               return (
                 <Button
                   key={index}
+                  type="button"
                   variant={isSelected ? "default" : "outline"}
                   className={cn(
                     "h-12 p-1 flex flex-col items-center justify-center",
@@ -235,8 +238,9 @@ export default function TimeSlotPicker({
                 {timeSlots.map((slot, index) => (
                   <Button
                     key={index}
+                    type="button"
                     variant={
-                      value === slot.datetime ? "default" : 
+                      value === slot.datetime ? "default" :
                       slot.available ? "outline" : "ghost"
                     }
                     className={cn(
