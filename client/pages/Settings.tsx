@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import {
-  Settings,
+  Settings as SettingsIcon,
   User,
   Palette,
   Shield,
@@ -352,7 +352,7 @@ export default function Settings() {
               Notifications
             </TabsTrigger>
             <TabsTrigger value="advanced" className="gap-2">
-              <Settings className="h-4 w-4" />
+              <SettingsIcon className="h-4 w-4" />
               Avancé
             </TabsTrigger>
           </TabsList>
@@ -722,7 +722,7 @@ export default function Settings() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Settings className="h-5 w-5" />
+                  <SettingsIcon className="h-5 w-5" />
                   Paramètres avancés
                 </CardTitle>
               </CardHeader>
