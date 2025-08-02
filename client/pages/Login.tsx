@@ -19,6 +19,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
 import { AuthService, LoginCredentials } from "@/services/authService";
+import { useTheme } from "@/hooks/use-theme";
 
 export default function Login() {
   const { login } = useAuth();
