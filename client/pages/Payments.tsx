@@ -30,7 +30,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
+
 import { useToast } from "@/components/ui/use-toast";
 import {
   PaymentsService,
