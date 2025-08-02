@@ -235,33 +235,7 @@ export default function Payments() {
           </Card>
         </div>
 
-        {/* Top Doctor Card */}
-        {statistics.topDoctor !== 'N/A' && (
-          <Card className="bg-primary/5 border-primary/20">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Activity className="h-5 w-5 text-primary" />
-                Meilleur Performer du Mois
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="text-lg font-semibold">{statistics.topDoctor}</div>
-                  <p className="text-sm text-muted-foreground">
-                    {statistics.doctorStats[statistics.topDoctor]?.count || 0} paiement(s)
-                  </p>
-                </div>
-                <div className="text-right">
-                  <div className="text-2xl font-bold text-primary">
-                    {formatPrice(statistics.doctorStats[statistics.topDoctor]?.revenue || 0)}
-                  </div>
-                  <p className="text-xs text-muted-foreground">Revenus générés</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+
 
         {/* Search and Filters */}
         <Card>
