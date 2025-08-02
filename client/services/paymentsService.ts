@@ -160,8 +160,7 @@ export const getAvailableDoctorsFromPayments = (): string[] => {
 };
 
 export const formatPrice = (price: number): string => {
-  // Import dynamically to avoid circular dependencies
-  return require("./currencyService").CurrencyService.formatCurrency(price);
+  return CurrencyService.formatCurrency(price);
 };
 
 // Get payment statistics
