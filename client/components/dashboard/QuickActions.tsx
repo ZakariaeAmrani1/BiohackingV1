@@ -215,7 +215,7 @@ export default function QuickActions() {
     }
   };
 
-  const handleCreateInvoice = async (data: InvoiceFormData) => {
+  const handleCreateInvoice = async (data: FactureFormData) => {
     try {
       setIsSubmitting(prev => ({ ...prev, invoice: true }));
       await InvoicesService.create(data);
