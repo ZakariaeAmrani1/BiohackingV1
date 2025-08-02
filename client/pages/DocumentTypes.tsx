@@ -393,7 +393,10 @@ export default function DocumentTypes() {
           <Card>
             <CardContent className="p-0">
               <div className="overflow-x-auto">
-                <Table>
+                {isLoading ? (
+                  <TableLoader columns={6} rows={6} />
+                ) : (
+                  <Table>
                   <TableHeader>
                     <TableRow>
                       <TableHead>Nom du modèle</TableHead>
@@ -492,7 +495,8 @@ export default function DocumentTypes() {
                       </TableRow>
                     )}
                   </TableBody>
-                </Table>
+                  </Table>
+                )}
               </div>
             </CardContent>
           </Card>
