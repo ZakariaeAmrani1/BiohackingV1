@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { UserService } from "@/services/userService";
+import { useTheme } from "@/hooks/use-theme";
 
 const navigation = [
   { name: "Tableau de Bord", href: "/", icon: Home },
