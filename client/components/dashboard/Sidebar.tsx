@@ -15,6 +15,7 @@ import {
   Package,
   ChevronDown,
   ChevronRight,
+  Receipt,
 } from "lucide-react";
 
 const navigation = [
