@@ -16,6 +16,7 @@ import {
   ChevronDown,
   ChevronRight,
   Receipt,
+  DollarSign,
 } from "lucide-react";
 
 const navigation = [
