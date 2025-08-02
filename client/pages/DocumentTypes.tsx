@@ -41,6 +41,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/components/ui/use-toast";
+import { TableLoader, GridLoader } from "@/components/ui/table-loader";
 import DocumentTemplateFormModal from "@/components/documentTemplates/DocumentTemplateFormModal";
 import DocumentTemplateDetailsModal from "@/components/documentTemplates/DocumentTemplateDetailsModal";
 import DeleteDocumentTemplateModal from "@/components/documentTemplates/DeleteDocumentTemplateModal";
