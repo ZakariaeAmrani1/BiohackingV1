@@ -1,4 +1,5 @@
 import { ClientsService, Client } from "./clientsService";
+import { ActivitiesService } from "./activitiesService";
 
 // Type matching your database structure
 export interface RendezVous {
@@ -154,6 +155,23 @@ export class AppointmentsService {
     };
 
     mockAppointments.push(newAppointment);
+
+    // Log activity
+    ActivitiesService.logActivity(
+      'appointment',
+      'created',
+      newAppointment.id,
+      `RV-${newAppointment.id.toString().padStart(3, '0')}`,
+      data.Cree_par,
+      {
+        patientName: newAppointment.patient_nom,
+        appointmentType: data.sujet
+      }
+    );
+
+    // Dispatch custom event for real-time updates
+    window.dispatchEvent(new CustomEvent('activityLogged'));
+
     return newAppointment;
   }
 
@@ -185,6 +203,23 @@ export class AppointmentsService {
     };
 
     mockAppointments[index] = updatedAppointment;
+
+    // Log activity
+    ActivitiesService.logActivity(
+      'appointment',
+      'updated',
+      id,
+      `RV-${id.toString().padStart(3, '0')}`,
+      data.Cree_par,
+      {
+        patientName: updatedAppointment.patient_nom,
+        appointmentType: data.sujet
+      }
+    );
+
+    // Dispatch custom event for real-time updates
+    window.dispatchEvent(new CustomEvent('activityLogged'));
+
     return updatedAppointment;
   }
 
@@ -195,7 +230,25 @@ export class AppointmentsService {
     const index = mockAppointments.findIndex((apt) => apt.id === id);
     if (index === -1) return false;
 
+    const deletedAppointment = mockAppointments[index];
     mockAppointments.splice(index, 1);
+
+    // Log activity
+    ActivitiesService.logActivity(
+      'appointment',
+      'deleted',
+      id,
+      `RV-${id.toString().padStart(3, '0')}`,
+      'System', // We don't have user context in delete, could be improved
+      {
+        patientName: deletedAppointment.patient_nom,
+        appointmentType: deletedAppointment.sujet
+      }
+    );
+
+    // Dispatch custom event for real-time updates
+    window.dispatchEvent(new CustomEvent('activityLogged'));
+
     return true;
   }
 
