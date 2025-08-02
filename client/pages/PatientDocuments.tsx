@@ -784,6 +784,13 @@ export default function PatientDocuments() {
                                 </DropdownMenuItem>
                                 <DropdownMenuItem
                                   className="gap-2"
+                                  onClick={() => generatePDF(document)}
+                                >
+                                  <Download className="h-4 w-4" />
+                                  Télécharger PDF
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  className="gap-2"
                                   onClick={() => openEditModal(document)}
                                 >
                                   <Edit className="h-4 w-4" />
