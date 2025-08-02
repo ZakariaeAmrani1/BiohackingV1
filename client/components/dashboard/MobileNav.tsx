@@ -96,15 +96,18 @@ export default function MobileNav() {
                 <div className="flex items-center gap-3">
                   <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
                     <span className="text-xs font-medium text-primary">
-                      {user?.prenom?.[0]?.toUpperCase()}{user?.nom?.[0]?.toUpperCase()}
+                      {user?.prenom?.[0]?.toUpperCase()}
+                      {user?.nom?.[0]?.toUpperCase()}
                     </span>
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-foreground truncate">
-                      {user ? UserService.getDisplayName(user) : 'Utilisateur'}
+                      {user ? UserService.getDisplayName(user) : "Utilisateur"}
                     </p>
                     <p className="text-xs text-muted-foreground truncate">
-                      {user ? UserService.getRoleDisplayName(user.role) : 'Rôle'}
+                      {user
+                        ? UserService.getRoleDisplayName(user.role)
+                        : "Rôle"}
                     </p>
                   </div>
                   <Button

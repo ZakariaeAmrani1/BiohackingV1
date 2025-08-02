@@ -24,7 +24,12 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import { UserService } from "@/services/userService";
 import { Button } from "@/components/ui/button";
-import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+  TooltipProvider,
+} from "@/components/ui/tooltip";
 
 const navigation = [
   { name: "Tableau de Bord", href: "/", icon: Home },
@@ -71,15 +76,19 @@ export default function Sidebar() {
 
   return (
     <TooltipProvider>
-      <div className={cn(
-        "flex h-full flex-col bg-card border-r border-border transition-all duration-300",
-        isCollapsed ? "w-16" : "w-64"
-      )}>
+      <div
+        className={cn(
+          "flex h-full flex-col bg-card border-r border-border transition-all duration-300",
+          isCollapsed ? "w-16" : "w-64",
+        )}
+      >
         {/* Logo */}
-        <div className={cn(
-          "flex h-16 items-center border-b border-border transition-all duration-300",
-          isCollapsed ? "px-3 justify-center" : "px-6 justify-center"
-        )}>
+        <div
+          className={cn(
+            "flex h-16 items-center border-b border-border transition-all duration-300",
+            isCollapsed ? "px-3 justify-center" : "px-6 justify-center",
+          )}
+        >
           <div className="flex items-center justify-center">
             <div className="flex h-16 w-40 items-center justify-center">
               <img
@@ -112,10 +121,12 @@ export default function Sidebar() {
         </div>
 
         {/* Navigation */}
-        <nav className={cn(
-          "flex-1 space-y-1 py-4 transition-all duration-300",
-          isCollapsed ? "px-2" : "px-3"
-        )}>
+        <nav
+          className={cn(
+            "flex-1 space-y-1 py-4 transition-all duration-300",
+            isCollapsed ? "px-2" : "px-3",
+          )}
+        >
           {navigation.map((item) => {
             if (item.dropdown && item.children) {
               const isExpanded = expandedDropdowns.includes(item.name);
@@ -123,7 +134,9 @@ export default function Sidebar() {
 
               if (isCollapsed) {
                 // For collapsed state, show only the first child if any is active
-                const activeChild = item.children.find(child => location.pathname === child.href);
+                const activeChild = item.children.find(
+                  (child) => location.pathname === child.href,
+                );
                 if (activeChild) {
                   return (
                     <Tooltip key={item.name}>
@@ -131,7 +144,7 @@ export default function Sidebar() {
                         <Link
                           to={activeChild.href}
                           className={cn(
-                            "group flex items-center justify-center rounded-lg p-2 text-sm font-medium transition-colors bg-primary text-primary-foreground"
+                            "group flex items-center justify-center rounded-lg p-2 text-sm font-medium transition-colors bg-primary text-primary-foreground",
                           )}
                         >
                           <activeChild.icon className="h-5 w-5" />
@@ -147,9 +160,11 @@ export default function Sidebar() {
                     <Tooltip key={item.name}>
                       <TooltipTrigger asChild>
                         <button
-                          onClick={() => !isCollapsed && toggleDropdown(item.name)}
+                          onClick={() =>
+                            !isCollapsed && toggleDropdown(item.name)
+                          }
                           className={cn(
-                            "group flex items-center justify-center rounded-lg p-2 text-sm font-medium transition-colors text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                            "group flex items-center justify-center rounded-lg p-2 text-sm font-medium transition-colors text-muted-foreground hover:bg-accent hover:text-accent-foreground",
                           )}
                         >
                           <item.icon className="h-5 w-5" />
@@ -254,24 +269,33 @@ export default function Sidebar() {
         </nav>
 
         {/* Footer */}
-        <div className={cn(
-          "border-t border-border transition-all duration-300",
-          isCollapsed ? "p-2" : "p-4"
-        )}>
+        <div
+          className={cn(
+            "border-t border-border transition-all duration-300",
+            isCollapsed ? "p-2" : "p-4",
+          )}
+        >
           {isCollapsed ? (
             <div className="flex flex-col items-center gap-2">
               <Tooltip>
                 <TooltipTrigger asChild>
                   <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
                     <span className="text-xs font-medium text-primary">
-                      {user?.prenom?.[0]?.toUpperCase()}{user?.nom?.[0]?.toUpperCase()}
+                      {user?.prenom?.[0]?.toUpperCase()}
+                      {user?.nom?.[0]?.toUpperCase()}
                     </span>
                   </div>
                 </TooltipTrigger>
                 <TooltipContent side="right">
                   <div>
-                    <p className="font-medium">{user ? UserService.getDisplayName(user) : 'Utilisateur'}</p>
-                    <p className="text-xs text-muted-foreground">{user ? UserService.getRoleDisplayName(user.role) : 'Rôle'}</p>
+                    <p className="font-medium">
+                      {user ? UserService.getDisplayName(user) : "Utilisateur"}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {user
+                        ? UserService.getRoleDisplayName(user.role)
+                        : "Rôle"}
+                    </p>
                   </div>
                 </TooltipContent>
               </Tooltip>
@@ -295,15 +319,16 @@ export default function Sidebar() {
             <div className="flex items-center gap-3">
               <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
                 <span className="text-xs font-medium text-primary">
-                  {user?.prenom?.[0]?.toUpperCase()}{user?.nom?.[0]?.toUpperCase()}
+                  {user?.prenom?.[0]?.toUpperCase()}
+                  {user?.nom?.[0]?.toUpperCase()}
                 </span>
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-foreground truncate">
-                  {user ? UserService.getDisplayName(user) : 'Utilisateur'}
+                  {user ? UserService.getDisplayName(user) : "Utilisateur"}
                 </p>
                 <p className="text-xs text-muted-foreground truncate">
-                  {user ? UserService.getRoleDisplayName(user.role) : 'Rôle'}
+                  {user ? UserService.getRoleDisplayName(user.role) : "Rôle"}
                 </p>
               </div>
               <Button

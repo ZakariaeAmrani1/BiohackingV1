@@ -58,76 +58,118 @@ const AppRoutes = () => {
       />
 
       {/* Protected routes */}
-      <Route path="/" element={
-        <ProtectedRoute>
-          <Index />
-        </ProtectedRoute>
-      } />
-      <Route path="/appointments" element={
-        <ProtectedRoute>
-          <Appointments />
-        </ProtectedRoute>
-      } />
-      <Route path="/patients" element={
-        <ProtectedRoute>
-          <Patients />
-        </ProtectedRoute>
-      } />
-      <Route path="/patients/:cin/documents" element={
-        <ProtectedRoute>
-          <PatientDocuments />
-        </ProtectedRoute>
-      } />
-      <Route path="/treatments" element={
-        <ProtectedRoute>
-          <Treatments />
-        </ProtectedRoute>
-      } />
-      <Route path="/products" element={
-        <ProtectedRoute>
-          <Products />
-        </ProtectedRoute>
-      } />
-      <Route path="/soins" element={
-        <ProtectedRoute>
-          <Soins />
-        </ProtectedRoute>
-      } />
-      <Route path="/invoices" element={
-        <ProtectedRoute>
-          <Invoices />
-        </ProtectedRoute>
-      } />
-      <Route path="/payments" element={
-        <ProtectedRoute>
-          <Payments />
-        </ProtectedRoute>
-      } />
-      <Route path="/document-types" element={
-        <ProtectedRoute>
-          <DocumentTypes />
-        </ProtectedRoute>
-      } />
-      <Route path="/biohacking" element={
-        <ProtectedRoute>
-          <Biohacking />
-        </ProtectedRoute>
-      } />
-      <Route path="/metrics" element={
-        <ProtectedRoute>
-          <Metrics />
-        </ProtectedRoute>
-      } />
-      <Route path="/reports" element={
-        <ProtectedRoute>
-          <Reports />
-        </ProtectedRoute>
-      } />
-      <Route path="/settings" element={
-        <ProtectedRoute>
-          <Settings />
-        </ProtectedRoute>
-      } />
+      <Route
+        path="/"
+        element={
+          <ProtectedRoute>
+            <Index />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/appointments"
+        element={
+          <ProtectedRoute>
+            <Appointments />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/patients"
+        element={
+          <ProtectedRoute>
+            <Patients />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/patients/:cin/documents"
+        element={
+          <ProtectedRoute>
+            <PatientDocuments />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/treatments"
+        element={
+          <ProtectedRoute>
+            <Treatments />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/products"
+        element={
+          <ProtectedRoute>
+            <Products />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/soins"
+        element={
+          <ProtectedRoute>
+            <Soins />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/invoices"
+        element={
+          <ProtectedRoute>
+            <Invoices />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/payments"
+        element={
+          <ProtectedRoute>
+            <Payments />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/document-types"
+        element={
+          <ProtectedRoute>
+            <DocumentTypes />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/biohacking"
+        element={
+          <ProtectedRoute>
+            <Biohacking />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/metrics"
+        element={
+          <ProtectedRoute>
+            <Metrics />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/reports"
+        element={
+          <ProtectedRoute>
+            <Reports />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/settings"
+        element={
+          <ProtectedRoute>
+            <Settings />
+          </ProtectedRoute>
+        }
+      />
 
       {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
       <Route path="*" element={<NotFound />} />
