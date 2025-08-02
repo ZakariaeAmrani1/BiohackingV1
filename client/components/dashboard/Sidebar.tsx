@@ -28,6 +28,7 @@ import {
   TooltipTrigger,
   TooltipProvider,
 } from "@/components/ui/tooltip";
+import { useTheme } from "@/hooks/use-theme";
 
 const navigation = [
   { name: "Tableau de Bord", href: "/", icon: Home },
