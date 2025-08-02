@@ -14,6 +14,7 @@ import {
   Mail,
   Phone,
   Heart,
+  FileText,
 } from "lucide-react";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
