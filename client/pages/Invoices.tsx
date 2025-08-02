@@ -47,6 +47,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/components/ui/use-toast";
+import { TableLoader, GridLoader } from "@/components/ui/table-loader";
 import InvoiceFormModal from "@/components/invoices/InvoiceFormModal";
 import InvoiceDetailsModal from "@/components/invoices/InvoiceDetailsModal";
 import DeleteInvoiceModal from "@/components/invoices/DeleteInvoiceModal";
@@ -984,132 +985,141 @@ export default function Invoices() {
           <Card>
             <CardContent className="p-0">
               <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Facture</TableHead>
-                      <TableHead>Patient</TableHead>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Montant TTC</TableHead>
-                      <TableHead>Statut</TableHead>
-                      <TableHead>Créé par</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredInvoices.length > 0 ? (
-                      filteredInvoices.map((invoice) => (
-                        <TableRow
-                          key={invoice.id}
-                          className="hover:bg-muted/50"
-                        >
-                          <TableCell>
-                            <div className="flex items-center gap-2">
-                              <Receipt className="h-4 w-4 text-primary" />
-                              <div>
-                                <div className="font-medium">
-                                  #{invoice.id.toString().padStart(4, "0")}
-                                </div>
-                                <div className="text-sm text-muted-foreground">
-                                  {invoice.notes
-                                    ? invoice.notes.slice(0, 30) + "..."
-                                    : "Aucune note"}
+                {isLoading ? (
+                  <TableLoader columns={7} rows={6} />
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Facture</TableHead>
+                        <TableHead>Patient</TableHead>
+                        <TableHead>Date</TableHead>
+                        <TableHead>Montant TTC</TableHead>
+                        <TableHead>Statut</TableHead>
+                        <TableHead>Créé par</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredInvoices.length > 0 ? (
+                        filteredInvoices.map((invoice) => (
+                          <TableRow
+                            key={invoice.id}
+                            className="hover:bg-muted/50"
+                          >
+                            <TableCell>
+                              <div className="flex items-center gap-2">
+                                <Receipt className="h-4 w-4 text-primary" />
+                                <div>
+                                  <div className="font-medium">
+                                    #{invoice.id.toString().padStart(4, "0")}
+                                  </div>
+                                  <div className="text-sm text-muted-foreground">
+                                    {invoice.notes
+                                      ? invoice.notes.slice(0, 30) + "..."
+                                      : "Aucune note"}
+                                  </div>
                                 </div>
                               </div>
-                            </div>
-                          </TableCell>
-                          <TableCell className="font-mono text-sm">
-                            {invoice.CIN}
-                          </TableCell>
-                          <TableCell>{formatDate(invoice.date)}</TableCell>
-                          <TableCell className="font-mono font-semibold">
-                            {formatPrice(invoice.prix_total)}
-                          </TableCell>
-                          <TableCell>
-                            <span
-                              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(invoice.statut)}`}
-                            >
-                              {invoice.statut}
-                            </span>
-                          </TableCell>
-                          <TableCell>{invoice.Cree_par}</TableCell>
-                          <TableCell className="text-right">
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" className="h-8 w-8 p-0">
-                                  <ChevronDown className="h-4 w-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuItem
-                                  className="gap-2"
-                                  onClick={() => openDetailsModal(invoice)}
-                                >
-                                  <Eye className="h-4 w-4" />
-                                  Voir détails
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                  className="gap-2"
-                                  onClick={() => handleDownloadPDF(invoice)}
-                                >
-                                  <Download className="h-4 w-4" />
-                                  Télécharger PDF
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                  className="gap-2"
-                                  onClick={() => openEditModal(invoice)}
-                                >
-                                  <Edit className="h-4 w-4" />
-                                  Modifier
-                                </DropdownMenuItem>
-                                {invoice.statut !== FactureStatut.PAYEE && (
+                            </TableCell>
+                            <TableCell className="font-mono text-sm">
+                              {invoice.CIN}
+                            </TableCell>
+                            <TableCell>{formatDate(invoice.date)}</TableCell>
+                            <TableCell className="font-mono font-semibold">
+                              {formatPrice(invoice.prix_total)}
+                            </TableCell>
+                            <TableCell>
+                              <span
+                                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(invoice.statut)}`}
+                              >
+                                {invoice.statut}
+                              </span>
+                            </TableCell>
+                            <TableCell>{invoice.Cree_par}</TableCell>
+                            <TableCell className="text-right">
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    className="h-8 w-8 p-0"
+                                  >
+                                    <ChevronDown className="h-4 w-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
                                   <DropdownMenuItem
                                     className="gap-2"
-                                    onClick={() =>
-                                      handleUpdateStatus(
-                                        invoice.id,
-                                        FactureStatut.PAYEE,
-                                      )
-                                    }
+                                    onClick={() => openDetailsModal(invoice)}
                                   >
-                                    <CheckCircle className="h-4 w-4" />
-                                    Marquer payée
+                                    <Eye className="h-4 w-4" />
+                                    Voir détails
                                   </DropdownMenuItem>
-                                )}
-                                <DropdownMenuItem
-                                  className="gap-2 text-red-600"
-                                  onClick={() => openDeleteModal(invoice)}
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                  Supprimer
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
+                                  <DropdownMenuItem
+                                    className="gap-2"
+                                    onClick={() => handleDownloadPDF(invoice)}
+                                  >
+                                    <Download className="h-4 w-4" />
+                                    Télécharger PDF
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem
+                                    className="gap-2"
+                                    onClick={() => openEditModal(invoice)}
+                                  >
+                                    <Edit className="h-4 w-4" />
+                                    Modifier
+                                  </DropdownMenuItem>
+                                  {invoice.statut !== FactureStatut.PAYEE && (
+                                    <DropdownMenuItem
+                                      className="gap-2"
+                                      onClick={() =>
+                                        handleUpdateStatus(
+                                          invoice.id,
+                                          FactureStatut.PAYEE,
+                                        )
+                                      }
+                                    >
+                                      <CheckCircle className="h-4 w-4" />
+                                      Marquer payée
+                                    </DropdownMenuItem>
+                                  )}
+                                  <DropdownMenuItem
+                                    className="gap-2 text-red-600"
+                                    onClick={() => openDeleteModal(invoice)}
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                    Supprimer
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      ) : (
+                        <TableRow>
+                          <TableCell colSpan={7} className="text-center py-8">
+                            <div className="flex flex-col items-center gap-2">
+                              <Receipt className="h-8 w-8 text-muted-foreground" />
+                              <p className="text-muted-foreground">
+                                Aucune facture trouvée avec les critères
+                                sélectionnés
+                              </p>
+                            </div>
                           </TableCell>
                         </TableRow>
-                      ))
-                    ) : (
-                      <TableRow>
-                        <TableCell colSpan={7} className="text-center py-8">
-                          <div className="flex flex-col items-center gap-2">
-                            <Receipt className="h-8 w-8 text-muted-foreground" />
-                            <p className="text-muted-foreground">
-                              Aucune facture trouvée avec les critères
-                              sélectionnés
-                            </p>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
+                      )}
+                    </TableBody>
+                  </Table>
+                )}
               </div>
             </CardContent>
           </Card>
         ) : (
           /* Cards View */
           <div className="space-y-6">
-            {filteredInvoices.length > 0 ? (
+            {isLoading ? (
+              <GridLoader items={6} />
+            ) : filteredInvoices.length > 0 ? (
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {filteredInvoices.map((invoice) => (
                   <Card

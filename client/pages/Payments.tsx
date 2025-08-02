@@ -32,6 +32,7 @@ import {
 } from "@/components/ui/table";
 
 import { useToast } from "@/components/ui/use-toast";
+import { TableLoader } from "@/components/ui/table-loader";
 import {
   PaymentsService,
   Payment,
@@ -320,97 +321,104 @@ export default function Payments() {
         <Card>
           <CardContent className="p-0">
             <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Paiement</TableHead>
-                    <TableHead>Facture</TableHead>
-                    <TableHead>Patient</TableHead>
-                    <TableHead>Date Paiement</TableHead>
-                    <TableHead>Montant</TableHead>
-                    <TableHead>Médecin</TableHead>
-                    <TableHead>Notes Facture</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredPayments.length > 0 ? (
-                    filteredPayments.map((payment) => (
-                      <TableRow key={payment.id} className="hover:bg-muted/50">
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <DollarSign className="h-4 w-4 text-green-600" />
-                            <div>
-                              <div className="font-medium">
-                                #{payment.id.toString().padStart(4, "0")}
-                              </div>
-                              <div className="text-sm text-muted-foreground">
-                                {formatDateTime(payment.date)}
-                              </div>
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <Receipt className="h-4 w-4 text-primary" />
-                            <div>
-                              <div className="font-medium">
-                                {payment.facture_number}
-                              </div>
-                              <div className="text-sm text-muted-foreground">
-                                {formatDate(payment.facture_date)}
+              {isLoading ? (
+                <TableLoader columns={7} rows={6} />
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Paiement</TableHead>
+                      <TableHead>Facture</TableHead>
+                      <TableHead>Patient</TableHead>
+                      <TableHead>Date Paiement</TableHead>
+                      <TableHead>Montant</TableHead>
+                      <TableHead>Médecin</TableHead>
+                      <TableHead>Notes Facture</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredPayments.length > 0 ? (
+                      filteredPayments.map((payment) => (
+                        <TableRow
+                          key={payment.id}
+                          className="hover:bg-muted/50"
+                        >
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <DollarSign className="h-4 w-4 text-green-600" />
+                              <div>
+                                <div className="font-medium">
+                                  #{payment.id.toString().padStart(4, "0")}
+                                </div>
+                                <div className="text-sm text-muted-foreground">
+                                  {formatDateTime(payment.date)}
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        </TableCell>
-                        <TableCell className="font-mono text-sm">
-                          {payment.patient_cin}
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <Calendar className="h-4 w-4 text-muted-foreground" />
-                            {formatDate(payment.date)}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="font-mono text-lg font-semibold text-green-600">
-                            {formatPrice(payment.montant_totale)}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <User className="h-4 w-4 text-muted-foreground" />
-                            {payment.Cree_par}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          {payment.facture_notes ? (
-                            <div className="max-w-xs truncate text-sm text-muted-foreground">
-                              {payment.facture_notes}
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <Receipt className="h-4 w-4 text-primary" />
+                              <div>
+                                <div className="font-medium">
+                                  {payment.facture_number}
+                                </div>
+                                <div className="text-sm text-muted-foreground">
+                                  {formatDate(payment.facture_date)}
+                                </div>
+                              </div>
                             </div>
-                          ) : (
-                            <span className="text-sm text-muted-foreground italic">
-                              Aucune note
-                            </span>
-                          )}
+                          </TableCell>
+                          <TableCell className="font-mono text-sm">
+                            {payment.patient_cin}
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <Calendar className="h-4 w-4 text-muted-foreground" />
+                              {formatDate(payment.date)}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="font-mono text-lg font-semibold text-green-600">
+                              {formatPrice(payment.montant_totale)}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <User className="h-4 w-4 text-muted-foreground" />
+                              {payment.Cree_par}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            {payment.facture_notes ? (
+                              <div className="max-w-xs truncate text-sm text-muted-foreground">
+                                {payment.facture_notes}
+                              </div>
+                            ) : (
+                              <span className="text-sm text-muted-foreground italic">
+                                Aucune note
+                              </span>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={7} className="text-center py-8">
+                          <div className="flex flex-col items-center gap-2">
+                            <DollarSign className="h-8 w-8 text-muted-foreground" />
+                            <p className="text-muted-foreground">
+                              {isLoading
+                                ? "Chargement des paiements..."
+                                : "Aucun paiement trouvé avec les critères sélectionnés"}
+                            </p>
+                          </div>
                         </TableCell>
                       </TableRow>
-                    ))
-                  ) : (
-                    <TableRow>
-                      <TableCell colSpan={7} className="text-center py-8">
-                        <div className="flex flex-col items-center gap-2">
-                          <DollarSign className="h-8 w-8 text-muted-foreground" />
-                          <p className="text-muted-foreground">
-                            {isLoading
-                              ? "Chargement des paiements..."
-                              : "Aucun paiement trouvé avec les critères sélectionnés"}
-                          </p>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
+                    )}
+                  </TableBody>
+                </Table>
+              )}
             </div>
           </CardContent>
         </Card>

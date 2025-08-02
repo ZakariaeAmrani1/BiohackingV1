@@ -1,3 +1,5 @@
+import { CurrencyService } from "./currencyService";
+
 // Product types
 export interface Product {
   id: number;
@@ -221,8 +223,7 @@ export const getAvailableDoctors = (): string[] => {
 };
 
 export const formatPrice = (price: number): string => {
-  // Import dynamically to avoid circular dependencies
-  return require("./currencyService").CurrencyService.formatCurrency(price);
+  return CurrencyService.formatCurrency(price);
 };
 
 export const getStockStatus = (

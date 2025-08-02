@@ -4,13 +4,11 @@ import { useState, useEffect } from "react";
 import {
   Calendar,
   Users,
-  Activity,
   FileText,
   Settings,
   Home,
   Stethoscope,
   Heart,
-  TestTube,
   FolderOpen,
   Package,
   ChevronDown,
@@ -30,12 +28,12 @@ import {
   TooltipTrigger,
   TooltipProvider,
 } from "@/components/ui/tooltip";
+import { useTheme } from "@/hooks/use-theme";
 
 const navigation = [
   { name: "Tableau de Bord", href: "/", icon: Home },
   { name: "Rendez-vous", href: "/appointments", icon: Calendar },
   { name: "Patients", href: "/patients", icon: Users },
-  { name: "Traitements", href: "/treatments", icon: Stethoscope },
   { name: "Types de Documents", href: "/document-types", icon: FolderOpen },
   {
     name: "Biens",
@@ -48,26 +46,32 @@ const navigation = [
   },
   { name: "Factures", href: "/invoices", icon: Receipt },
   { name: "Paiements", href: "/payments", icon: DollarSign },
-  { name: "Biohacking", href: "/biohacking", icon: TestTube },
-  { name: "Métriques de Santé", href: "/metrics", icon: Activity },
-  { name: "Rapports", href: "/reports", icon: FileText },
   { name: "Paramètres", href: "/settings", icon: Settings },
 ];
 
 export default function Sidebar() {
   const location = useLocation();
   const { user, logout } = useAuth();
+  const { isDark } = useTheme();
   const [isCollapsed, setIsCollapsed] = useState(() => {
     const saved = localStorage.getItem("sidebar-collapsed");
     return saved ? JSON.parse(saved) : false;
   });
-  const [expandedDropdowns, setExpandedDropdowns] = useState<string[]>([
-    "Biens",
-  ]);
+  const [expandedDropdowns, setExpandedDropdowns] = useState<string[]>(() => {
+    const saved = localStorage.getItem("sidebar-expanded-dropdowns");
+    return saved ? JSON.parse(saved) : ["Biens"];
+  });
 
   useEffect(() => {
     localStorage.setItem("sidebar-collapsed", JSON.stringify(isCollapsed));
   }, [isCollapsed]);
+
+  useEffect(() => {
+    localStorage.setItem(
+      "sidebar-expanded-dropdowns",
+      JSON.stringify(expandedDropdowns),
+    );
+  }, [expandedDropdowns]);
 
   const toggleDropdown = (itemName: string) => {
     setExpandedDropdowns((prev) =>
@@ -105,9 +109,13 @@ export default function Sidebar() {
             >
               <img
                 src={
-                  isCollapsed
-                    ? "https://cdn.builder.io/api/v1/image/assets%2F7aa559df90fe4ddaa64a743a97acfd66%2F0e48021fb78c480987c1e833adc83cec?format=webp&width=800"
-                    : "https://cdn.builder.io/api/v1/image/assets%2F7fd7290220b94e06a6f7cd5d150de493%2Fce1def9ea6774ec0bb2758b12ced93f9?format=webp&width=500"
+                  isCollapsed && isDark
+                    ? "https://cdn.builder.io/api/v1/image/assets%2Fd10fa76c4c4f4ba5b5e5c227a43b88a3%2F3f9200fdbe85411c888de06f4fddabc4?format=webp&width=800"
+                    : isDark
+                      ? "https://cdn.builder.io/api/v1/image/assets%2Fd10fa76c4c4f4ba5b5e5c227a43b88a3%2F0959c370406340f6bd9464107f56613b?format=webp&width=800"
+                      : isCollapsed
+                        ? "https://cdn.builder.io/api/v1/image/assets%2F7aa559df90fe4ddaa64a743a97acfd66%2F0e48021fb78c480987c1e833adc83cec?format=webp&width=800"
+                        : "https://cdn.builder.io/api/v1/image/assets%2F7fd7290220b94e06a6f7cd5d150de493%2Fce1def9ea6774ec0bb2758b12ced93f9?format=webp&width=500"
                 }
                 alt="BioHacking Logo"
                 className="w-full h-full object-contain"

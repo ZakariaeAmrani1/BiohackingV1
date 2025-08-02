@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { UserService } from "@/services/userService";
+import { useTheme } from "@/hooks/use-theme";
 
 const navigation = [
   { name: "Tableau de Bord", href: "/", icon: Home },
@@ -33,6 +34,7 @@ export default function MobileNav() {
   const [open, setOpen] = useState(false);
   const location = useLocation();
   const { user, logout } = useAuth();
+  const { isDark } = useTheme();
 
   return (
     <div className="lg:hidden border-b border-border bg-card">
@@ -40,7 +42,11 @@ export default function MobileNav() {
         <div className="flex items-center">
           <div className="flex h-10 w-20 items-center justify-center">
             <img
-              src="https://cdn.builder.io/api/v1/image/assets%2F7fd7290220b94e06a6f7cd5d150de493%2Fce1def9ea6774ec0bb2758b12ced93f9?format=webp&width=300"
+              src={
+                isDark
+                  ? "https://cdn.builder.io/api/v1/image/assets%2Fd10fa76c4c4f4ba5b5e5c227a43b88a3%2F0959c370406340f6bd9464107f56613b?format=webp&width=800"
+                  : "https://cdn.builder.io/api/v1/image/assets%2F7fd7290220b94e06a6f7cd5d150de493%2Fce1def9ea6774ec0bb2758b12ced93f9?format=webp&width=300"
+              }
               alt="BioHacking Logo"
               className="w-full h-full object-contain"
             />
@@ -60,7 +66,11 @@ export default function MobileNav() {
                 <div className="flex items-center justify-center w-full">
                   <div className="flex h-12 w-24 items-center justify-center">
                     <img
-                      src="https://cdn.builder.io/api/v1/image/assets%2F7fd7290220b94e06a6f7cd5d150de493%2Fce1def9ea6774ec0bb2758b12ced93f9?format=webp&width=300"
+                      src={
+                        isDark
+                          ? "https://cdn.builder.io/api/v1/image/assets%2Fd10fa76c4c4f4ba5b5e5c227a43b88a3%2F0959c370406340f6bd9464107f56613b?format=webp&width=800"
+                          : "https://cdn.builder.io/api/v1/image/assets%2F7fd7290220b94e06a6f7cd5d150de493%2Fce1def9ea6774ec0bb2758b12ced93f9?format=webp&width=300"
+                      }
                       alt="BioHacking Logo"
                       className="w-full h-full object-contain"
                     />
