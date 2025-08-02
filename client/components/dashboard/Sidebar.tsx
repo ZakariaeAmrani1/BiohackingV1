@@ -40,6 +40,19 @@ const navigation = [
 
 export default function Sidebar() {
   const location = useLocation();
+  const [expandedDropdowns, setExpandedDropdowns] = useState<string[]>(["Biens"]);
+
+  const toggleDropdown = (itemName: string) => {
+    setExpandedDropdowns(prev =>
+      prev.includes(itemName)
+        ? prev.filter(name => name !== itemName)
+        : [...prev, itemName]
+    );
+  };
+
+  const isChildActive = (children: any[]) => {
+    return children.some(child => location.pathname === child.href);
+  };
 
   return (
     <div className="flex h-full w-64 flex-col bg-card border-r border-border">
@@ -61,22 +74,72 @@ export default function Sidebar() {
       {/* Navigation */}
       <nav className="flex-1 space-y-1 px-3 py-4">
         {navigation.map((item) => {
-          const isActive = location.pathname === item.href;
-          return (
-            <Link
-              key={item.name}
-              to={item.href}
-              className={cn(
-                "group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-                isActive
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
-              )}
-            >
-              <item.icon className="h-5 w-5" />
-              {item.name}
-            </Link>
-          );
+          if (item.dropdown && item.children) {
+            const isExpanded = expandedDropdowns.includes(item.name);
+            const hasActiveChild = isChildActive(item.children);
+
+            return (
+              <div key={item.name}>
+                <button
+                  onClick={() => toggleDropdown(item.name)}
+                  className={cn(
+                    "group flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                    hasActiveChild
+                      ? "bg-accent text-accent-foreground"
+                      : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
+                  )}
+                >
+                  <item.icon className="h-5 w-5" />
+                  {item.name}
+                  {isExpanded ? (
+                    <ChevronDown className="h-4 w-4 ml-auto" />
+                  ) : (
+                    <ChevronRight className="h-4 w-4 ml-auto" />
+                  )}
+                </button>
+
+                {isExpanded && (
+                  <div className="ml-6 mt-1 space-y-1">
+                    {item.children.map((child) => {
+                      const isChildActiveItem = location.pathname === child.href;
+                      return (
+                        <Link
+                          key={child.name}
+                          to={child.href}
+                          className={cn(
+                            "group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                            isChildActiveItem
+                              ? "bg-primary text-primary-foreground"
+                              : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
+                          )}
+                        >
+                          <child.icon className="h-4 w-4" />
+                          {child.name}
+                        </Link>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            );
+          } else {
+            const isActive = location.pathname === item.href;
+            return (
+              <Link
+                key={item.name}
+                to={item.href}
+                className={cn(
+                  "group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                  isActive
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
+                )}
+              >
+                <item.icon className="h-5 w-5" />
+                {item.name}
+              </Link>
+            );
+          }
         })}
       </nav>
 
