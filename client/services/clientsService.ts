@@ -32,6 +32,8 @@ export interface ClientFormData {
   Cree_par: string;
 }
 
+import { ActivitiesService } from "./activitiesService";
+
 // Mock data storage - in real app this would connect to your backend
 let mockClients: Client[] = [
   {
@@ -192,6 +194,19 @@ export class ClientsService {
     };
 
     mockClients.push(newClient);
+
+    // Log activity
+    ActivitiesService.logActivity(
+      'patient',
+      'created',
+      newClient.id,
+      `${newClient.prenom} ${newClient.nom}`,
+      data.Cree_par,
+    );
+
+    // Dispatch custom event for real-time updates
+    window.dispatchEvent(new CustomEvent('activityLogged'));
+
     return newClient;
   }
 
@@ -211,6 +226,19 @@ export class ClientsService {
     };
 
     mockClients[index] = updatedClient;
+
+    // Log activity
+    ActivitiesService.logActivity(
+      'patient',
+      'updated',
+      id,
+      `${updatedClient.prenom} ${updatedClient.nom}`,
+      data.Cree_par,
+    );
+
+    // Dispatch custom event for real-time updates
+    window.dispatchEvent(new CustomEvent('activityLogged'));
+
     return updatedClient;
   }
 
@@ -221,7 +249,21 @@ export class ClientsService {
     const index = mockClients.findIndex((client) => client.id === id);
     if (index === -1) return false;
 
+    const deletedClient = mockClients[index];
     mockClients.splice(index, 1);
+
+    // Log activity
+    ActivitiesService.logActivity(
+      'patient',
+      'deleted',
+      id,
+      `${deletedClient.prenom} ${deletedClient.nom}`,
+      'System', // Could be improved to track actual user
+    );
+
+    // Dispatch custom event for real-time updates
+    window.dispatchEvent(new CustomEvent('activityLogged'));
+
     return true;
   }
 
