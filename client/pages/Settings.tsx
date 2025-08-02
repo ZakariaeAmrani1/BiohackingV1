@@ -146,6 +146,8 @@ export default function Settings() {
         description: "Impossible de charger les paramètres",
         variant: "destructive",
       });
+    } finally {
+      setIsInitialLoading(false);
     }
   };
 
