@@ -453,7 +453,10 @@ export default function Soins() {
           <Card>
             <CardContent className="p-0">
               <div className="overflow-x-auto">
-                <Table>
+                {isLoading ? (
+                  <TableLoader columns={6} rows={6} />
+                ) : (
+                  <Table>
                   <TableHeader>
                     <TableRow>
                       <TableHead>Soin</TableHead>
@@ -538,7 +541,8 @@ export default function Soins() {
                       </TableRow>
                     )}
                   </TableBody>
-                </Table>
+                  </Table>
+                )}
               </div>
             </CardContent>
           </Card>
