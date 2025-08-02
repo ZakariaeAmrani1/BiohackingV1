@@ -384,14 +384,14 @@ export default function Invoices() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
-                Chiffre d'Affaires
+                Chiffre d'Affaires TTC
               </CardTitle>
               <Euro className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{formatPrice(statistics.totalRevenue)}</div>
               <p className="text-xs text-muted-foreground">
-                Revenu total
+                Revenu total TTC (TVA incluse)
               </p>
             </CardContent>
           </Card>
