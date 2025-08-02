@@ -17,7 +17,11 @@ import {
   ChevronRight,
   Receipt,
   DollarSign,
+  LogOut,
 } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { UserService } from "@/services/userService";
+import { Button } from "@/components/ui/button";
 
 const navigation = [
   { name: "Tableau de Bord", href: "/", icon: Home },
@@ -44,6 +48,7 @@ const navigation = [
 
 export default function Sidebar() {
   const location = useLocation();
+  const { user, logout } = useAuth();
   const [expandedDropdowns, setExpandedDropdowns] = useState<string[]>([
     "Biens",
   ]);
@@ -154,16 +159,27 @@ export default function Sidebar() {
       <div className="border-t border-border p-4">
         <div className="flex items-center gap-3">
           <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
-            <span className="text-xs font-medium text-primary">DR</span>
+            <span className="text-xs font-medium text-primary">
+              {user?.prenom?.[0]?.toUpperCase()}{user?.nom?.[0]?.toUpperCase()}
+            </span>
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-foreground truncate">
-              Dr. Smith
+              {user ? UserService.getDisplayName(user) : 'Utilisateur'}
             </p>
             <p className="text-xs text-muted-foreground truncate">
-              Administrateur
+              {user ? UserService.getRoleDisplayName(user.role) : 'Rôle'}
             </p>
           </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={logout}
+            className="h-8 w-8 p-0 hover:bg-destructive/10 hover:text-destructive"
+            title="Se déconnecter"
+          >
+            <LogOut className="h-4 w-4" />
+          </Button>
         </div>
       </div>
     </div>
