@@ -10,8 +10,6 @@ import {
   Clock,
   Euro,
   CreditCard,
-  BarChart3,
-  Activity,
   Target,
 } from "lucide-react";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
