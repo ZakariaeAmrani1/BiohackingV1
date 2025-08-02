@@ -4,6 +4,9 @@ export interface Facture {
   CIN: string;
   date: string;
   prix_total: number;
+  prix_ht: number; // Prix hors taxes
+  tva_amount: number; // Montant TVA
+  tva_rate: number; // Taux TVA (20%)
   statut: FactureStatut;
   notes: string;
   Cree_par: string;
@@ -63,7 +66,10 @@ let mockFactures: Facture[] = [
     id: 1,
     CIN: "BE123456",
     date: "2024-01-15T10:30:00",
-    prix_total: 125.50,
+    prix_ht: 123.00,
+    tva_amount: 24.60,
+    tva_rate: 20,
+    prix_total: 147.60,
     statut: FactureStatut.PAYEE,
     notes: "Consultation et médicaments prescrits",
     Cree_par: "Dr. Smith",
@@ -73,7 +79,10 @@ let mockFactures: Facture[] = [
     id: 2,
     CIN: "BE234567",
     date: "2024-01-18T14:20:00",
-    prix_total: 75.00,
+    prix_ht: 75.00,
+    tva_amount: 15.00,
+    tva_rate: 20,
+    prix_total: 90.00,
     statut: FactureStatut.ENVOYEE,
     notes: "Suivi vaccination",
     Cree_par: "Dr. Martin",
@@ -83,7 +92,10 @@ let mockFactures: Facture[] = [
     id: 3,
     CIN: "BE123456",
     date: "2024-01-22T09:15:00",
-    prix_total: 200.00,
+    prix_ht: 200.00,
+    tva_amount: 40.00,
+    tva_rate: 20,
+    prix_total: 240.00,
     statut: FactureStatut.BROUILLON,
     notes: "Consultation spécialisée avec examens",
     Cree_par: "Dr. Dubois",
@@ -93,7 +105,10 @@ let mockFactures: Facture[] = [
     id: 4,
     CIN: "BE345678",
     date: "2024-01-10T16:45:00",
-    prix_total: 45.00,
+    prix_ht: 45.00,
+    tva_amount: 9.00,
+    tva_rate: 20,
+    prix_total: 54.00,
     statut: FactureStatut.EN_RETARD,
     notes: "Séance de kinésithérapie",
     Cree_par: "Dr. Smith",
@@ -216,15 +231,21 @@ export class InvoicesService {
   static async create(data: FactureFormData): Promise<FactureWithDetails> {
     await delay(800);
 
-    // Calculate total price
-    const prix_total = data.items.reduce((total, item) => 
+    // Calculate prices with TVA
+    const prix_ht = data.items.reduce((total, item) =>
       total + (item.prix_unitaire * item.quantite), 0
     );
+    const tva_rate = 20;
+    const tva_amount = parseFloat((prix_ht * (tva_rate / 100)).toFixed(2));
+    const prix_total = parseFloat((prix_ht + tva_amount).toFixed(2));
 
     const newFacture: Facture = {
       id: Math.max(...mockFactures.map((facture) => facture.id)) + 1,
       CIN: data.CIN,
       date: data.date,
+      prix_ht,
+      tva_amount,
+      tva_rate,
       prix_total,
       statut: data.statut,
       notes: data.notes,
@@ -264,15 +285,21 @@ export class InvoicesService {
     const index = mockFactures.findIndex((facture) => facture.id === id);
     if (index === -1) return null;
 
-    // Calculate total price
-    const prix_total = data.items.reduce((total, item) => 
+    // Calculate prices with TVA
+    const prix_ht = data.items.reduce((total, item) =>
       total + (item.prix_unitaire * item.quantite), 0
     );
+    const tva_rate = 20;
+    const tva_amount = parseFloat((prix_ht * (tva_rate / 100)).toFixed(2));
+    const prix_total = parseFloat((prix_ht + tva_amount).toFixed(2));
 
     const updatedFacture: Facture = {
       ...mockFactures[index],
       CIN: data.CIN,
       date: data.date,
+      prix_ht,
+      tva_amount,
+      tva_rate,
       prix_total,
       statut: data.statut,
       notes: data.notes,
@@ -453,4 +480,24 @@ export const getInvoiceStatistics = (factures: Facture[]) => {
 // Calculate invoice total
 export const calculateInvoiceTotal = (items: FactureItem[]): number => {
   return items.reduce((total, item) => total + (item.prix_unitaire * item.quantite), 0);
+};
+
+// Calculate invoice totals with TVA
+export const calculateInvoiceTotals = (items: FactureItem[]): {
+  prix_ht: number;
+  tva_amount: number;
+  tva_rate: number;
+  prix_total: number;
+} => {
+  const prix_ht = items.reduce((total, item) => total + (item.prix_unitaire * item.quantite), 0);
+  const tva_rate = 20;
+  const tva_amount = parseFloat((prix_ht * (tva_rate / 100)).toFixed(2));
+  const prix_total = parseFloat((prix_ht + tva_amount).toFixed(2));
+
+  return {
+    prix_ht,
+    tva_amount,
+    tva_rate,
+    prix_total
+  };
 };
