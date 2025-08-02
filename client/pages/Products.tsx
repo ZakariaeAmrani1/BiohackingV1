@@ -464,7 +464,10 @@ export default function Products() {
           <Card>
             <CardContent className="p-0">
               <div className="overflow-x-auto">
-                <Table>
+                {isLoading ? (
+                  <TableLoader columns={7} rows={6} />
+                ) : (
+                  <Table>
                   <TableHeader>
                     <TableRow>
                       <TableHead>Produit</TableHead>
@@ -565,7 +568,8 @@ export default function Products() {
                       </TableRow>
                     )}
                   </TableBody>
-                </Table>
+                  </Table>
+                )}
               </div>
             </CardContent>
           </Card>
