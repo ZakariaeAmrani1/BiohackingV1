@@ -9,6 +9,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Appointments from "./pages/Appointments";
 import Patients from "./pages/Patients";
+import PatientDocuments from "./pages/PatientDocuments";
 import Treatments from "./pages/Treatments";
 import Biohacking from "./pages/Biohacking";
 import Metrics from "./pages/Metrics";
