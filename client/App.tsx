@@ -14,6 +14,7 @@ import Biohacking from "./pages/Biohacking";
 import Metrics from "./pages/Metrics";
 import Reports from "./pages/Reports";
 import Settings from "./pages/Settings";
+import DocumentTypes from "./pages/DocumentTypes";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
