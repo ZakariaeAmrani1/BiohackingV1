@@ -14,6 +14,7 @@ import Treatments from "./pages/Treatments";
 import Products from "./pages/Products";
 import Soins from "./pages/Soins";
 import Invoices from "./pages/Invoices";
+import Payments from "./pages/Payments";
 import Biohacking from "./pages/Biohacking";
 import Metrics from "./pages/Metrics";
 import Reports from "./pages/Reports";
