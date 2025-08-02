@@ -257,6 +257,10 @@ export default function Patients() {
     }, 100);
   };
 
+  const navigateToDocuments = (client: Client) => {
+    navigate(`/patients/${client.CIN}/documents`);
+  };
+
   // Force close all modals - can be used as emergency escape
   const forceCloseAllModals = () => {
     setIsFormModalOpen(false);
