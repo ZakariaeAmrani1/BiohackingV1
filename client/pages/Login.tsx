@@ -23,6 +23,7 @@ import { useTheme } from "@/hooks/use-theme";
 
 export default function Login() {
   const { login } = useAuth();
+  const { isDark } = useTheme();
   const [formData, setFormData] = useState<LoginCredentials>({
     email: "",
     password: "",
