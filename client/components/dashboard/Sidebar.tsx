@@ -18,6 +18,7 @@ const navigation = [
   { name: "Rendez-vous", href: "/appointments", icon: Calendar },
   { name: "Patients", href: "/patients", icon: Users },
   { name: "Traitements", href: "/treatments", icon: Stethoscope },
+  { name: "Types de Documents", href: "/document-types", icon: FolderOpen },
   { name: "Biohacking", href: "/biohacking", icon: TestTube },
   { name: "Métriques de Santé", href: "/metrics", icon: Activity },
   { name: "Rapports", href: "/reports", icon: FileText },
