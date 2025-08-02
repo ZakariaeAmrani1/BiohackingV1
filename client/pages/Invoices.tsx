@@ -985,7 +985,10 @@ export default function Invoices() {
           <Card>
             <CardContent className="p-0">
               <div className="overflow-x-auto">
-                <Table>
+                {isLoading ? (
+                  <TableLoader columns={7} rows={6} />
+                ) : (
+                  <Table>
                   <TableHeader>
                     <TableRow>
                       <TableHead>Facture</TableHead>
@@ -1103,7 +1106,8 @@ export default function Invoices() {
                       </TableRow>
                     )}
                   </TableBody>
-                </Table>
+                  </Table>
+                )}
               </div>
             </CardContent>
           </Card>
