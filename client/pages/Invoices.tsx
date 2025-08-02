@@ -643,7 +643,7 @@ export default function Invoices() {
                     <CardContent className="space-y-4">
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <div className="text-sm text-muted-foreground">Montant</div>
+                          <div className="text-sm text-muted-foreground">Montant TTC</div>
                           <div className="font-mono text-lg font-semibold">
                             {formatPrice(invoice.prix_total)}
                           </div>
