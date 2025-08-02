@@ -221,10 +221,8 @@ export const getAvailableDoctors = (): string[] => {
 };
 
 export const formatPrice = (price: number): string => {
-  return new Intl.NumberFormat("fr-FR", {
-    style: "currency",
-    currency: "EUR",
-  }).format(price);
+  // Import dynamically to avoid circular dependencies
+  return require('./currencyService').CurrencyService.formatCurrency(price);
 };
 
 export const getStockStatus = (
