@@ -85,7 +85,7 @@ export default function Login() {
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 p-4 relative">
       {/* Logo in top left corner */}
       <div className="absolute top-4 left-4">
-        <div className="flex h-16 w-32 items-center justify-center">
+        <div className="flex h-24 w-48 items-center justify-center">
           <img
             src="https://cdn.builder.io/api/v1/image/assets%2F7fd7290220b94e06a6f7cd5d150de493%2Fce1def9ea6774ec0bb2758b12ced93f9?format=webp&width=800"
             alt="BioHacking Logo"
