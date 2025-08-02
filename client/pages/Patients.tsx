@@ -434,20 +434,23 @@ export default function Patients() {
           <Card>
             <CardContent className="p-0">
               <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Patient</TableHead>
-                      <TableHead>CIN</TableHead>
-                      <TableHead>Âge</TableHead>
-                      <TableHead>Groupe sanguin</TableHead>
-                      <TableHead>Contact</TableHead>
-                      <TableHead>Créé par</TableHead>
-                      <TableHead>Créé le</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
+                {isLoading ? (
+                  <TableLoader columns={8} rows={6} />
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Patient</TableHead>
+                        <TableHead>CIN</TableHead>
+                        <TableHead>Âge</TableHead>
+                        <TableHead>Groupe sanguin</TableHead>
+                        <TableHead>Contact</TableHead>
+                        <TableHead>Créé par</TableHead>
+                        <TableHead>Créé le</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
                     {filteredClients.length > 0 ? (
                       filteredClients.map((client) => (
                         <TableRow key={client.id} className="hover:bg-muted/50">
@@ -534,15 +537,18 @@ export default function Patients() {
                         </TableCell>
                       </TableRow>
                     )}
-                  </TableBody>
-                </Table>
+                    </TableBody>
+                  </Table>
+                )}
               </div>
             </CardContent>
           </Card>
         ) : (
           /* Cards View */
           <div className="space-y-6">
-            {filteredClients.length > 0 ? (
+            {isLoading ? (
+              <GridLoader items={6} />
+            ) : filteredClients.length > 0 ? (
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {filteredClients.map((client) => (
                   <Card
