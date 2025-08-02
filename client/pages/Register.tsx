@@ -75,28 +75,31 @@ export default function Register() {
   const availableRoles = UserService.getAvailableRoles();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 flex items-center justify-center p-4">
-      <div className="w-full max-w-2xl space-y-6">
-        {/* Logo and Title */}
-        <div className="text-center space-y-4">
-          <div className="flex justify-center">
-            <div className="flex h-24 w-48 items-center justify-center">
-              <img
-                src="https://cdn.builder.io/api/v1/image/assets%2F7fd7290220b94e06a6f7cd5d150de493%2Fce1def9ea6774ec0bb2758b12ced93f9?format=webp&width=600"
-                alt="BioHacking Logo"
-                className="w-full h-full object-contain"
-              />
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 p-4 relative">
+      {/* Logo in top left corner */}
+      <div className="absolute top-4 left-4">
+        <div className="flex h-24 w-48 items-center justify-center">
+          <img
+            src="https://cdn.builder.io/api/v1/image/assets%2F7fd7290220b94e06a6f7cd5d150de493%2Fce1def9ea6774ec0bb2758b12ced93f9?format=webp&width=600"
+            alt="BioHacking Logo"
+            className="w-full h-full object-contain"
+          />
+        </div>
+      </div>
+
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="w-full max-w-2xl space-y-6">
+          {/* Title */}
+          <div className="text-center space-y-4">
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight text-center">
+                Créer un compte
+              </h1>
+              <p className="text-muted-foreground mt-2 text-center">
+                Rejoignez l'équipe
+              </p>
             </div>
           </div>
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight text-center">
-              Créer un compte
-            </h1>
-            <p className="text-muted-foreground mt-2 text-center">
-              Rejoignez l'équipe
-            </p>
-          </div>
-        </div>
 
         {/* Registration Form */}
         <Card>
@@ -385,9 +388,10 @@ export default function Register() {
           </CardContent>
         </Card>
 
-        {/* Footer */}
-        <div className="text-center text-xs text-muted-foreground">
-          <p>© 2024 Biohacking Clinic. Tous droits réservés.</p>
+          {/* Footer */}
+          <div className="text-center text-xs text-muted-foreground">
+            <p>© 2024 Biohacking Clinic. Tous droits réservés.</p>
+          </div>
         </div>
       </div>
     </div>
