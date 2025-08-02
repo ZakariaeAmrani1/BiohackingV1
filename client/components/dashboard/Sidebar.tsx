@@ -33,6 +33,7 @@ const navigation = [
       { name: "Soins", href: "/soins", icon: Stethoscope },
     ]
   },
+  { name: "Factures", href: "/invoices", icon: Receipt },
   { name: "Biohacking", href: "/biohacking", icon: TestTube },
   { name: "Métriques de Santé", href: "/metrics", icon: Activity },
   { name: "Rapports", href: "/reports", icon: FileText },
