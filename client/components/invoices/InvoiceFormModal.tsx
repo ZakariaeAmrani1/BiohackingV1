@@ -511,14 +511,27 @@ export default function InvoiceFormModal({
               </div>
             )}
 
-            {/* Total */}
+            {/* Total with TVA breakdown */}
             {formData.items.length > 0 && (
               <Card className="bg-primary/5 border-primary/20">
-                <CardContent className="p-4">
+                <CardContent className="p-4 space-y-3">
+                  <div className="flex items-center justify-between text-sm">
+                    <span>Sous-total (HT):</span>
+                    <span className="font-mono font-medium">
+                      {formatPrice(totals.prix_ht)}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span>TVA ({totals.tva_rate}%):</span>
+                    <span className="font-mono font-medium">
+                      {formatPrice(totals.tva_amount)}
+                    </span>
+                  </div>
+                  <Separator />
                   <div className="flex items-center justify-between text-lg font-semibold">
-                    <span>Total de la facture:</span>
-                    <span className="text-2xl font-bold text-primary">
-                      {formatPrice(total)}
+                    <span>Total TTC:</span>
+                    <span className="text-2xl font-bold text-primary font-mono">
+                      {formatPrice(totals.prix_total)}
                     </span>
                   </div>
                 </CardContent>
