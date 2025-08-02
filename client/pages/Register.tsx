@@ -80,8 +80,12 @@ export default function Register() {
         {/* Logo and Title */}
         <div className="text-center space-y-4">
           <div className="flex justify-center">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary shadow-lg">
-              <Heart className="h-8 w-8 text-primary-foreground" />
+            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white shadow-lg">
+              <img
+                src="https://cdn.builder.io/api/v1/image/assets%2F7fd7290220b94e06a6f7cd5d150de493%2Fce1def9ea6774ec0bb2758b12ced93f9?format=webp&width=100"
+                alt="BioHacking Logo"
+                className="h-12 w-12 object-contain"
+              />
             </div>
           </div>
           <div>
