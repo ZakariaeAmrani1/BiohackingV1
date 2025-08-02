@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Calendar,
   Users,
@@ -57,10 +57,17 @@ const navigation = [
 export default function Sidebar() {
   const location = useLocation();
   const { user, logout } = useAuth();
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(() => {
+    const saved = localStorage.getItem("sidebar-collapsed");
+    return saved ? JSON.parse(saved) : false;
+  });
   const [expandedDropdowns, setExpandedDropdowns] = useState<string[]>([
     "Biens",
   ]);
+
+  useEffect(() => {
+    localStorage.setItem("sidebar-collapsed", JSON.stringify(isCollapsed));
+  }, [isCollapsed]);
 
   const toggleDropdown = (itemName: string) => {
     setExpandedDropdowns((prev) =>
@@ -86,13 +93,22 @@ export default function Sidebar() {
         <div
           className={cn(
             "flex h-16 items-center border-b border-border transition-all duration-300",
-            isCollapsed ? "px-3 justify-center" : "px-6 justify-center",
+            isCollapsed ? "px-3 justify-center" : "px-6 justify-start",
           )}
         >
-          <div className="flex items-center justify-center">
-            <div className="flex h-16 w-40 items-center justify-center">
+          <div className="flex items-center justify-start">
+            <div
+              className={cn(
+                "flex items-center justify-start",
+                isCollapsed ? "h-12 w-12" : "h-18 w-44",
+              )}
+            >
               <img
-                src="https://cdn.builder.io/api/v1/image/assets%2F7fd7290220b94e06a6f7cd5d150de493%2Fce1def9ea6774ec0bb2758b12ced93f9?format=webp&width=500"
+                src={
+                  isCollapsed
+                    ? "https://cdn.builder.io/api/v1/image/assets%2F7aa559df90fe4ddaa64a743a97acfd66%2F0e48021fb78c480987c1e833adc83cec?format=webp&width=800"
+                    : "https://cdn.builder.io/api/v1/image/assets%2F7fd7290220b94e06a6f7cd5d150de493%2Fce1def9ea6774ec0bb2758b12ced93f9?format=webp&width=500"
+                }
                 alt="BioHacking Logo"
                 className="w-full h-full object-contain"
               />
@@ -103,7 +119,7 @@ export default function Sidebar() {
               variant="ghost"
               size="sm"
               onClick={() => setIsCollapsed(true)}
-              className="h-8 w-8 p-0"
+              className="h-8 w-8 p-0 ml-auto"
             >
               <PanelLeftClose className="h-4 w-4" />
             </Button>
