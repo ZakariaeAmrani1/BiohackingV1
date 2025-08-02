@@ -98,8 +98,8 @@ export default function Sidebar() {
         >
           <div className="flex items-center justify-start">
             <div className={cn(
-              "flex items-center justify-center",
-              isCollapsed ? "h-12 w-12" : "h-20 w-48"
+              "flex items-center justify-start",
+              isCollapsed ? "h-12 w-12" : "h-18 w-44"
             )}>
               <img
                 src={isCollapsed
