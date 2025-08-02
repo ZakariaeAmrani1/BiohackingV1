@@ -292,6 +292,174 @@ export default function PatientDocuments() {
     }, 100);
   };
 
+  const generatePDF = async (document: Document) => {
+    const template = templates.find(t => t.id === document.template_id);
+
+    // Create a new window for PDF generation
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      toast({
+        title: "Erreur",
+        description: "Impossible d'ouvrir la fenêtre d'impression",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Generate HTML content for the document
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Document ${document.id} - ${template?.name || 'Document'}</title>
+          <style>
+            body {
+              font-family: Arial, sans-serif;
+              margin: 40px;
+              line-height: 1.6;
+              color: #333;
+            }
+            .header {
+              text-align: center;
+              border-bottom: 2px solid #333;
+              padding-bottom: 20px;
+              margin-bottom: 30px;
+            }
+            .title {
+              font-size: 24px;
+              font-weight: bold;
+              margin-bottom: 10px;
+            }
+            .subtitle {
+              font-size: 14px;
+              color: #666;
+            }
+            .patient-info {
+              background-color: #f5f5f5;
+              padding: 15px;
+              border-radius: 5px;
+              margin-bottom: 30px;
+            }
+            .section {
+              margin-bottom: 25px;
+              page-break-inside: avoid;
+            }
+            .section-title {
+              font-size: 18px;
+              font-weight: bold;
+              color: #2563eb;
+              border-bottom: 1px solid #e5e7eb;
+              padding-bottom: 5px;
+              margin-bottom: 15px;
+            }
+            .field {
+              margin-bottom: 10px;
+              display: flex;
+            }
+            .field-label {
+              font-weight: bold;
+              min-width: 150px;
+              margin-right: 10px;
+            }
+            .field-value {
+              flex: 1;
+            }
+            .footer {
+              margin-top: 40px;
+              padding-top: 20px;
+              border-top: 1px solid #ccc;
+              font-size: 12px;
+              color: #666;
+            }
+            @media print {
+              body { margin: 20px; }
+              .header { page-break-after: avoid; }
+              .section { page-break-inside: avoid; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <div class="title">${template?.name || 'Document Médical'}</div>
+            <div class="subtitle">Document ID: ${document.id}</div>
+          </div>
+
+          <div class="patient-info">
+            <h3>Informations Patient</h3>
+            <div class="field">
+              <span class="field-label">Nom:</span>
+              <span class="field-value">${patient?.prenom || ''} ${patient?.nom || ''}</span>
+            </div>
+            <div class="field">
+              <span class="field-label">CIN:</span>
+              <span class="field-value">${document.CIN}</span>
+            </div>
+            <div class="field">
+              <span class="field-label">Date de création:</span>
+              <span class="field-value">${formatDate(document.created_at)}</span>
+            </div>
+            <div class="field">
+              <span class="field-label">Créé par:</span>
+              <span class="field-value">${document.Cree_par}</span>
+            </div>
+          </div>
+
+          ${template ? template.sections_json.sections.map(section => `
+            <div class="section">
+              <div class="section-title">${section.title}</div>
+              ${section.fields.map(field => {
+                const value = document.data_json[field.name];
+                let displayValue = value;
+
+                if (value === null || value === undefined || value === '') {
+                  displayValue = 'Non renseigné';
+                } else if (field.type === 'checkbox') {
+                  displayValue = value ? 'Oui' : 'Non';
+                } else if (field.type === 'date' && value) {
+                  try {
+                    displayValue = new Date(value).toLocaleDateString('fr-FR');
+                  } catch (e) {
+                    displayValue = value;
+                  }
+                }
+
+                return `
+                  <div class="field">
+                    <span class="field-label">${field.name}:</span>
+                    <span class="field-value">${displayValue}</span>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          `).join('') : ''}
+
+          <div class="footer">
+            <p>Document généré le ${new Date().toLocaleDateString('fr-FR')} à ${new Date().toLocaleTimeString('fr-FR')}</p>
+            <p>Système de Gestion Médicale - Document confidentiel</p>
+          </div>
+        </body>
+      </html>
+    `;
+
+    printWindow.document.write(htmlContent);
+    printWindow.document.close();
+
+    // Wait for content to load then trigger print
+    printWindow.onload = () => {
+      printWindow.focus();
+      printWindow.print();
+      // Close the window after printing (user can cancel)
+      setTimeout(() => {
+        printWindow.close();
+      }, 1000);
+    };
+
+    toast({
+      title: "PDF généré",
+      description: "Le document a été ouvert pour impression/sauvegarde en PDF",
+    });
+  };
+
   // Force close all modals
   const forceCloseAllModals = () => {
     setIsFormModalOpen(false);
