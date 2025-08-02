@@ -412,30 +412,39 @@ export default function DocumentFormModal({
             <div className="space-y-4">
               <h3 className="text-lg font-semibold">Données du document</h3>
 
-              {selectedTemplate.sections_json?.sections?.map(
-                (section, sectionIndex) => (
-                  <Card key={sectionIndex}>
-                    <CardHeader className="pb-3">
-                      <CardTitle className="text-base">
-                        {section.title}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      {section.fields.map((field, fieldIndex) => (
-                        <div key={fieldIndex} className="space-y-2">
-                          <Label className="flex items-center gap-2">
-                            {getFieldIcon(field.type)}
-                            {field.name}
-                            {field.required && (
-                              <span className="text-red-500">*</span>
-                            )}
-                          </Label>
-                          {renderField(field)}
-                        </div>
-                      ))}
-                    </CardContent>
-                  </Card>
-                ),
+              {selectedTemplate.sections_json?.sections?.length > 0 ? (
+                selectedTemplate.sections_json.sections.map(
+                  (section, sectionIndex) => (
+                    <Card key={sectionIndex}>
+                      <CardHeader className="pb-3">
+                        <CardTitle className="text-base">
+                          {section.title}
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {section.fields?.map((field, fieldIndex) => (
+                          <div key={fieldIndex} className="space-y-2">
+                            <Label className="flex items-center gap-2">
+                              {getFieldIcon(field.type)}
+                              {field.name}
+                              {field.required && (
+                                <span className="text-red-500">*</span>
+                              )}
+                            </Label>
+                            {renderField(field)}
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+                  ),
+                )
+              ) : (
+                <div className="text-center py-8">
+                  <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <p className="text-muted-foreground">
+                    Ce modèle de document ne contient aucune section configurée.
+                  </p>
+                </div>
               )}
             </div>
           )}
