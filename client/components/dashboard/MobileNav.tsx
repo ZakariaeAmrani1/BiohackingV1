@@ -11,10 +11,12 @@ import {
   Settings,
   Home,
   Stethoscope,
-  Heart,
   TestTube,
   Menu,
+  LogOut,
 } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { UserService } from "@/services/userService";
 
 const navigation = [
   { name: "Tableau de Bord", href: "/", icon: Home },
@@ -30,13 +32,18 @@ const navigation = [
 export default function MobileNav() {
   const [open, setOpen] = useState(false);
   const location = useLocation();
+  const { user, logout } = useAuth();
 
   return (
     <div className="lg:hidden border-b border-border bg-card">
       <div className="flex h-16 items-center justify-between px-4">
         <div className="flex items-center gap-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-            <Heart className="h-5 w-5 text-primary-foreground" />
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white">
+            <img
+              src="https://cdn.builder.io/api/v1/image/assets%2F7fd7290220b94e06a6f7cd5d150de493%2Fce1def9ea6774ec0bb2758b12ced93f9?format=webp&width=100"
+              alt="BioHacking Logo"
+              className="h-6 w-6 object-contain"
+            />
           </div>
           <h1 className="text-lg font-semibold text-foreground">Biohacking</h1>
         </div>
@@ -52,8 +59,12 @@ export default function MobileNav() {
               {/* Logo */}
               <div className="flex h-16 items-center border-b border-border px-6">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
-                    <Heart className="h-6 w-6 text-primary-foreground" />
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white">
+                    <img
+                      src="https://cdn.builder.io/api/v1/image/assets%2F7fd7290220b94e06a6f7cd5d150de493%2Fce1def9ea6774ec0bb2758b12ced93f9?format=webp&width=100"
+                      alt="BioHacking Logo"
+                      className="h-8 w-8 object-contain"
+                    />
                   </div>
                   <div>
                     <h1 className="text-lg font-semibold text-foreground">
@@ -93,16 +104,30 @@ export default function MobileNav() {
               <div className="border-t border-border p-4">
                 <div className="flex items-center gap-3">
                   <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
-                    <span className="text-xs font-medium text-primary">DR</span>
+                    <span className="text-xs font-medium text-primary">
+                      {user?.prenom?.[0]?.toUpperCase()}{user?.nom?.[0]?.toUpperCase()}
+                    </span>
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-foreground truncate">
-                      Dr. Smith
+                      {user ? UserService.getDisplayName(user) : 'Utilisateur'}
                     </p>
                     <p className="text-xs text-muted-foreground truncate">
-                      Administrateur
+                      {user ? UserService.getRoleDisplayName(user.role) : 'Rôle'}
                     </p>
                   </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      logout();
+                      setOpen(false);
+                    }}
+                    className="h-8 w-8 p-0 hover:bg-destructive/10 hover:text-destructive"
+                    title="Se déconnecter"
+                  >
+                    <LogOut className="h-4 w-4" />
+                  </Button>
                 </div>
               </div>
             </div>
