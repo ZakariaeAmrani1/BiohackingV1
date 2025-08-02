@@ -57,13 +57,18 @@ export default function Sidebar() {
     const saved = localStorage.getItem("sidebar-collapsed");
     return saved ? JSON.parse(saved) : false;
   });
-  const [expandedDropdowns, setExpandedDropdowns] = useState<string[]>([
-    "Biens",
-  ]);
+  const [expandedDropdowns, setExpandedDropdowns] = useState<string[]>(() => {
+    const saved = localStorage.getItem("sidebar-expanded-dropdowns");
+    return saved ? JSON.parse(saved) : ["Biens"];
+  });
 
   useEffect(() => {
     localStorage.setItem("sidebar-collapsed", JSON.stringify(isCollapsed));
   }, [isCollapsed]);
+
+  useEffect(() => {
+    localStorage.setItem("sidebar-expanded-dropdowns", JSON.stringify(expandedDropdowns));
+  }, [expandedDropdowns]);
 
   const toggleDropdown = (itemName: string) => {
     setExpandedDropdowns((prev) =>
