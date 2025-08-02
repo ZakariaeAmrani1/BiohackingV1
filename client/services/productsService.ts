@@ -15,6 +15,8 @@ export interface ProductFormData {
   Cree_par: string;
 }
 
+import { ActivitiesService } from "./activitiesService";
+
 // Mock data storage
 let mockProducts: Product[] = [
   {
@@ -111,6 +113,19 @@ export class ProductsService {
     };
 
     mockProducts.push(newProduct);
+
+    // Log activity
+    ActivitiesService.logActivity(
+      'product',
+      'created',
+      newProduct.id,
+      newProduct.Nom,
+      data.Cree_par,
+    );
+
+    // Dispatch custom event for real-time updates
+    window.dispatchEvent(new CustomEvent('activityLogged'));
+
     return newProduct;
   }
 
