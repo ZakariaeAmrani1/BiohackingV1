@@ -184,7 +184,7 @@ export default function AppointmentFormModal({
     e.preventDefault();
 
     // Validate form data
-    const validationErrors = validateAppointmentData(formData);
+    const validationErrors = validateAppointmentData(formData, appointment?.id);
     if (validationErrors.length > 0) {
       setErrors(validationErrors);
       return;
