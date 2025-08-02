@@ -321,7 +321,10 @@ export default function Payments() {
         <Card>
           <CardContent className="p-0">
             <div className="overflow-x-auto">
-              <Table>
+              {isLoading ? (
+                <TableLoader columns={7} rows={6} />
+              ) : (
+                <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead>Paiement</TableHead>
@@ -411,7 +414,8 @@ export default function Payments() {
                     </TableRow>
                   )}
                 </TableBody>
-              </Table>
+                </Table>
+              )}
             </div>
           </CardContent>
         </Card>
