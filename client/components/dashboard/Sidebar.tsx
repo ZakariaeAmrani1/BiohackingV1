@@ -33,7 +33,6 @@ const navigation = [
   { name: "Tableau de Bord", href: "/", icon: Home },
   { name: "Rendez-vous", href: "/appointments", icon: Calendar },
   { name: "Patients", href: "/patients", icon: Users },
-  { name: "Traitements", href: "/treatments", icon: Stethoscope },
   { name: "Types de Documents", href: "/document-types", icon: FolderOpen },
   {
     name: "Biens",
@@ -46,9 +45,6 @@ const navigation = [
   },
   { name: "Factures", href: "/invoices", icon: Receipt },
   { name: "Paiements", href: "/payments", icon: DollarSign },
-  { name: "Biohacking", href: "/biohacking", icon: TestTube },
-  { name: "Métriques de Santé", href: "/metrics", icon: Activity },
-  { name: "Rapports", href: "/reports", icon: FileText },
   { name: "Paramètres", href: "/settings", icon: Settings },
 ];
 
