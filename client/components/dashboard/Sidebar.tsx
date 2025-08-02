@@ -65,6 +65,10 @@ export default function Sidebar() {
     "Biens",
   ]);
 
+  useEffect(() => {
+    localStorage.setItem('sidebar-collapsed', JSON.stringify(isCollapsed));
+  }, [isCollapsed]);
+
   const toggleDropdown = (itemName: string) => {
     setExpandedDropdowns((prev) =>
       prev.includes(itemName)
