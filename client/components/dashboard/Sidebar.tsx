@@ -35,6 +35,7 @@ const navigation = [
     ]
   },
   { name: "Factures", href: "/invoices", icon: Receipt },
+  { name: "Paiements", href: "/payments", icon: DollarSign },
   { name: "Biohacking", href: "/biohacking", icon: TestTube },
   { name: "Métriques de Santé", href: "/metrics", icon: Activity },
   { name: "Rapports", href: "/reports", icon: FileText },
