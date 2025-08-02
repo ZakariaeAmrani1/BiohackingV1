@@ -13,6 +13,7 @@ import PatientDocuments from "./pages/PatientDocuments";
 import Treatments from "./pages/Treatments";
 import Products from "./pages/Products";
 import Soins from "./pages/Soins";
+import Invoices from "./pages/Invoices";
 import Biohacking from "./pages/Biohacking";
 import Metrics from "./pages/Metrics";
 import Reports from "./pages/Reports";
