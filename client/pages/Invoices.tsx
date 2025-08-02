@@ -47,6 +47,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/components/ui/use-toast";
+import { TableLoader, GridLoader } from "@/components/ui/table-loader";
 import InvoiceFormModal from "@/components/invoices/InvoiceFormModal";
 import InvoiceDetailsModal from "@/components/invoices/InvoiceDetailsModal";
 import DeleteInvoiceModal from "@/components/invoices/DeleteInvoiceModal";
