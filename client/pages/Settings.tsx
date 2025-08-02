@@ -114,6 +114,7 @@ export default function Settings() {
 
   const loadUserProfile = async () => {
     try {
+      setIsInitialLoading(true);
       const userData = await UserService.getCurrentUser();
       setUser(userData);
       setUserFormData({
