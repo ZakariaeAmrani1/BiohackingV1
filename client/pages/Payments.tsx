@@ -32,6 +32,7 @@ import {
 } from "@/components/ui/table";
 
 import { useToast } from "@/components/ui/use-toast";
+import { TableLoader } from "@/components/ui/table-loader";
 import {
   PaymentsService,
   Payment,
