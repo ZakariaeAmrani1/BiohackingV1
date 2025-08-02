@@ -1020,6 +1020,13 @@ export default function Invoices() {
                                 </DropdownMenuItem>
                                 <DropdownMenuItem
                                   className="gap-2"
+                                  onClick={() => handleDownloadPDF(invoice)}
+                                >
+                                  <Download className="h-4 w-4" />
+                                  Télécharger PDF
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  className="gap-2"
                                   onClick={() => openEditModal(invoice)}
                                 >
                                   <Edit className="h-4 w-4" />
