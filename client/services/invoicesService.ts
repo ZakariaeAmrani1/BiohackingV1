@@ -1,3 +1,5 @@
+import { CurrencyService } from "./currencyService";
+
 // Invoice types
 export interface Facture {
   id: number;
