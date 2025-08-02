@@ -81,9 +81,9 @@ export default function Sidebar() {
           isCollapsed ? "px-3 justify-center" : "px-6 justify-between"
         )}>
           <div className="flex items-center">
-            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-white p-1">
+            <div className="flex h-16 w-32 items-center justify-center">
               <img
-                src="https://cdn.builder.io/api/v1/image/assets%2F7fd7290220b94e06a6f7cd5d150de493%2Fce1def9ea6774ec0bb2758b12ced93f9?format=webp&width=200"
+                src="https://cdn.builder.io/api/v1/image/assets%2F7fd7290220b94e06a6f7cd5d150de493%2Fce1def9ea6774ec0bb2758b12ced93f9?format=webp&width=400"
                 alt="BioHacking Logo"
                 className="w-full h-full object-contain"
               />

@@ -87,9 +87,9 @@ export default function Login() {
         {/* Logo and Title */}
         <div className="text-center space-y-4">
           <div className="flex justify-center">
-            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-white shadow-lg p-2">
+            <div className="flex h-16 w-32 items-center justify-center">
               <img
-                src="https://cdn.builder.io/api/v1/image/assets%2F7fd7290220b94e06a6f7cd5d150de493%2Fce1def9ea6774ec0bb2758b12ced93f9?format=webp&width=300"
+                src="https://cdn.builder.io/api/v1/image/assets%2F7fd7290220b94e06a6f7cd5d150de493%2Fce1def9ea6774ec0bb2758b12ced93f9?format=webp&width=400"
                 alt="BioHacking Logo"
                 className="w-full h-full object-contain"
               />

@@ -38,7 +38,7 @@ export default function MobileNav() {
     <div className="lg:hidden border-b border-border bg-card">
       <div className="flex h-16 items-center justify-between px-4">
         <div className="flex items-center">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white p-1">
+          <div className="flex h-8 w-16 items-center justify-center">
             <img
               src="https://cdn.builder.io/api/v1/image/assets%2F7fd7290220b94e06a6f7cd5d150de493%2Fce1def9ea6774ec0bb2758b12ced93f9?format=webp&width=200"
               alt="BioHacking Logo"
@@ -58,7 +58,7 @@ export default function MobileNav() {
               {/* Logo */}
               <div className="flex h-16 items-center border-b border-border px-6">
                 <div className="flex items-center justify-center w-full">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-white p-1">
+                  <div className="flex h-10 w-20 items-center justify-center">
                     <img
                       src="https://cdn.builder.io/api/v1/image/assets%2F7fd7290220b94e06a6f7cd5d150de493%2Fce1def9ea6774ec0bb2758b12ced93f9?format=webp&width=200"
                       alt="BioHacking Logo"
