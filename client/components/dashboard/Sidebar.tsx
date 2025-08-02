@@ -11,6 +11,9 @@ import {
   Heart,
   TestTube,
   FolderOpen,
+  Package,
+  ChevronDown,
+  ChevronRight,
 } from "lucide-react";
 
 const navigation = [
