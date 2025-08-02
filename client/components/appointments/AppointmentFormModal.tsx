@@ -8,6 +8,7 @@ import {
   User,
   Users,
 } from "lucide-react";
+import TimeSlotPicker from "./TimeSlotPicker";
 import {
   Dialog,
   DialogContent,
@@ -183,7 +184,7 @@ export default function AppointmentFormModal({
     e.preventDefault();
 
     // Validate form data
-    const validationErrors = validateAppointmentData(formData);
+    const validationErrors = validateAppointmentData(formData, appointment?.id);
     if (validationErrors.length > 0) {
       setErrors(validationErrors);
       return;
@@ -212,7 +213,7 @@ export default function AppointmentFormModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[800px] max-h-[95vh] overflow-y-auto scrollbar-thin">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <CalendarDays className="h-5 w-5" />
@@ -363,51 +364,44 @@ export default function AppointmentFormModal({
             </Select>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Date and Time */}
-            <div className="space-y-2">
-              <Label
-                htmlFor="date_rendez_vous"
-                className="flex items-center gap-2"
-              >
-                <Clock className="h-4 w-4" />
-                Date et heure
-              </Label>
-              <Input
-                id="date_rendez_vous"
-                type="datetime-local"
-                value={formData.date_rendez_vous}
-                onChange={(e) =>
-                  handleInputChange("date_rendez_vous", e.target.value)
-                }
-                disabled={isSubmitting}
-                min={new Date().toISOString().slice(0, 16)}
-              />
-            </div>
+          {/* Date and Time Slot Selection */}
+          <div className="space-y-2">
+            <Label className="flex items-center gap-2">
+              <Clock className="h-4 w-4" />
+              Date et heure du rendez-vous
+            </Label>
+            <TimeSlotPicker
+              value={formData.date_rendez_vous}
+              onChange={(datetime) =>
+                handleInputChange("date_rendez_vous", datetime)
+              }
+              excludeAppointmentId={appointment?.id}
+              disabled={isSubmitting}
+            />
+          </div>
 
-            {/* Created By */}
-            <div className="space-y-2">
-              <Label htmlFor="Cree_par" className="flex items-center gap-2">
-                <User className="h-4 w-4" />
-                Créé par
-              </Label>
-              <Select
-                value={formData.Cree_par}
-                onValueChange={(value) => handleInputChange("Cree_par", value)}
-                disabled={isSubmitting}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Sélectionnez le médecin" />
-                </SelectTrigger>
-                <SelectContent>
-                  {availableDoctors.map((doctor) => (
-                    <SelectItem key={doctor} value={doctor}>
-                      {doctor}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+          {/* Created By */}
+          <div className="space-y-2">
+            <Label htmlFor="Cree_par" className="flex items-center gap-2">
+              <User className="h-4 w-4" />
+              Créé par
+            </Label>
+            <Select
+              value={formData.Cree_par}
+              onValueChange={(value) => handleInputChange("Cree_par", value)}
+              disabled={isSubmitting}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Sélectionnez le médecin" />
+              </SelectTrigger>
+              <SelectContent>
+                {availableDoctors.map((doctor) => (
+                  <SelectItem key={doctor} value={doctor}>
+                    {doctor}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Status - only show in edit mode */}

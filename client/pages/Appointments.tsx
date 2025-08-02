@@ -431,7 +431,7 @@ export default function Appointments() {
         {viewMode === "table" ? (
           <Card>
             <CardContent className="p-0">
-              <div className="overflow-x-auto">
+              <div className="overflow-x-auto scrollbar-thin">
                 <Table>
                   <TableHeader>
                     <TableRow>

@@ -87,5 +87,25 @@ export default {
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [
+    require("tailwindcss-animate"),
+    function ({ addUtilities }) {
+      addUtilities({
+        ".scrollbar-thin": {
+          "scrollbar-width": "thin",
+        },
+        ".scrollbar-none": {
+          "scrollbar-width": "none",
+          "-ms-overflow-style": "none",
+          "&::-webkit-scrollbar": {
+            display: "none",
+          },
+        },
+        ".scrollbar-custom": {
+          "scrollbar-width": "thin",
+          "scrollbar-color": "hsl(var(--primary) / 0.3) hsl(var(--muted))",
+        },
+      });
+    },
+  ],
 } satisfies Config;
