@@ -56,6 +56,7 @@ import {
   getStockStatus,
   getStockStatistics,
 } from "@/services/productsService";
+import { CurrencyService } from "@/services/currencyService";
 
 export default function Products() {
   const [searchTerm, setSearchTerm] = useState("");
