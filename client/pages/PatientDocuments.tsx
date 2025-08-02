@@ -650,7 +650,7 @@ export default function PatientDocuments() {
         </div>
 
         {/* Patient Info Card - Right Side */}
-        <div className="w-80 space-y-6">
+        <div className="w-96 space-y-6">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
