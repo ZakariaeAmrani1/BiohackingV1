@@ -46,6 +46,7 @@ import {
   createEmptyFacture,
   createEmptyItem,
   calculateInvoiceTotal,
+  calculateInvoiceTotals,
 } from "@/services/invoicesService";
 import { ProductsService, Product } from "@/services/productsService";
 import { SoinsService, Soin } from "@/services/soinsService";
