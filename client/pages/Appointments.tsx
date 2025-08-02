@@ -433,101 +433,105 @@ export default function Appointments() {
           <Card>
             <CardContent className="p-0">
               <div className="overflow-x-auto scrollbar-thin">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Patient</TableHead>
-                      <TableHead>CIN</TableHead>
-                      <TableHead>Sujet</TableHead>
-                      <TableHead>Date & Heure</TableHead>
-                      <TableHead>Statut</TableHead>
-                      <TableHead>Créé par</TableHead>
-                      <TableHead>Créé le</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredAppointments.length > 0 ? (
-                      filteredAppointments.map((appointment) => (
-                        <TableRow
-                          key={appointment.id}
-                          className="hover:bg-muted/50"
-                        >
-                          <TableCell className="font-medium">
-                            {appointment.patient_nom}
-                          </TableCell>
-                          <TableCell className="font-mono text-sm">
-                            {appointment.CIN}
-                          </TableCell>
-                          <TableCell>{appointment.sujet}</TableCell>
-                          <TableCell>
-                            {formatDateTime(appointment.date_rendez_vous)}
-                          </TableCell>
-                          <TableCell>
-                            <Badge
-                              variant="secondary"
-                              className={
-                                statusColors[
-                                  appointment.status as keyof typeof statusColors
-                                ]
-                              }
-                            >
-                              {appointment.status}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>{appointment.Cree_par}</TableCell>
-                          <TableCell>
-                            {formatDate(appointment.created_at)}
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" className="h-8 w-8 p-0">
-                                  <ChevronDown className="h-4 w-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuItem
-                                  className="gap-2"
-                                  onClick={() => openDetailsModal(appointment)}
-                                >
-                                  <Eye className="h-4 w-4" />
-                                  Voir détails
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                  className="gap-2"
-                                  onClick={() => openEditModal(appointment)}
-                                >
-                                  <Edit className="h-4 w-4" />
-                                  Modifier
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                  className="gap-2 text-red-600"
-                                  onClick={() => openDeleteModal(appointment)}
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                  Supprimer
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
+                {isLoading ? (
+                  <TableLoader columns={8} rows={6} />
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Patient</TableHead>
+                        <TableHead>CIN</TableHead>
+                        <TableHead>Sujet</TableHead>
+                        <TableHead>Date & Heure</TableHead>
+                        <TableHead>Statut</TableHead>
+                        <TableHead>Créé par</TableHead>
+                        <TableHead>Créé le</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredAppointments.length > 0 ? (
+                        filteredAppointments.map((appointment) => (
+                          <TableRow
+                            key={appointment.id}
+                            className="hover:bg-muted/50"
+                          >
+                            <TableCell className="font-medium">
+                              {appointment.patient_nom}
+                            </TableCell>
+                            <TableCell className="font-mono text-sm">
+                              {appointment.CIN}
+                            </TableCell>
+                            <TableCell>{appointment.sujet}</TableCell>
+                            <TableCell>
+                              {formatDateTime(appointment.date_rendez_vous)}
+                            </TableCell>
+                            <TableCell>
+                              <Badge
+                                variant="secondary"
+                                className={
+                                  statusColors[
+                                    appointment.status as keyof typeof statusColors
+                                  ]
+                                }
+                              >
+                                {appointment.status}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>{appointment.Cree_par}</TableCell>
+                            <TableCell>
+                              {formatDate(appointment.created_at)}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="ghost" className="h-8 w-8 p-0">
+                                    <ChevronDown className="h-4 w-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuItem
+                                    className="gap-2"
+                                    onClick={() => openDetailsModal(appointment)}
+                                  >
+                                    <Eye className="h-4 w-4" />
+                                    Voir détails
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem
+                                    className="gap-2"
+                                    onClick={() => openEditModal(appointment)}
+                                  >
+                                    <Edit className="h-4 w-4" />
+                                    Modifier
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem
+                                    className="gap-2 text-red-600"
+                                    onClick={() => openDeleteModal(appointment)}
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                    Supprimer
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      ) : (
+                        <TableRow>
+                          <TableCell colSpan={8} className="text-center py-8">
+                            <div className="flex flex-col items-center gap-2">
+                              <Calendar className="h-8 w-8 text-muted-foreground" />
+                              <p className="text-muted-foreground">
+                                Aucun rendez-vous trouvé avec les critères
+                                sélectionnés
+                              </p>
+                            </div>
                           </TableCell>
                         </TableRow>
-                      ))
-                    ) : (
-                      <TableRow>
-                        <TableCell colSpan={8} className="text-center py-8">
-                          <div className="flex flex-col items-center gap-2">
-                            <Calendar className="h-8 w-8 text-muted-foreground" />
-                            <p className="text-muted-foreground">
-                              Aucun rendez-vous trouvé avec les critères
-                              sélectionnés
-                            </p>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
+                      )}
+                    </TableBody>
+                  </Table>
+                )}
               </div>
             </CardContent>
           </Card>
