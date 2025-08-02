@@ -1114,7 +1114,9 @@ export default function Invoices() {
         ) : (
           /* Cards View */
           <div className="space-y-6">
-            {filteredInvoices.length > 0 ? (
+            {isLoading ? (
+              <GridLoader items={6} />
+            ) : filteredInvoices.length > 0 ? (
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {filteredInvoices.map((invoice) => (
                   <Card
