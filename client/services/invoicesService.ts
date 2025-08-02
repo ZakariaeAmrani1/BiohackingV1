@@ -443,8 +443,10 @@ export const getStatusColor = (status: FactureStatut): string => {
 };
 
 export const formatPrice = (price: number): string => {
-  // Import dynamically to avoid circular dependencies
-  return require("./currencyService").CurrencyService.formatCurrency(price);
+  // Use dynamic import to avoid circular dependencies
+  return import("./currencyService").then(module =>
+    module.CurrencyService.formatCurrency(price)
+  ) as any;
 };
 
 export const createEmptyFacture = (): FactureFormData => {
