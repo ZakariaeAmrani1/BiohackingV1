@@ -176,7 +176,9 @@ export default function Login() {
                       type="email"
                       placeholder="votre@email.com"
                       value={formData.email}
-                      onChange={(e) => handleInputChange("email", e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("email", e.target.value)
+                      }
                       className="pl-10"
                       disabled={isLoading}
                     />

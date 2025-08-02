@@ -58,7 +58,7 @@ export default function Sidebar() {
   const location = useLocation();
   const { user, logout } = useAuth();
   const [isCollapsed, setIsCollapsed] = useState(() => {
-    const saved = localStorage.getItem('sidebar-collapsed');
+    const saved = localStorage.getItem("sidebar-collapsed");
     return saved ? JSON.parse(saved) : false;
   });
   const [expandedDropdowns, setExpandedDropdowns] = useState<string[]>([
@@ -66,7 +66,7 @@ export default function Sidebar() {
   ]);
 
   useEffect(() => {
-    localStorage.setItem('sidebar-collapsed', JSON.stringify(isCollapsed));
+    localStorage.setItem("sidebar-collapsed", JSON.stringify(isCollapsed));
   }, [isCollapsed]);
 
   const toggleDropdown = (itemName: string) => {
@@ -97,14 +97,17 @@ export default function Sidebar() {
           )}
         >
           <div className="flex items-center justify-start">
-            <div className={cn(
-              "flex items-center justify-start",
-              isCollapsed ? "h-12 w-12" : "h-18 w-44"
-            )}>
+            <div
+              className={cn(
+                "flex items-center justify-start",
+                isCollapsed ? "h-12 w-12" : "h-18 w-44",
+              )}
+            >
               <img
-                src={isCollapsed
-                  ? "https://cdn.builder.io/api/v1/image/assets%2F7aa559df90fe4ddaa64a743a97acfd66%2F0e48021fb78c480987c1e833adc83cec?format=webp&width=800"
-                  : "https://cdn.builder.io/api/v1/image/assets%2F7fd7290220b94e06a6f7cd5d150de493%2Fce1def9ea6774ec0bb2758b12ced93f9?format=webp&width=500"
+                src={
+                  isCollapsed
+                    ? "https://cdn.builder.io/api/v1/image/assets%2F7aa559df90fe4ddaa64a743a97acfd66%2F0e48021fb78c480987c1e833adc83cec?format=webp&width=800"
+                    : "https://cdn.builder.io/api/v1/image/assets%2F7fd7290220b94e06a6f7cd5d150de493%2Fce1def9ea6774ec0bb2758b12ced93f9?format=webp&width=500"
                 }
                 alt="BioHacking Logo"
                 className="w-full h-full object-contain"
