@@ -357,7 +357,47 @@ export default function Settings() {
           </p>
         </div>
 
-        <Tabs defaultValue="profile" className="space-y-6">
+        {isInitialLoading ? (
+          <div className="space-y-6">
+            <div className="grid w-full grid-cols-4 h-10 gap-2">
+              <Skeleton className="h-full" />
+              <Skeleton className="h-full" />
+              <Skeleton className="h-full" />
+              <Skeleton className="h-full" />
+            </div>
+            <div className="grid gap-6 md:grid-cols-2">
+              <div className="space-y-4">
+                <Skeleton className="h-8 w-48" />
+                <div className="space-y-3">
+                  <Skeleton className="h-4 w-32" />
+                  <Skeleton className="h-10 w-full" />
+                  <Skeleton className="h-4 w-32" />
+                  <Skeleton className="h-10 w-full" />
+                  <Skeleton className="h-4 w-32" />
+                  <Skeleton className="h-10 w-full" />
+                </div>
+              </div>
+              <div className="space-y-4">
+                <Skeleton className="h-8 w-48" />
+                <div className="space-y-3">
+                  <Skeleton className="h-4 w-32" />
+                  <Skeleton className="h-10 w-full" />
+                  <Skeleton className="h-4 w-32" />
+                  <Skeleton className="h-10 w-full" />
+                </div>
+              </div>
+            </div>
+            <div className="space-y-4">
+              <Skeleton className="h-8 w-48" />
+              <div className="grid gap-4 md:grid-cols-3">
+                <Skeleton className="h-24 w-full" />
+                <Skeleton className="h-24 w-full" />
+                <Skeleton className="h-24 w-full" />
+              </div>
+            </div>
+          </div>
+        ) : (
+          <Tabs defaultValue="profile" className="space-y-6">
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="profile" className="gap-2">
               <User className="h-4 w-4" />
@@ -881,7 +921,8 @@ export default function Settings() {
               </CardContent>
             </Card>
           </TabsContent>
-        </Tabs>
+          </Tabs>
+        )}
 
         {/* Password Change Dialog */}
         <Dialog
