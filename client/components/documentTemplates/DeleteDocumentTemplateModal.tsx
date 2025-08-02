@@ -43,7 +43,7 @@ export default function DeleteDocumentTemplateModal({
   const getFieldCount = () => {
     return template.sections_json.sections.reduce(
       (total, section) => total + section.fields.length,
-      0
+      0,
     );
   };
 
@@ -56,7 +56,8 @@ export default function DeleteDocumentTemplateModal({
             Supprimer le modèle
           </DialogTitle>
           <DialogDescription>
-            Cette action est irréversible. Le modèle de document sera définitivement supprimé.
+            Cette action est irréversible. Le modèle de document sera
+            définitivement supprimé.
           </DialogDescription>
         </DialogHeader>
 
@@ -75,25 +76,25 @@ export default function DeleteDocumentTemplateModal({
               <FileText className="h-5 w-5 text-muted-foreground" />
               <span className="font-medium">Modèle à supprimer:</span>
             </div>
-            
+
             <div className="space-y-2 ml-7">
               <div>
                 <span className="text-sm font-medium">Nom:</span>
                 <span className="ml-2">{template.name}</span>
               </div>
-              
+
               <div>
                 <span className="text-sm font-medium">Créé par:</span>
                 <span className="ml-2">{template.Cree_par}</span>
               </div>
-              
+
               <div>
                 <span className="text-sm font-medium">Structure:</span>
                 <span className="ml-2">
                   {getSectionCount()} section(s), {getFieldCount()} champ(s)
                 </span>
               </div>
-              
+
               <div>
                 <span className="text-sm font-medium">Créé le:</span>
                 <span className="ml-2">
@@ -115,11 +116,7 @@ export default function DeleteDocumentTemplateModal({
         </div>
 
         <DialogFooter className="gap-2">
-          <Button
-            variant="outline"
-            onClick={onClose}
-            disabled={isLoading}
-          >
+          <Button variant="outline" onClick={onClose} disabled={isLoading}>
             Annuler
           </Button>
           <Button

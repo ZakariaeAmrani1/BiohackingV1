@@ -318,13 +318,15 @@ export default function Products() {
               <Package className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{statistics.totalProducts}</div>
+              <div className="text-2xl font-bold">
+                {statistics.totalProducts}
+              </div>
               <p className="text-xs text-muted-foreground">
                 Produits enregistrés
               </p>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
@@ -333,7 +335,9 @@ export default function Products() {
               <Euro className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{formatPrice(statistics.totalValue)}</div>
+              <div className="text-2xl font-bold">
+                {formatPrice(statistics.totalValue)}
+              </div>
               <p className="text-xs text-muted-foreground">
                 Valeur totale inventaire
               </p>
@@ -348,7 +352,9 @@ export default function Products() {
               <TrendingDown className="h-4 w-4 text-orange-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-orange-600">{statistics.lowStock}</div>
+              <div className="text-2xl font-bold text-orange-600">
+                {statistics.lowStock}
+              </div>
               <p className="text-xs text-muted-foreground">
                 Produits à réapprovisionner
               </p>
@@ -363,10 +369,10 @@ export default function Products() {
               <AlertTriangle className="h-4 w-4 text-red-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-red-600">{statistics.outOfStock}</div>
-              <p className="text-xs text-muted-foreground">
-                Produits épuisés
-              </p>
+              <div className="text-2xl font-bold text-red-600">
+                {statistics.outOfStock}
+              </div>
+              <p className="text-xs text-muted-foreground">Produits épuisés</p>
             </CardContent>
           </Card>
         </div>
@@ -473,12 +479,17 @@ export default function Products() {
                       filteredProducts.map((product) => {
                         const stockStatus = getStockStatus(product.stock);
                         return (
-                          <TableRow key={product.id} className="hover:bg-muted/50">
+                          <TableRow
+                            key={product.id}
+                            className="hover:bg-muted/50"
+                          >
                             <TableCell>
                               <div className="flex items-center gap-2">
                                 <Package className="h-4 w-4 text-primary" />
                                 <div>
-                                  <div className="font-medium">{product.Nom}</div>
+                                  <div className="font-medium">
+                                    {product.Nom}
+                                  </div>
                                   <div className="text-sm text-muted-foreground">
                                     ID: {product.id}
                                   </div>
@@ -497,11 +508,16 @@ export default function Products() {
                               </Badge>
                             </TableCell>
                             <TableCell>{product.Cree_par}</TableCell>
-                            <TableCell>{formatDate(product.created_at)}</TableCell>
+                            <TableCell>
+                              {formatDate(product.created_at)}
+                            </TableCell>
                             <TableCell className="text-right">
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                  <Button variant="ghost" className="h-8 w-8 p-0">
+                                  <Button
+                                    variant="ghost"
+                                    className="h-8 w-8 p-0"
+                                  >
                                     <ChevronDown className="h-4 w-4" />
                                   </Button>
                                 </DropdownMenuTrigger>
@@ -539,7 +555,8 @@ export default function Products() {
                           <div className="flex flex-col items-center gap-2">
                             <Package className="h-8 w-8 text-muted-foreground" />
                             <p className="text-muted-foreground">
-                              Aucun produit trouvé avec les critères sélectionnés
+                              Aucun produit trouvé avec les critères
+                              sélectionnés
                             </p>
                           </div>
                         </TableCell>
@@ -581,13 +598,17 @@ export default function Products() {
                       <CardContent className="space-y-4">
                         <div className="grid grid-cols-2 gap-4">
                           <div>
-                            <div className="text-sm text-muted-foreground">Prix</div>
+                            <div className="text-sm text-muted-foreground">
+                              Prix
+                            </div>
                             <div className="font-mono text-lg font-semibold">
                               {formatPrice(product.prix)}
                             </div>
                           </div>
                           <div>
-                            <div className="text-sm text-muted-foreground">Stock</div>
+                            <div className="text-sm text-muted-foreground">
+                              Stock
+                            </div>
                             <div className="font-mono text-lg font-semibold">
                               {product.stock} unités
                             </div>

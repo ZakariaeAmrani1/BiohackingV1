@@ -52,12 +52,12 @@ export enum FactureStatut {
   ENVOYEE = "Envoyée",
   PAYEE = "Payée",
   ANNULEE = "Annulée",
-  EN_RETARD = "En retard"
+  EN_RETARD = "En retard",
 }
 
 export enum TypeBien {
   PRODUIT = "produit",
-  SOIN = "soin"
+  SOIN = "soin",
 }
 
 // Mock data storage
@@ -66,54 +66,54 @@ let mockFactures: Facture[] = [
     id: 1,
     CIN: "BE123456",
     date: "2024-01-15T10:30:00",
-    prix_ht: 123.00,
-    tva_amount: 24.60,
+    prix_ht: 123.0,
+    tva_amount: 24.6,
     tva_rate: 20,
-    prix_total: 147.60,
+    prix_total: 147.6,
     statut: FactureStatut.PAYEE,
     notes: "Consultation et médicaments prescrits",
     Cree_par: "Dr. Smith",
-    created_at: "2024-01-15T10:30:00"
+    created_at: "2024-01-15T10:30:00",
   },
   {
     id: 2,
     CIN: "BE234567",
     date: "2024-01-18T14:20:00",
-    prix_ht: 75.00,
-    tva_amount: 15.00,
+    prix_ht: 75.0,
+    tva_amount: 15.0,
     tva_rate: 20,
-    prix_total: 90.00,
+    prix_total: 90.0,
     statut: FactureStatut.ENVOYEE,
     notes: "Suivi vaccination",
     Cree_par: "Dr. Martin",
-    created_at: "2024-01-18T14:20:00"
+    created_at: "2024-01-18T14:20:00",
   },
   {
     id: 3,
     CIN: "BE123456",
     date: "2024-01-22T09:15:00",
-    prix_ht: 200.00,
-    tva_amount: 40.00,
+    prix_ht: 200.0,
+    tva_amount: 40.0,
     tva_rate: 20,
-    prix_total: 240.00,
+    prix_total: 240.0,
     statut: FactureStatut.BROUILLON,
     notes: "Consultation spécialisée avec examens",
     Cree_par: "Dr. Dubois",
-    created_at: "2024-01-22T09:15:00"
+    created_at: "2024-01-22T09:15:00",
   },
   {
     id: 4,
     CIN: "BE345678",
     date: "2024-01-10T16:45:00",
-    prix_ht: 45.00,
-    tva_amount: 9.00,
+    prix_ht: 45.0,
+    tva_amount: 9.0,
     tva_rate: 20,
-    prix_total: 54.00,
+    prix_total: 54.0,
     statut: FactureStatut.EN_RETARD,
     notes: "Séance de kinésithérapie",
     Cree_par: "Dr. Smith",
-    created_at: "2024-01-10T16:45:00"
-  }
+    created_at: "2024-01-10T16:45:00",
+  },
 ];
 
 let mockFactureBiens: FactureBien[] = [
@@ -124,8 +124,8 @@ let mockFactureBiens: FactureBien[] = [
     type_bien: TypeBien.PRODUIT,
     quantite: 2,
     Cree_par: "Dr. Smith",
-    prix_unitaire: 2.50,
-    nom_bien: "Paracétamol 500mg"
+    prix_unitaire: 2.5,
+    nom_bien: "Paracétamol 500mg",
   },
   {
     id: 2,
@@ -134,8 +134,8 @@ let mockFactureBiens: FactureBien[] = [
     type_bien: TypeBien.SOIN,
     quantite: 1,
     Cree_par: "Dr. Smith",
-    prix_unitaire: 50.00,
-    nom_bien: "Consultation générale"
+    prix_unitaire: 50.0,
+    nom_bien: "Consultation générale",
   },
   {
     id: 3,
@@ -144,8 +144,8 @@ let mockFactureBiens: FactureBien[] = [
     type_bien: TypeBien.SOIN,
     quantite: 1,
     Cree_par: "Dr. Smith",
-    prix_unitaire: 70.50,
-    nom_bien: "Radiographie thoracique"
+    prix_unitaire: 70.5,
+    nom_bien: "Radiographie thoracique",
   },
   {
     id: 4,
@@ -154,8 +154,8 @@ let mockFactureBiens: FactureBien[] = [
     type_bien: TypeBien.SOIN,
     quantite: 1,
     Cree_par: "Dr. Martin",
-    prix_unitaire: 25.00,
-    nom_bien: "Vaccination antigrippale"
+    prix_unitaire: 25.0,
+    nom_bien: "Vaccination antigrippale",
   },
   {
     id: 5,
@@ -164,8 +164,8 @@ let mockFactureBiens: FactureBien[] = [
     type_bien: TypeBien.SOIN,
     quantite: 1,
     Cree_par: "Dr. Martin",
-    prix_unitaire: 50.00,
-    nom_bien: "Consultation générale"
+    prix_unitaire: 50.0,
+    nom_bien: "Consultation générale",
   },
   {
     id: 6,
@@ -174,8 +174,8 @@ let mockFactureBiens: FactureBien[] = [
     type_bien: TypeBien.SOIN,
     quantite: 1,
     Cree_par: "Dr. Dubois",
-    prix_unitaire: 200.00,
-    nom_bien: "Chirurgie ambulatoire"
+    prix_unitaire: 200.0,
+    nom_bien: "Chirurgie ambulatoire",
   },
   {
     id: 7,
@@ -184,9 +184,9 @@ let mockFactureBiens: FactureBien[] = [
     type_bien: TypeBien.SOIN,
     quantite: 1,
     Cree_par: "Dr. Smith",
-    prix_unitaire: 45.00,
-    nom_bien: "Séance de kinésithérapie"
-  }
+    prix_unitaire: 45.0,
+    nom_bien: "Séance de kinésithérapie",
+  },
 ];
 
 // Simulate API delay
@@ -202,9 +202,9 @@ export class InvoicesService {
   // Get all invoices with details
   static async getAllWithDetails(): Promise<FactureWithDetails[]> {
     await delay(500);
-    return mockFactures.map(facture => ({
+    return mockFactures.map((facture) => ({
       ...facture,
-      items: mockFactureBiens.filter(item => item.id_facture === facture.id)
+      items: mockFactureBiens.filter((item) => item.id_facture === facture.id),
     }));
   }
 
@@ -214,17 +214,17 @@ export class InvoicesService {
     const facture = mockFactures.find((facture) => facture.id === id);
     if (!facture) return null;
 
-    const items = mockFactureBiens.filter(item => item.id_facture === id);
+    const items = mockFactureBiens.filter((item) => item.id_facture === id);
     return {
       ...facture,
-      items
+      items,
     };
   }
 
   // Get invoices by patient CIN
   static async getByPatientCIN(cin: string): Promise<Facture[]> {
     await delay(500);
-    return mockFactures.filter(facture => facture.CIN === cin);
+    return mockFactures.filter((facture) => facture.CIN === cin);
   }
 
   // Create new invoice
@@ -232,8 +232,9 @@ export class InvoicesService {
     await delay(800);
 
     // Calculate prices with TVA
-    const prix_ht = data.items.reduce((total, item) =>
-      total + (item.prix_unitaire * item.quantite), 0
+    const prix_ht = data.items.reduce(
+      (total, item) => total + item.prix_unitaire * item.quantite,
+      0,
     );
     const tva_rate = 20;
     const tva_amount = parseFloat((prix_ht * (tva_rate / 100)).toFixed(2));
@@ -264,14 +265,14 @@ export class InvoicesService {
       quantite: item.quantite,
       Cree_par: data.Cree_par,
       prix_unitaire: item.prix_unitaire,
-      nom_bien: item.nom_bien
+      nom_bien: item.nom_bien,
     }));
 
     mockFactureBiens.push(...newItems);
 
     return {
       ...newFacture,
-      items: newItems
+      items: newItems,
     };
   }
 
@@ -286,8 +287,9 @@ export class InvoicesService {
     if (index === -1) return null;
 
     // Calculate prices with TVA
-    const prix_ht = data.items.reduce((total, item) =>
-      total + (item.prix_unitaire * item.quantite), 0
+    const prix_ht = data.items.reduce(
+      (total, item) => total + item.prix_unitaire * item.quantite,
+      0,
     );
     const tva_rate = 20;
     const tva_amount = parseFloat((prix_ht * (tva_rate / 100)).toFixed(2));
@@ -309,8 +311,10 @@ export class InvoicesService {
     mockFactures[index] = updatedFacture;
 
     // Remove old items and add new ones
-    mockFactureBiens = mockFactureBiens.filter(item => item.id_facture !== id);
-    
+    mockFactureBiens = mockFactureBiens.filter(
+      (item) => item.id_facture !== id,
+    );
+
     const newItems: FactureBien[] = data.items.map((item, itemIndex) => ({
       id: Math.max(...mockFactureBiens.map((item) => item.id)) + itemIndex + 1,
       id_facture: id,
@@ -319,14 +323,14 @@ export class InvoicesService {
       quantite: item.quantite,
       Cree_par: data.Cree_par,
       prix_unitaire: item.prix_unitaire,
-      nom_bien: item.nom_bien
+      nom_bien: item.nom_bien,
     }));
 
     mockFactureBiens.push(...newItems);
 
     return {
       ...updatedFacture,
-      items: newItems
+      items: newItems,
     };
   }
 
@@ -339,7 +343,9 @@ export class InvoicesService {
 
     // Remove invoice and its items
     mockFactures.splice(index, 1);
-    mockFactureBiens = mockFactureBiens.filter(item => item.id_facture !== id);
+    mockFactureBiens = mockFactureBiens.filter(
+      (item) => item.id_facture !== id,
+    );
     return true;
   }
 
@@ -352,12 +358,15 @@ export class InvoicesService {
       (facture) =>
         facture.CIN.toLowerCase().includes(lowerQuery) ||
         facture.Cree_par.toLowerCase().includes(lowerQuery) ||
-        facture.notes.toLowerCase().includes(lowerQuery)
+        facture.notes.toLowerCase().includes(lowerQuery),
     );
   }
 
   // Update invoice status
-  static async updateStatus(id: number, status: FactureStatut): Promise<Facture | null> {
+  static async updateStatus(
+    id: number,
+    status: FactureStatut,
+  ): Promise<Facture | null> {
     await delay(500);
 
     const index = mockFactures.findIndex((facture) => facture.id === id);
@@ -389,10 +398,14 @@ export const validateFactureData = (data: FactureFormData): string[] => {
   } else {
     data.items.forEach((item, index) => {
       if (!item.id_bien) {
-        errors.push(`L'article ${index + 1} doit avoir un produit/service sélectionné`);
+        errors.push(
+          `L'article ${index + 1} doit avoir un produit/service sélectionné`,
+        );
       }
       if (item.quantite <= 0) {
-        errors.push(`L'article ${index + 1} doit avoir une quantité supérieure à 0`);
+        errors.push(
+          `L'article ${index + 1} doit avoir une quantité supérieure à 0`,
+        );
       }
       if (item.prix_unitaire <= 0) {
         errors.push(`L'article ${index + 1} doit avoir un prix supérieur à 0`);
@@ -430,9 +443,9 @@ export const getStatusColor = (status: FactureStatut): string => {
 };
 
 export const formatPrice = (price: number): string => {
-  return new Intl.NumberFormat('fr-FR', {
-    style: 'currency',
-    currency: 'EUR'
+  return new Intl.NumberFormat("fr-FR", {
+    style: "currency",
+    currency: "EUR",
   }).format(price);
 };
 
@@ -443,7 +456,7 @@ export const createEmptyFacture = (): FactureFormData => {
     statut: FactureStatut.BROUILLON,
     notes: "",
     Cree_par: "",
-    items: []
+    items: [],
   };
 };
 
@@ -453,18 +466,29 @@ export const createEmptyItem = (): FactureItem => {
     type_bien: TypeBien.PRODUIT,
     quantite: 1,
     prix_unitaire: 0,
-    nom_bien: ""
+    nom_bien: "",
   };
 };
 
 // Get invoice statistics
 export const getInvoiceStatistics = (factures: Facture[]) => {
   const totalInvoices = factures.length;
-  const totalRevenue = factures.reduce((sum, facture) => sum + facture.prix_total, 0);
-  const paidInvoices = factures.filter(f => f.statut === FactureStatut.PAYEE).length;
-  const pendingInvoices = factures.filter(f => f.statut === FactureStatut.ENVOYEE).length;
-  const overdueInvoices = factures.filter(f => f.statut === FactureStatut.EN_RETARD).length;
-  const draftInvoices = factures.filter(f => f.statut === FactureStatut.BROUILLON).length;
+  const totalRevenue = factures.reduce(
+    (sum, facture) => sum + facture.prix_total,
+    0,
+  );
+  const paidInvoices = factures.filter(
+    (f) => f.statut === FactureStatut.PAYEE,
+  ).length;
+  const pendingInvoices = factures.filter(
+    (f) => f.statut === FactureStatut.ENVOYEE,
+  ).length;
+  const overdueInvoices = factures.filter(
+    (f) => f.statut === FactureStatut.EN_RETARD,
+  ).length;
+  const draftInvoices = factures.filter(
+    (f) => f.statut === FactureStatut.BROUILLON,
+  ).length;
 
   return {
     totalInvoices,
@@ -473,23 +497,31 @@ export const getInvoiceStatistics = (factures: Facture[]) => {
     pendingInvoices,
     overdueInvoices,
     draftInvoices,
-    averageInvoiceValue: totalInvoices > 0 ? totalRevenue / totalInvoices : 0
+    averageInvoiceValue: totalInvoices > 0 ? totalRevenue / totalInvoices : 0,
   };
 };
 
 // Calculate invoice total
 export const calculateInvoiceTotal = (items: FactureItem[]): number => {
-  return items.reduce((total, item) => total + (item.prix_unitaire * item.quantite), 0);
+  return items.reduce(
+    (total, item) => total + item.prix_unitaire * item.quantite,
+    0,
+  );
 };
 
 // Calculate invoice totals with TVA
-export const calculateInvoiceTotals = (items: FactureItem[]): {
+export const calculateInvoiceTotals = (
+  items: FactureItem[],
+): {
   prix_ht: number;
   tva_amount: number;
   tva_rate: number;
   prix_total: number;
 } => {
-  const prix_ht = items.reduce((total, item) => total + (item.prix_unitaire * item.quantite), 0);
+  const prix_ht = items.reduce(
+    (total, item) => total + item.prix_unitaire * item.quantite,
+    0,
+  );
   const tva_rate = 20;
   const tva_amount = parseFloat((prix_ht * (tva_rate / 100)).toFixed(2));
   const prix_total = parseFloat((prix_ht + tva_amount).toFixed(2));
@@ -498,6 +530,6 @@ export const calculateInvoiceTotals = (items: FactureItem[]): {
     prix_ht,
     tva_amount,
     tva_rate,
-    prix_total
+    prix_total,
   };
 };

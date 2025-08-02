@@ -1,11 +1,5 @@
 import { useState, useEffect } from "react";
-import {
-  Package,
-  AlertTriangle,
-  User,
-  Euro,
-  Hash,
-} from "lucide-react";
+import { Package, AlertTriangle, User, Euro, Hash } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -48,7 +42,8 @@ export default function ProductFormModal({
   product,
   isLoading = false,
 }: ProductFormModalProps) {
-  const [formData, setFormData] = useState<ProductFormData>(createEmptyProduct());
+  const [formData, setFormData] =
+    useState<ProductFormData>(createEmptyProduct());
   const [errors, setErrors] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -71,7 +66,7 @@ export default function ProductFormModal({
   }, [product, isOpen]);
 
   const handleInputChange = (field: keyof ProductFormData, value: any) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
     if (errors.length > 0) {
       setErrors([]);
     }
@@ -160,7 +155,9 @@ export default function ProductFormModal({
                 step="0.01"
                 min="0"
                 value={formData.prix || ""}
-                onChange={(e) => handleInputChange("prix", parseFloat(e.target.value) || 0)}
+                onChange={(e) =>
+                  handleInputChange("prix", parseFloat(e.target.value) || 0)
+                }
                 placeholder="0.00"
                 disabled={isSubmitting}
               />
@@ -176,7 +173,9 @@ export default function ProductFormModal({
                 type="number"
                 min="0"
                 value={formData.stock || ""}
-                onChange={(e) => handleInputChange("stock", parseInt(e.target.value) || 0)}
+                onChange={(e) =>
+                  handleInputChange("stock", parseInt(e.target.value) || 0)
+                }
                 placeholder="0"
                 disabled={isSubmitting}
               />

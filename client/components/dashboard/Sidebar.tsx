@@ -32,7 +32,7 @@ const navigation = [
     children: [
       { name: "Produits", href: "/products", icon: Package },
       { name: "Soins", href: "/soins", icon: Stethoscope },
-    ]
+    ],
   },
   { name: "Factures", href: "/invoices", icon: Receipt },
   { name: "Paiements", href: "/payments", icon: DollarSign },
@@ -44,18 +44,20 @@ const navigation = [
 
 export default function Sidebar() {
   const location = useLocation();
-  const [expandedDropdowns, setExpandedDropdowns] = useState<string[]>(["Biens"]);
+  const [expandedDropdowns, setExpandedDropdowns] = useState<string[]>([
+    "Biens",
+  ]);
 
   const toggleDropdown = (itemName: string) => {
-    setExpandedDropdowns(prev =>
+    setExpandedDropdowns((prev) =>
       prev.includes(itemName)
-        ? prev.filter(name => name !== itemName)
-        : [...prev, itemName]
+        ? prev.filter((name) => name !== itemName)
+        : [...prev, itemName],
     );
   };
 
   const isChildActive = (children: any[]) => {
-    return children.some(child => location.pathname === child.href);
+    return children.some((child) => location.pathname === child.href);
   };
 
   return (
@@ -105,7 +107,8 @@ export default function Sidebar() {
                 {isExpanded && (
                   <div className="ml-6 mt-1 space-y-1">
                     {item.children.map((child) => {
-                      const isChildActiveItem = location.pathname === child.href;
+                      const isChildActiveItem =
+                        location.pathname === child.href;
                       return (
                         <Link
                           key={child.name}

@@ -58,7 +58,8 @@ export default function DeleteProductModal({
             Supprimer le produit
           </DialogTitle>
           <DialogDescription>
-            Cette action est irréversible. Le produit sera définitivement supprimé.
+            Cette action est irréversible. Le produit sera définitivement
+            supprimé.
           </DialogDescription>
         </DialogHeader>
 
@@ -69,7 +70,8 @@ export default function DeleteProductModal({
               <strong>Attention:</strong> Cette action ne peut pas être annulée.
               {product.stock > 0 && (
                 <span className="block mt-1">
-                  Ce produit a un stock de {product.stock} unités d'une valeur de {formatPrice(totalValue)}.
+                  Ce produit a un stock de {product.stock} unités d'une valeur
+                  de {formatPrice(totalValue)}.
                 </span>
               )}
             </AlertDescription>
@@ -81,30 +83,30 @@ export default function DeleteProductModal({
               <Package className="h-5 w-5 text-muted-foreground" />
               <span className="font-medium">Produit à supprimer:</span>
             </div>
-            
+
             <div className="space-y-2 ml-7">
               <div>
                 <span className="text-sm font-medium">Nom:</span>
                 <span className="ml-2">{product.Nom}</span>
               </div>
-              
+
               <div>
                 <span className="text-sm font-medium">ID:</span>
                 <span className="ml-2 font-mono">#{product.id}</span>
               </div>
-              
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <span className="text-sm font-medium">Prix unitaire:</span>
                   <div className="font-mono">{formatPrice(product.prix)}</div>
                 </div>
-                
+
                 <div>
                   <span className="text-sm font-medium">Stock:</span>
                   <div className="font-mono">{product.stock} unités</div>
                 </div>
               </div>
-              
+
               {product.stock > 0 && (
                 <div className="p-2 bg-yellow-50 dark:bg-yellow-950/20 rounded">
                   <span className="text-sm font-medium">Valeur totale:</span>
@@ -113,12 +115,12 @@ export default function DeleteProductModal({
                   </div>
                 </div>
               )}
-              
+
               <div>
                 <span className="text-sm font-medium">Créé par:</span>
                 <span className="ml-2">{product.Cree_par}</span>
               </div>
-              
+
               <div>
                 <span className="text-sm font-medium">Date de création:</span>
                 <span className="ml-2">{formatDate(product.created_at)}</span>
@@ -133,7 +135,7 @@ export default function DeleteProductModal({
                   Note importante:
                 </span>
                 <div className="mt-1 text-orange-600 dark:text-orange-400">
-                  Ce produit contient encore {product.stock} unités en stock. 
+                  Ce produit contient encore {product.stock} unités en stock.
                   Assurez-vous que cette suppression est intentionnelle.
                 </div>
               </div>
@@ -146,11 +148,7 @@ export default function DeleteProductModal({
         </div>
 
         <DialogFooter className="gap-2">
-          <Button
-            variant="outline"
-            onClick={onClose}
-            disabled={isLoading}
-          >
+          <Button variant="outline" onClick={onClose} disabled={isLoading}>
             Annuler
           </Button>
           <Button

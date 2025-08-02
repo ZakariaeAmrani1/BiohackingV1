@@ -67,7 +67,8 @@ export default function InvoiceFormModal({
   invoice,
   isLoading = false,
 }: InvoiceFormModalProps) {
-  const [formData, setFormData] = useState<FactureFormData>(createEmptyFacture());
+  const [formData, setFormData] =
+    useState<FactureFormData>(createEmptyFacture());
   const [errors, setErrors] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -89,7 +90,7 @@ export default function InvoiceFormModal({
         const [clientsData, productsData, soinsData] = await Promise.all([
           ClientsService.getAll(),
           ProductsService.getAll(),
-          SoinsService.getAll()
+          SoinsService.getAll(),
         ]);
         setClients(clientsData);
         setProducts(productsData);
@@ -109,12 +110,12 @@ export default function InvoiceFormModal({
   // Initialize form data when invoice changes
   useEffect(() => {
     if (invoice) {
-      const items: FactureItem[] = invoice.items.map(item => ({
+      const items: FactureItem[] = invoice.items.map((item) => ({
         id_bien: item.id_bien,
         type_bien: item.type_bien,
         quantite: item.quantite,
         prix_unitaire: item.prix_unitaire,
-        nom_bien: item.nom_bien
+        nom_bien: item.nom_bien,
       }));
 
       setFormData({
@@ -123,7 +124,7 @@ export default function InvoiceFormModal({
         statut: invoice.statut,
         notes: invoice.notes,
         Cree_par: invoice.Cree_par,
-        items
+        items,
       });
     } else {
       setFormData(createEmptyFacture());
@@ -131,45 +132,52 @@ export default function InvoiceFormModal({
     setErrors([]);
   }, [invoice, isOpen]);
 
-  const handleInputChange = (field: keyof Omit<FactureFormData, 'items'>, value: any) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+  const handleInputChange = (
+    field: keyof Omit<FactureFormData, "items">,
+    value: any,
+  ) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
     if (errors.length > 0) {
       setErrors([]);
     }
   };
 
   const addItem = () => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      items: [...prev.items, createEmptyItem()]
+      items: [...prev.items, createEmptyItem()],
     }));
   };
 
   const removeItem = (index: number) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      items: prev.items.filter((_, i) => i !== index)
+      items: prev.items.filter((_, i) => i !== index),
     }));
   };
 
-  const handleItemChange = (index: number, field: keyof FactureItem, value: any) => {
-    setFormData(prev => {
+  const handleItemChange = (
+    index: number,
+    field: keyof FactureItem,
+    value: any,
+  ) => {
+    setFormData((prev) => {
       const newItems = [...prev.items];
       newItems[index] = { ...newItems[index], [field]: value };
 
       // If changing the item selection, update price and name
-      if (field === 'id_bien' && value) {
+      if (field === "id_bien" && value) {
         const itemId = parseInt(value);
         const currentItem = newItems[index];
-        
+
         if (currentItem.type_bien === TypeBien.PRODUIT) {
-          const product = products.find(p => p.id === itemId);
+          const product = products.find((p) => p.id === itemId);
           if (product) {
             newItems[index].prix_unitaire = product.prix;
             newItems[index].nom_bien = product.Nom;
           }
         } else {
-          const soin = soins.find(s => s.id === itemId);
+          const soin = soins.find((s) => s.id === itemId);
           if (soin) {
             newItems[index].prix_unitaire = soin.prix;
             newItems[index].nom_bien = soin.Nom;
@@ -191,7 +199,11 @@ export default function InvoiceFormModal({
   };
 
   const getItemIcon = (type: TypeBien) => {
-    return type === TypeBien.PRODUIT ? <Package className="h-4 w-4" /> : <Stethoscope className="h-4 w-4" />;
+    return type === TypeBien.PRODUIT ? (
+      <Package className="h-4 w-4" />
+    ) : (
+      <Stethoscope className="h-4 w-4" />
+    );
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -221,7 +233,7 @@ export default function InvoiceFormModal({
   };
 
   const getPatientName = (cin: string) => {
-    const client = clients.find(c => c.CIN === cin);
+    const client = clients.find((c) => c.CIN === cin);
     return client ? `${client.prenom} ${client.nom}` : cin;
   };
 
@@ -259,7 +271,7 @@ export default function InvoiceFormModal({
           {/* Basic Information */}
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">Informations de base</h3>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="CIN" className="flex items-center gap-2">
@@ -304,7 +316,9 @@ export default function InvoiceFormModal({
                 <Label htmlFor="statut">Statut</Label>
                 <Select
                   value={formData.statut}
-                  onValueChange={(value) => handleInputChange("statut", value as FactureStatut)}
+                  onValueChange={(value) =>
+                    handleInputChange("statut", value as FactureStatut)
+                  }
                   disabled={isSubmitting}
                 >
                   <SelectTrigger>
@@ -324,7 +338,9 @@ export default function InvoiceFormModal({
                 <Label htmlFor="Cree_par">Créé par</Label>
                 <Select
                   value={formData.Cree_par}
-                  onValueChange={(value) => handleInputChange("Cree_par", value)}
+                  onValueChange={(value) =>
+                    handleInputChange("Cree_par", value)
+                  }
                   disabled={isSubmitting}
                 >
                   <SelectTrigger>
@@ -377,7 +393,8 @@ export default function InvoiceFormModal({
               <Card>
                 <CardContent className="text-center py-8">
                   <p className="text-muted-foreground">
-                    Aucun article ajouté. Cliquez sur "Ajouter un article" pour commencer.
+                    Aucun article ajouté. Cliquez sur "Ajouter un article" pour
+                    commencer.
                   </p>
                 </CardContent>
               </Card>
@@ -412,7 +429,11 @@ export default function InvoiceFormModal({
                           <Select
                             value={item.type_bien}
                             onValueChange={(value) => {
-                              handleItemChange(index, "type_bien", value as TypeBien);
+                              handleItemChange(
+                                index,
+                                "type_bien",
+                                value as TypeBien,
+                              );
                               // Reset item selection when changing type
                               handleItemChange(index, "id_bien", 0);
                               handleItemChange(index, "prix_unitaire", 0);
@@ -444,18 +465,32 @@ export default function InvoiceFormModal({
                           <Label>Article</Label>
                           <Select
                             value={item.id_bien.toString()}
-                            onValueChange={(value) => handleItemChange(index, "id_bien", parseInt(value))}
-                            disabled={isSubmitting || isLoadingData || !item.type_bien}
+                            onValueChange={(value) =>
+                              handleItemChange(
+                                index,
+                                "id_bien",
+                                parseInt(value),
+                              )
+                            }
+                            disabled={
+                              isSubmitting || isLoadingData || !item.type_bien
+                            }
                           >
                             <SelectTrigger>
                               <SelectValue placeholder="Sélectionnez un article" />
                             </SelectTrigger>
                             <SelectContent>
-                              {getAvailableItems(item.type_bien).map((availableItem) => (
-                                <SelectItem key={availableItem.id} value={availableItem.id.toString()}>
-                                  {availableItem.Nom} - {formatPrice(availableItem.prix)}
-                                </SelectItem>
-                              ))}
+                              {getAvailableItems(item.type_bien).map(
+                                (availableItem) => (
+                                  <SelectItem
+                                    key={availableItem.id}
+                                    value={availableItem.id.toString()}
+                                  >
+                                    {availableItem.Nom} -{" "}
+                                    {formatPrice(availableItem.prix)}
+                                  </SelectItem>
+                                ),
+                              )}
                             </SelectContent>
                           </Select>
                         </div>
@@ -471,8 +506,16 @@ export default function InvoiceFormModal({
                             type="number"
                             min="1"
                             value={item.quantite}
-                            onChange={(e) => handleItemChange(index, "quantite", parseInt(e.target.value) || 1)}
-                            disabled={isSubmitting || item.type_bien === TypeBien.SOIN}
+                            onChange={(e) =>
+                              handleItemChange(
+                                index,
+                                "quantite",
+                                parseInt(e.target.value) || 1,
+                              )
+                            }
+                            disabled={
+                              isSubmitting || item.type_bien === TypeBien.SOIN
+                            }
                             placeholder="1"
                           />
                           {item.type_bien === TypeBien.SOIN && (
@@ -492,7 +535,13 @@ export default function InvoiceFormModal({
                             step="0.01"
                             min="0"
                             value={item.prix_unitaire}
-                            onChange={(e) => handleItemChange(index, "prix_unitaire", parseFloat(e.target.value) || 0)}
+                            onChange={(e) =>
+                              handleItemChange(
+                                index,
+                                "prix_unitaire",
+                                parseFloat(e.target.value) || 0,
+                              )
+                            }
                             disabled={isSubmitting}
                             placeholder="0.00"
                           />

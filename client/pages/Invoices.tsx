@@ -77,7 +77,8 @@ export default function Invoices() {
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [selectedInvoice, setSelectedInvoice] = useState<FactureWithDetails | null>(null);
+  const [selectedInvoice, setSelectedInvoice] =
+    useState<FactureWithDetails | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { toast } = useToast();
@@ -212,7 +213,10 @@ export default function Invoices() {
     }
   };
 
-  const handleUpdateStatus = async (invoiceId: number, newStatus: FactureStatut) => {
+  const handleUpdateStatus = async (
+    invoiceId: number,
+    newStatus: FactureStatut,
+  ) => {
     try {
       await InvoicesService.updateStatus(invoiceId, newStatus);
       await loadInvoices();
@@ -360,7 +364,7 @@ export default function Invoices() {
       }
 
       // Create a new window for PDF generation
-      const printWindow = window.open('', '_blank');
+      const printWindow = window.open("", "_blank");
       if (!printWindow) {
         toast({
           title: "Erreur",
@@ -406,14 +410,17 @@ export default function Invoices() {
     };
 
     const formatPriceForPDF = (price: number): string => {
-      return new Intl.NumberFormat('fr-FR', {
-        style: 'currency',
-        currency: 'EUR'
+      return new Intl.NumberFormat("fr-FR", {
+        style: "currency",
+        currency: "EUR",
       }).format(price);
     };
 
     const calculateTotals = (items: any[]) => {
-      const prix_ht = items.reduce((total, item) => total + (item.prix_unitaire * item.quantite), 0);
+      const prix_ht = items.reduce(
+        (total, item) => total + item.prix_unitaire * item.quantite,
+        0,
+      );
       const tva_rate = 20;
       const tva_amount = parseFloat((prix_ht * (tva_rate / 100)).toFixed(2));
       const prix_total = parseFloat((prix_ht + tva_amount).toFixed(2));
@@ -427,7 +434,7 @@ export default function Invoices() {
       <html>
         <head>
           <meta charset="UTF-8">
-          <title>Facture #${invoice.id.toString().padStart(4, '0')}</title>
+          <title>Facture #${invoice.id.toString().padStart(4, "0")}</title>
           <style>
             * {
               margin: 0;
@@ -692,7 +699,7 @@ export default function Invoices() {
               </div>
 
               <div class="invoice-title">FACTURE</div>
-              <div class="invoice-number">#${invoice.id.toString().padStart(4, '0')}</div>
+              <div class="invoice-number">#${invoice.id.toString().padStart(4, "0")}</div>
             </div>
 
             <!-- Invoice Info -->
@@ -703,12 +710,16 @@ export default function Invoices() {
                   <span class="info-label">Patient:</span>
                   <span class="info-value">${invoice.CIN}</span>
                 </div>
-                ${invoice.patient_name ? `
+                ${
+                  invoice.patient_name
+                    ? `
                 <div class="info-row">
                   <span class="info-label">Nom:</span>
                   <span class="info-value">${invoice.patient_name}</span>
                 </div>
-                ` : ''}
+                `
+                    : ""
+                }
               </div>
 
               <div class="invoice-details">
@@ -723,7 +734,7 @@ export default function Invoices() {
                 </div>
                 <div class="info-row">
                   <span class="info-label">Statut:</span>
-                  <span class="status-badge status-${invoice.statut.toLowerCase().replace(' ', '-')}">${invoice.statut}</span>
+                  <span class="status-badge status-${invoice.statut.toLowerCase().replace(" ", "-")}">${invoice.statut}</span>
                 </div>
               </div>
             </div>
@@ -740,19 +751,23 @@ export default function Invoices() {
                 </tr>
               </thead>
               <tbody>
-                ${invoice.items.map(item => `
+                ${invoice.items
+                  .map(
+                    (item) => `
                   <tr>
                     <td>
                       <div class="item-name">${item.nom_bien}</div>
                     </td>
                     <td>
-                      <span class="item-type">${item.type_bien === 'produit' ? 'Produit' : 'Soin'}</span>
+                      <span class="item-type">${item.type_bien === "produit" ? "Produit" : "Soin"}</span>
                     </td>
                     <td class="amount">${item.quantite}</td>
                     <td class="amount">${formatPriceForPDF(item.prix_unitaire)}</td>
                     <td class="amount">${formatPriceForPDF(item.prix_unitaire * item.quantite)}</td>
                   </tr>
-                `).join('')}
+                `,
+                  )
+                  .join("")}
               </tbody>
             </table>
 
@@ -774,13 +789,17 @@ export default function Invoices() {
               </table>
             </div>
 
-            ${invoice.notes ? `
+            ${
+              invoice.notes
+                ? `
             <!-- Notes -->
             <div class="notes-section">
               <div class="notes-title">Notes</div>
               <div>${invoice.notes}</div>
             </div>
-            ` : ''}
+            `
+                : ""
+            }
 
             <!-- Footer -->
             <div class="footer">
@@ -823,13 +842,13 @@ export default function Invoices() {
               <Receipt className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{statistics.totalInvoices}</div>
-              <p className="text-xs text-muted-foreground">
-                Factures créées
-              </p>
+              <div className="text-2xl font-bold">
+                {statistics.totalInvoices}
+              </div>
+              <p className="text-xs text-muted-foreground">Factures créées</p>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
@@ -838,7 +857,9 @@ export default function Invoices() {
               <Euro className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{formatPrice(statistics.totalRevenue)}</div>
+              <div className="text-2xl font-bold">
+                {formatPrice(statistics.totalRevenue)}
+              </div>
               <p className="text-xs text-muted-foreground">
                 Revenu total TTC (TVA incluse)
               </p>
@@ -853,22 +874,22 @@ export default function Invoices() {
               <CheckCircle className="h-4 w-4 text-green-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-green-600">{statistics.paidInvoices}</div>
-              <p className="text-xs text-muted-foreground">
-                Paiements reçus
-              </p>
+              <div className="text-2xl font-bold text-green-600">
+                {statistics.paidInvoices}
+              </div>
+              <p className="text-xs text-muted-foreground">Paiements reçus</p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                En Retard
-              </CardTitle>
+              <CardTitle className="text-sm font-medium">En Retard</CardTitle>
               <AlertCircle className="h-4 w-4 text-orange-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-orange-600">{statistics.overdueInvoices}</div>
+              <div className="text-2xl font-bold text-orange-600">
+                {statistics.overdueInvoices}
+              </div>
               <p className="text-xs text-muted-foreground">
                 Factures en retard
               </p>
@@ -978,14 +999,21 @@ export default function Invoices() {
                   <TableBody>
                     {filteredInvoices.length > 0 ? (
                       filteredInvoices.map((invoice) => (
-                        <TableRow key={invoice.id} className="hover:bg-muted/50">
+                        <TableRow
+                          key={invoice.id}
+                          className="hover:bg-muted/50"
+                        >
                           <TableCell>
                             <div className="flex items-center gap-2">
                               <Receipt className="h-4 w-4 text-primary" />
                               <div>
-                                <div className="font-medium">#{invoice.id.toString().padStart(4, '0')}</div>
+                                <div className="font-medium">
+                                  #{invoice.id.toString().padStart(4, "0")}
+                                </div>
                                 <div className="text-sm text-muted-foreground">
-                                  {invoice.notes ? invoice.notes.slice(0, 30) + "..." : "Aucune note"}
+                                  {invoice.notes
+                                    ? invoice.notes.slice(0, 30) + "..."
+                                    : "Aucune note"}
                                 </div>
                               </div>
                             </div>
@@ -998,7 +1026,9 @@ export default function Invoices() {
                             {formatPrice(invoice.prix_total)}
                           </TableCell>
                           <TableCell>
-                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(invoice.statut)}`}>
+                            <span
+                              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(invoice.statut)}`}
+                            >
                               {invoice.statut}
                             </span>
                           </TableCell>
@@ -1035,7 +1065,12 @@ export default function Invoices() {
                                 {invoice.statut !== FactureStatut.PAYEE && (
                                   <DropdownMenuItem
                                     className="gap-2"
-                                    onClick={() => handleUpdateStatus(invoice.id, FactureStatut.PAYEE)}
+                                    onClick={() =>
+                                      handleUpdateStatus(
+                                        invoice.id,
+                                        FactureStatut.PAYEE,
+                                      )
+                                    }
                                   >
                                     <CheckCircle className="h-4 w-4" />
                                     Marquer payée
@@ -1059,7 +1094,8 @@ export default function Invoices() {
                           <div className="flex flex-col items-center gap-2">
                             <Receipt className="h-8 w-8 text-muted-foreground" />
                             <p className="text-muted-foreground">
-                              Aucune facture trouvée avec les critères sélectionnés
+                              Aucune facture trouvée avec les critères
+                              sélectionnés
                             </p>
                           </div>
                         </TableCell>
@@ -1085,13 +1121,15 @@ export default function Invoices() {
                         <div className="space-y-1">
                           <CardTitle className="text-lg flex items-center gap-2">
                             <Receipt className="h-5 w-5 text-primary" />
-                            Facture #{invoice.id.toString().padStart(4, '0')}
+                            Facture #{invoice.id.toString().padStart(4, "0")}
                           </CardTitle>
                           <p className="text-sm text-muted-foreground">
                             {invoice.CIN}
                           </p>
                         </div>
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(invoice.statut)}`}>
+                        <span
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(invoice.statut)}`}
+                        >
                           {invoice.statut}
                         </span>
                       </div>
@@ -1099,13 +1137,17 @@ export default function Invoices() {
                     <CardContent className="space-y-4">
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <div className="text-sm text-muted-foreground">Montant TTC</div>
+                          <div className="text-sm text-muted-foreground">
+                            Montant TTC
+                          </div>
                           <div className="font-mono text-lg font-semibold">
                             {formatPrice(invoice.prix_total)}
                           </div>
                         </div>
                         <div>
-                          <div className="text-sm text-muted-foreground">Date</div>
+                          <div className="text-sm text-muted-foreground">
+                            Date
+                          </div>
                           <div className="text-sm font-medium">
                             {formatDate(invoice.date)}
                           </div>
@@ -1124,7 +1166,8 @@ export default function Invoices() {
                             <div>
                               <span className="font-medium">Notes:</span>
                               <div className="text-muted-foreground mt-1">
-                                {invoice.notes.slice(0, 60)}{invoice.notes.length > 60 ? "..." : ""}
+                                {invoice.notes.slice(0, 60)}
+                                {invoice.notes.length > 60 ? "..." : ""}
                               </div>
                             </div>
                           </div>
@@ -1168,7 +1211,12 @@ export default function Invoices() {
                               {invoice.statut !== FactureStatut.PAYEE && (
                                 <DropdownMenuItem
                                   className="gap-2"
-                                  onClick={() => handleUpdateStatus(invoice.id, FactureStatut.PAYEE)}
+                                  onClick={() =>
+                                    handleUpdateStatus(
+                                      invoice.id,
+                                      FactureStatut.PAYEE,
+                                    )
+                                  }
                                 >
                                   <CheckCircle className="h-4 w-4" />
                                   Marquer payée

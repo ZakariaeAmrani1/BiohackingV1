@@ -66,10 +66,10 @@ export default function Payments() {
   const loadPayments = async () => {
     try {
       setIsLoading(true);
-      
+
       // Generate payments from paid invoices first
       await generatePaymentsFromPaidInvoices();
-      
+
       // Then load the payments with details
       const data = await PaymentsService.getAllWithDetails();
       setPayments(data);
@@ -91,17 +91,20 @@ export default function Payments() {
     // Search filter
     if (searchTerm) {
       const lowerQuery = searchTerm.toLowerCase();
-      filtered = filtered.filter(payment =>
-        payment.patient_cin.toLowerCase().includes(lowerQuery) ||
-        payment.Cree_par.toLowerCase().includes(lowerQuery) ||
-        payment.facture_number.toLowerCase().includes(lowerQuery) ||
-        payment.id.toString().includes(lowerQuery)
+      filtered = filtered.filter(
+        (payment) =>
+          payment.patient_cin.toLowerCase().includes(lowerQuery) ||
+          payment.Cree_par.toLowerCase().includes(lowerQuery) ||
+          payment.facture_number.toLowerCase().includes(lowerQuery) ||
+          payment.id.toString().includes(lowerQuery),
       );
     }
 
     // Doctor filter
     if (doctorFilter !== "tous") {
-      filtered = filtered.filter(payment => payment.Cree_par === doctorFilter);
+      filtered = filtered.filter(
+        (payment) => payment.Cree_par === doctorFilter,
+      );
     }
 
     // Date filter
@@ -112,28 +115,28 @@ export default function Payments() {
       switch (dateFilter) {
         case "today":
           filterDate.setHours(0, 0, 0, 0);
-          filtered = filtered.filter(payment => {
+          filtered = filtered.filter((payment) => {
             const paymentDate = new Date(payment.date);
             return paymentDate >= filterDate;
           });
           break;
         case "week":
           filterDate.setDate(now.getDate() - 7);
-          filtered = filtered.filter(payment => {
+          filtered = filtered.filter((payment) => {
             const paymentDate = new Date(payment.date);
             return paymentDate >= filterDate;
           });
           break;
         case "month":
           filterDate.setMonth(now.getMonth() - 1);
-          filtered = filtered.filter(payment => {
+          filtered = filtered.filter((payment) => {
             const paymentDate = new Date(payment.date);
             return paymentDate >= filterDate;
           });
           break;
         case "quarter":
           filterDate.setMonth(now.getMonth() - 3);
-          filtered = filtered.filter(payment => {
+          filtered = filtered.filter((payment) => {
             const paymentDate = new Date(payment.date);
             return paymentDate >= filterDate;
           });
@@ -141,17 +144,21 @@ export default function Payments() {
       }
     }
 
-    return filtered.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    return filtered.sort(
+      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+    );
   }, [searchTerm, doctorFilter, dateFilter, payments]);
 
   // Get statistics from filtered payments
-  const statistics = getPaymentStatistics(filteredPayments.map(p => ({
-    id: p.id,
-    id_facture: p.id_facture,
-    date: p.date,
-    montant_totale: p.montant_totale,
-    Cree_par: p.Cree_par
-  })));
+  const statistics = getPaymentStatistics(
+    filteredPayments.map((p) => ({
+      id: p.id,
+      id_facture: p.id_facture,
+      date: p.date,
+      montant_totale: p.montant_totale,
+      Cree_par: p.Cree_par,
+    })),
+  );
 
   return (
     <DashboardLayout>
@@ -176,13 +183,15 @@ export default function Payments() {
               <Euro className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{formatPrice(statistics.totalRevenue)}</div>
+              <div className="text-2xl font-bold">
+                {formatPrice(statistics.totalRevenue)}
+              </div>
               <p className="text-xs text-muted-foreground">
                 Tous les paiements reçus
               </p>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
@@ -191,7 +200,9 @@ export default function Payments() {
               <CreditCard className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{statistics.totalPayments}</div>
+              <div className="text-2xl font-bold">
+                {statistics.totalPayments}
+              </div>
               <p className="text-xs text-muted-foreground">
                 Nombre de paiements
               </p>
@@ -206,7 +217,9 @@ export default function Payments() {
               <Target className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{formatPrice(statistics.averagePayment)}</div>
+              <div className="text-2xl font-bold">
+                {formatPrice(statistics.averagePayment)}
+              </div>
               <p className="text-xs text-muted-foreground">
                 Montant moyen par paiement
               </p>
@@ -215,9 +228,7 @@ export default function Payments() {
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Ce Mois
-              </CardTitle>
+              <CardTitle className="text-sm font-medium">Ce Mois</CardTitle>
               {statistics.monthlyTrend >= 0 ? (
                 <TrendingUp className="h-4 w-4 text-green-500" />
               ) : (
@@ -225,15 +236,18 @@ export default function Payments() {
               )}
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{formatPrice(statistics.currentMonthRevenue)}</div>
-              <p className={`text-xs ${statistics.monthlyTrend >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                {statistics.monthlyTrend >= 0 ? '+' : ''}{formatPrice(statistics.monthlyTrend)} vs mois dernier
+              <div className="text-2xl font-bold">
+                {formatPrice(statistics.currentMonthRevenue)}
+              </div>
+              <p
+                className={`text-xs ${statistics.monthlyTrend >= 0 ? "text-green-600" : "text-red-600"}`}
+              >
+                {statistics.monthlyTrend >= 0 ? "+" : ""}
+                {formatPrice(statistics.monthlyTrend)} vs mois dernier
               </p>
             </CardContent>
           </Card>
         </div>
-
-
 
         {/* Search and Filters */}
         <Card>
@@ -294,7 +308,10 @@ export default function Payments() {
           </p>
           {filteredPayments.length > 0 && (
             <p className="text-sm font-medium">
-              Total affiché: {formatPrice(filteredPayments.reduce((sum, p) => sum + p.montant_totale, 0))}
+              Total affiché:{" "}
+              {formatPrice(
+                filteredPayments.reduce((sum, p) => sum + p.montant_totale, 0),
+              )}
             </p>
           )}
         </div>
@@ -323,7 +340,9 @@ export default function Payments() {
                           <div className="flex items-center gap-2">
                             <DollarSign className="h-4 w-4 text-green-600" />
                             <div>
-                              <div className="font-medium">#{payment.id.toString().padStart(4, '0')}</div>
+                              <div className="font-medium">
+                                #{payment.id.toString().padStart(4, "0")}
+                              </div>
                               <div className="text-sm text-muted-foreground">
                                 {formatDateTime(payment.date)}
                               </div>
@@ -334,7 +353,9 @@ export default function Payments() {
                           <div className="flex items-center gap-2">
                             <Receipt className="h-4 w-4 text-primary" />
                             <div>
-                              <div className="font-medium">{payment.facture_number}</div>
+                              <div className="font-medium">
+                                {payment.facture_number}
+                              </div>
                               <div className="text-sm text-muted-foreground">
                                 {formatDate(payment.facture_date)}
                               </div>
@@ -367,7 +388,9 @@ export default function Payments() {
                               {payment.facture_notes}
                             </div>
                           ) : (
-                            <span className="text-sm text-muted-foreground italic">Aucune note</span>
+                            <span className="text-sm text-muted-foreground italic">
+                              Aucune note
+                            </span>
                           )}
                         </TableCell>
                       </TableRow>
@@ -378,10 +401,9 @@ export default function Payments() {
                         <div className="flex flex-col items-center gap-2">
                           <DollarSign className="h-8 w-8 text-muted-foreground" />
                           <p className="text-muted-foreground">
-                            {isLoading 
-                              ? "Chargement des paiements..." 
-                              : "Aucun paiement trouvé avec les critères sélectionnés"
-                            }
+                            {isLoading
+                              ? "Chargement des paiements..."
+                              : "Aucun paiement trouvé avec les critères sélectionnés"}
                           </p>
                         </div>
                       </TableCell>
@@ -392,8 +414,6 @@ export default function Payments() {
             </div>
           </CardContent>
         </Card>
-
-
       </div>
     </DashboardLayout>
   );

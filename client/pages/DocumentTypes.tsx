@@ -64,7 +64,8 @@ export default function DocumentTypes() {
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [selectedTemplate, setSelectedTemplate] = useState<DocumentTemplate | null>(null);
+  const [selectedTemplate, setSelectedTemplate] =
+    useState<DocumentTemplate | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { toast } = useToast();
@@ -298,7 +299,7 @@ export default function DocumentTypes() {
   const getFieldCount = (template: DocumentTemplate) => {
     return template.sections_json.sections.reduce(
       (total, section) => total + section.fields.length,
-      0
+      0,
     );
   };
 
@@ -308,7 +309,9 @@ export default function DocumentTypes() {
         {/* Header */}
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Types de Documents</h1>
+            <h1 className="text-3xl font-bold tracking-tight">
+              Types de Documents
+            </h1>
             <p className="text-muted-foreground">
               Gestion des modèles de documents et formulaires personnalisés
             </p>
@@ -403,12 +406,17 @@ export default function DocumentTypes() {
                   <TableBody>
                     {filteredTemplates.length > 0 ? (
                       filteredTemplates.map((template) => (
-                        <TableRow key={template.id} className="hover:bg-muted/50">
+                        <TableRow
+                          key={template.id}
+                          className="hover:bg-muted/50"
+                        >
                           <TableCell>
                             <div className="flex items-center gap-2">
                               <FileText className="h-4 w-4 text-primary" />
                               <div>
-                                <div className="font-medium">{template.name}</div>
+                                <div className="font-medium">
+                                  {template.name}
+                                </div>
                               </div>
                             </div>
                           </TableCell>
@@ -423,7 +431,9 @@ export default function DocumentTypes() {
                             </Badge>
                           </TableCell>
                           <TableCell>{template.Cree_par}</TableCell>
-                          <TableCell>{formatDate(template.created_at)}</TableCell>
+                          <TableCell>
+                            {formatDate(template.created_at)}
+                          </TableCell>
                           <TableCell className="text-right">
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
@@ -448,7 +458,9 @@ export default function DocumentTypes() {
                                 </DropdownMenuItem>
                                 <DropdownMenuItem
                                   className="gap-2"
-                                  onClick={() => handleDuplicateTemplate(template)}
+                                  onClick={() =>
+                                    handleDuplicateTemplate(template)
+                                  }
                                   disabled={isSubmitting}
                                 >
                                   <Copy className="h-4 w-4" />
@@ -555,7 +567,9 @@ export default function DocumentTypes() {
                               </DropdownMenuItem>
                               <DropdownMenuItem
                                 className="gap-2"
-                                onClick={() => handleDuplicateTemplate(template)}
+                                onClick={() =>
+                                  handleDuplicateTemplate(template)
+                                }
                                 disabled={isSubmitting}
                               >
                                 <Copy className="h-4 w-4" />
@@ -600,7 +614,9 @@ export default function DocumentTypes() {
         <DocumentTemplateFormModal
           isOpen={isFormModalOpen}
           onClose={closeFormModal}
-          onSubmit={selectedTemplate ? handleUpdateTemplate : handleCreateTemplate}
+          onSubmit={
+            selectedTemplate ? handleUpdateTemplate : handleCreateTemplate
+          }
           template={selectedTemplate}
           isLoading={isSubmitting}
         />

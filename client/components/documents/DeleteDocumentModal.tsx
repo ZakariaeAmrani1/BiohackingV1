@@ -63,7 +63,8 @@ export default function DeleteDocumentModal({
             Supprimer le document
           </DialogTitle>
           <DialogDescription>
-            Cette action est irréversible. Le document sera définitivement supprimé.
+            Cette action est irréversible. Le document sera définitivement
+            supprimé.
           </DialogDescription>
         </DialogHeader>
 
@@ -82,35 +83,35 @@ export default function DeleteDocumentModal({
               <FileText className="h-5 w-5 text-muted-foreground" />
               <span className="font-medium">Document à supprimer:</span>
             </div>
-            
+
             <div className="space-y-2 ml-7">
               <div>
                 <span className="text-sm font-medium">ID:</span>
                 <span className="ml-2 font-mono">#{document.id}</span>
               </div>
-              
+
               <div>
                 <span className="text-sm font-medium">Type:</span>
                 <span className="ml-2">
                   {template?.name || "Modèle inconnu"}
                 </span>
               </div>
-              
+
               <div>
                 <span className="text-sm font-medium">Patient (CIN):</span>
                 <span className="ml-2 font-mono">{document.CIN}</span>
               </div>
-              
+
               <div>
                 <span className="text-sm font-medium">Créé par:</span>
                 <span className="ml-2">{document.Cree_par}</span>
               </div>
-              
+
               <div>
                 <span className="text-sm font-medium">Date de création:</span>
                 <span className="ml-2">{formatDate(document.created_at)}</span>
               </div>
-              
+
               <div>
                 <span className="text-sm font-medium">Données:</span>
                 <span className="ml-2">
@@ -138,11 +139,7 @@ export default function DeleteDocumentModal({
         </div>
 
         <DialogFooter className="gap-2">
-          <Button
-            variant="outline"
-            onClick={onClose}
-            disabled={isLoading}
-          >
+          <Button variant="outline" onClick={onClose} disabled={isLoading}>
             Annuler
           </Button>
           <Button

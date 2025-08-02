@@ -89,7 +89,9 @@ export default function PatientDocuments() {
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
+  const [selectedDocument, setSelectedDocument] = useState<Document | null>(
+    null,
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { toast } = useToast();
@@ -126,11 +128,11 @@ export default function PatientDocuments() {
 
   const loadPatientData = async () => {
     if (!cin) return;
-    
+
     try {
       setIsPatientLoading(true);
       const clients = await ClientsService.getAll();
-      const foundPatient = clients.find(client => client.CIN === cin);
+      const foundPatient = clients.find((client) => client.CIN === cin);
       setPatient(foundPatient || null);
     } catch (error) {
       toast({
@@ -145,7 +147,7 @@ export default function PatientDocuments() {
 
   const loadDocuments = async () => {
     if (!cin) return;
-    
+
     try {
       setIsLoading(true);
       const data = await DocumentsService.getByPatientCIN(cin);
@@ -173,16 +175,19 @@ export default function PatientDocuments() {
   // Filter and search logic
   const filteredDocuments = useMemo(() => {
     return documents.filter((document) => {
-      const template = templates.find(t => t.id === document.template_id);
+      const template = templates.find((t) => t.id === document.template_id);
       const templateName = template?.name || "";
-      
+
       const matchesSearch =
         templateName.toLowerCase().includes(searchTerm.toLowerCase()) ||
         document.Cree_par.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        JSON.stringify(document.data_json).toLowerCase().includes(searchTerm.toLowerCase());
+        JSON.stringify(document.data_json)
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase());
 
       const matchesTemplate =
-        templateFilter === "tous" || document.template_id.toString() === templateFilter;
+        templateFilter === "tous" ||
+        document.template_id.toString() === templateFilter;
 
       const matchesCreator =
         creatorFilter === "tous" || document.Cree_par === creatorFilter;
@@ -293,10 +298,10 @@ export default function PatientDocuments() {
   };
 
   const generatePDF = async (document: Document) => {
-    const template = templates.find(t => t.id === document.template_id);
+    const template = templates.find((t) => t.id === document.template_id);
 
     // Create a new window for PDF generation
-    const printWindow = window.open('', '_blank');
+    const printWindow = window.open("", "_blank");
     if (!printWindow) {
       toast({
         title: "Erreur",
@@ -311,7 +316,7 @@ export default function PatientDocuments() {
       <!DOCTYPE html>
       <html>
         <head>
-          <title>Document ${document.id} - ${template?.name || 'Document'}</title>
+          <title>Document ${document.id} - ${template?.name || "Document"}</title>
           <style>
             body {
               font-family: Arial, sans-serif;
@@ -380,7 +385,7 @@ export default function PatientDocuments() {
         </head>
         <body>
           <div class="header">
-            <div class="title">${template?.name || 'Document Médical'}</div>
+            <div class="title">${template?.name || "Document Médical"}</div>
             <div class="subtitle">Document ID: ${document.id}</div>
           </div>
 
@@ -388,7 +393,7 @@ export default function PatientDocuments() {
             <h3>Informations Patient</h3>
             <div class="field">
               <span class="field-label">Nom:</span>
-              <span class="field-value">${patient?.prenom || ''} ${patient?.nom || ''}</span>
+              <span class="field-value">${patient?.prenom || ""} ${patient?.nom || ""}</span>
             </div>
             <div class="field">
               <span class="field-label">CIN:</span>
@@ -404,37 +409,49 @@ export default function PatientDocuments() {
             </div>
           </div>
 
-          ${template ? template.sections_json.sections.map(section => `
+          ${
+            template
+              ? template.sections_json.sections
+                  .map(
+                    (section) => `
             <div class="section">
               <div class="section-title">${section.title}</div>
-              ${section.fields.map(field => {
-                const value = document.data_json[field.name];
-                let displayValue = value;
+              ${section.fields
+                .map((field) => {
+                  const value = document.data_json[field.name];
+                  let displayValue = value;
 
-                if (value === null || value === undefined || value === '') {
-                  displayValue = 'Non renseigné';
-                } else if (field.type === 'checkbox') {
-                  displayValue = value ? 'Oui' : 'Non';
-                } else if (field.type === 'date' && value) {
-                  try {
-                    displayValue = new Date(value).toLocaleDateString('fr-FR');
-                  } catch (e) {
-                    displayValue = value;
+                  if (value === null || value === undefined || value === "") {
+                    displayValue = "Non renseigné";
+                  } else if (field.type === "checkbox") {
+                    displayValue = value ? "Oui" : "Non";
+                  } else if (field.type === "date" && value) {
+                    try {
+                      displayValue = new Date(value).toLocaleDateString(
+                        "fr-FR",
+                      );
+                    } catch (e) {
+                      displayValue = value;
+                    }
                   }
-                }
 
-                return `
+                  return `
                   <div class="field">
                     <span class="field-label">${field.name}:</span>
                     <span class="field-value">${displayValue}</span>
                   </div>
                 `;
-              }).join('')}
+                })
+                .join("")}
             </div>
-          `).join('') : ''}
+          `,
+                  )
+                  .join("")
+              : ""
+          }
 
           <div class="footer">
-            <p>Document généré le ${new Date().toLocaleDateString('fr-FR')} à ${new Date().toLocaleTimeString('fr-FR')}</p>
+            <p>Document généré le ${new Date().toLocaleDateString("fr-FR")} à ${new Date().toLocaleTimeString("fr-FR")}</p>
             <p>Système de Gestion Médicale - Document confidentiel</p>
           </div>
         </body>
@@ -503,7 +520,7 @@ export default function PatientDocuments() {
   };
 
   const getTemplateName = (templateId: number) => {
-    const template = templates.find(t => t.id === templateId);
+    const template = templates.find((t) => t.id === templateId);
     return template?.name || "Modèle inconnu";
   };
 
@@ -540,14 +557,18 @@ export default function PatientDocuments() {
                 Retour aux patients
               </Button>
               <div>
-                <h1 className="text-3xl font-bold tracking-tight">Documents Patient</h1>
+                <h1 className="text-3xl font-bold tracking-tight">
+                  Documents Patient
+                </h1>
                 <p className="text-muted-foreground">
-                  {patient ? `${patient.prenom} ${patient.nom} (${patient.CIN})` : `CIN: ${cin}`}
+                  {patient
+                    ? `${patient.prenom} ${patient.nom} (${patient.CIN})`
+                    : `CIN: ${cin}`}
                 </p>
               </div>
             </div>
-            <Button 
-              className="gap-2" 
+            <Button
+              className="gap-2"
               onClick={openCreateModal}
               disabled={!patient}
             >
@@ -575,14 +596,20 @@ export default function PatientDocuments() {
                 </div>
 
                 {/* Template Filter */}
-                <Select value={templateFilter} onValueChange={setTemplateFilter}>
+                <Select
+                  value={templateFilter}
+                  onValueChange={setTemplateFilter}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Type de document" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="tous">Tous les types</SelectItem>
                     {templates.map((template) => (
-                      <SelectItem key={template.id} value={template.id.toString()}>
+                      <SelectItem
+                        key={template.id}
+                        value={template.id.toString()}
+                      >
                         {template.name}
                       </SelectItem>
                     ))}
@@ -653,12 +680,17 @@ export default function PatientDocuments() {
                     <TableBody>
                       {filteredDocuments.length > 0 ? (
                         filteredDocuments.map((document) => (
-                          <TableRow key={document.id} className="hover:bg-muted/50">
+                          <TableRow
+                            key={document.id}
+                            className="hover:bg-muted/50"
+                          >
                             <TableCell>
                               <div className="flex items-center gap-2">
                                 <FileText className="h-4 w-4 text-primary" />
                                 <div>
-                                  <div className="font-medium">{getTemplateName(document.template_id)}</div>
+                                  <div className="font-medium">
+                                    {getTemplateName(document.template_id)}
+                                  </div>
                                   <div className="text-sm text-muted-foreground">
                                     ID: {document.id}
                                   </div>
@@ -666,11 +698,16 @@ export default function PatientDocuments() {
                               </div>
                             </TableCell>
                             <TableCell>{document.Cree_par}</TableCell>
-                            <TableCell>{formatDate(document.created_at)}</TableCell>
+                            <TableCell>
+                              {formatDate(document.created_at)}
+                            </TableCell>
                             <TableCell className="text-right">
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                  <Button variant="ghost" className="h-8 w-8 p-0">
+                                  <Button
+                                    variant="ghost"
+                                    className="h-8 w-8 p-0"
+                                  >
                                     <ChevronDown className="h-4 w-4" />
                                   </Button>
                                 </DropdownMenuTrigger>
@@ -936,15 +973,14 @@ export default function PatientDocuments() {
                   <Separator />
 
                   <div className="text-xs text-muted-foreground">
-                    Patient créé par {patient.Cree_par} le {formatDate(patient.created_at)}
+                    Patient créé par {patient.Cree_par} le{" "}
+                    {formatDate(patient.created_at)}
                   </div>
                 </div>
               ) : (
                 <div className="text-center py-6">
                   <AlertTriangle className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-                  <p className="text-muted-foreground">
-                    Patient non trouvé
-                  </p>
+                  <p className="text-muted-foreground">Patient non trouvé</p>
                 </div>
               )}
             </CardContent>
@@ -965,10 +1001,15 @@ export default function PatientDocuments() {
                   <Badge variant="secondary">{documents.length}</Badge>
                 </div>
                 {templates.map((template) => {
-                  const count = documents.filter(d => d.template_id === template.id).length;
+                  const count = documents.filter(
+                    (d) => d.template_id === template.id,
+                  ).length;
                   if (count > 0) {
                     return (
-                      <div key={template.id} className="flex justify-between text-sm">
+                      <div
+                        key={template.id}
+                        className="flex justify-between text-sm"
+                      >
                         <span className="truncate">{template.name}:</span>
                         <Badge variant="outline">{count}</Badge>
                       </div>
@@ -985,7 +1026,9 @@ export default function PatientDocuments() {
         <DocumentFormModal
           isOpen={isFormModalOpen}
           onClose={closeFormModal}
-          onSubmit={selectedDocument ? handleUpdateDocument : handleCreateDocument}
+          onSubmit={
+            selectedDocument ? handleUpdateDocument : handleCreateDocument
+          }
           document={selectedDocument}
           patient={patient}
           templates={templates}
@@ -996,7 +1039,11 @@ export default function PatientDocuments() {
           isOpen={isDetailsModalOpen}
           onClose={closeDetailsModal}
           document={selectedDocument}
-          template={selectedDocument ? templates.find(t => t.id === selectedDocument.template_id) : null}
+          template={
+            selectedDocument
+              ? templates.find((t) => t.id === selectedDocument.template_id)
+              : null
+          }
           onEdit={openEditModal}
           onDelete={openDeleteModal}
         />
@@ -1006,7 +1053,11 @@ export default function PatientDocuments() {
           onClose={closeDeleteModal}
           onConfirm={handleDeleteDocument}
           document={selectedDocument}
-          template={selectedDocument ? templates.find(t => t.id === selectedDocument.template_id) : null}
+          template={
+            selectedDocument
+              ? templates.find((t) => t.id === selectedDocument.template_id)
+              : null
+          }
           isLoading={isSubmitting}
         />
       </div>

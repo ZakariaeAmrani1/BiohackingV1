@@ -64,7 +64,9 @@ export default function DocumentTemplateFormModal({
   template,
   isLoading = false,
 }: DocumentTemplateFormModalProps) {
-  const [formData, setFormData] = useState<DocumentTemplateFormData>(createEmptyTemplate());
+  const [formData, setFormData] = useState<DocumentTemplateFormData>(
+    createEmptyTemplate(),
+  );
   const [errors, setErrors] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -86,16 +88,26 @@ export default function DocumentTemplateFormModal({
     setErrors([]);
   }, [template, isOpen]);
 
-  const handleInputChange = (field: keyof DocumentTemplateFormData, value: any) => {
+  const handleInputChange = (
+    field: keyof DocumentTemplateFormData,
+    value: any,
+  ) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     if (errors.length > 0) {
       setErrors([]);
     }
   };
 
-  const handleSectionChange = (sectionIndex: number, field: keyof DocumentSection, value: any) => {
+  const handleSectionChange = (
+    sectionIndex: number,
+    field: keyof DocumentSection,
+    value: any,
+  ) => {
     const newSections = [...formData.sections_json.sections];
-    newSections[sectionIndex] = { ...newSections[sectionIndex], [field]: value };
+    newSections[sectionIndex] = {
+      ...newSections[sectionIndex],
+      [field]: value,
+    };
     handleInputChange("sections_json", { sections: newSections });
   };
 
@@ -103,22 +115,30 @@ export default function DocumentTemplateFormModal({
     sectionIndex: number,
     fieldIndex: number,
     field: keyof DocumentField,
-    value: any
+    value: any,
   ) => {
     const newSections = [...formData.sections_json.sections];
     const newFields = [...newSections[sectionIndex].fields];
     newFields[fieldIndex] = { ...newFields[fieldIndex], [field]: value };
-    newSections[sectionIndex] = { ...newSections[sectionIndex], fields: newFields };
+    newSections[sectionIndex] = {
+      ...newSections[sectionIndex],
+      fields: newFields,
+    };
     handleInputChange("sections_json", { sections: newSections });
   };
 
   const addSection = () => {
-    const newSections = [...formData.sections_json.sections, createEmptySection()];
+    const newSections = [
+      ...formData.sections_json.sections,
+      createEmptySection(),
+    ];
     handleInputChange("sections_json", { sections: newSections });
   };
 
   const removeSection = (sectionIndex: number) => {
-    const newSections = formData.sections_json.sections.filter((_, index) => index !== sectionIndex);
+    const newSections = formData.sections_json.sections.filter(
+      (_, index) => index !== sectionIndex,
+    );
     handleInputChange("sections_json", { sections: newSections });
   };
 
@@ -131,25 +151,39 @@ export default function DocumentTemplateFormModal({
   const removeField = (sectionIndex: number, fieldIndex: number) => {
     const newSections = [...formData.sections_json.sections];
     newSections[sectionIndex].fields = newSections[sectionIndex].fields.filter(
-      (_, index) => index !== fieldIndex
+      (_, index) => index !== fieldIndex,
     );
     handleInputChange("sections_json", { sections: newSections });
   };
 
-  const handleFieldOptionsChange = (sectionIndex: number, fieldIndex: number, options: string) => {
-    const optionsArray = options.split('\n').map(option => option.trim()).filter(option => option);
+  const handleFieldOptionsChange = (
+    sectionIndex: number,
+    fieldIndex: number,
+    options: string,
+  ) => {
+    const optionsArray = options
+      .split("\n")
+      .map((option) => option.trim())
+      .filter((option) => option);
     handleFieldChange(sectionIndex, fieldIndex, "options", optionsArray);
   };
 
   const getFieldIcon = (type: string) => {
     switch (type) {
-      case "text": return <Type className="h-4 w-4" />;
-      case "number": return <Hash className="h-4 w-4" />;
-      case "textarea": return <AlignLeft className="h-4 w-4" />;
-      case "date": return <Calendar className="h-4 w-4" />;
-      case "select": return <List className="h-4 w-4" />;
-      case "checkbox": return <CheckSquare className="h-4 w-4" />;
-      default: return <Type className="h-4 w-4" />;
+      case "text":
+        return <Type className="h-4 w-4" />;
+      case "number":
+        return <Hash className="h-4 w-4" />;
+      case "textarea":
+        return <AlignLeft className="h-4 w-4" />;
+      case "date":
+        return <Calendar className="h-4 w-4" />;
+      case "select":
+        return <List className="h-4 w-4" />;
+      case "checkbox":
+        return <CheckSquare className="h-4 w-4" />;
+      default:
+        return <Type className="h-4 w-4" />;
     }
   };
 
@@ -211,7 +245,7 @@ export default function DocumentTemplateFormModal({
           {/* Basic Information */}
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">Informations de base</h3>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="name">Nom du modèle</Label>
@@ -228,7 +262,9 @@ export default function DocumentTemplateFormModal({
                 <Label htmlFor="Cree_par">Créé par</Label>
                 <Select
                   value={formData.Cree_par}
-                  onValueChange={(value) => handleInputChange("Cree_par", value)}
+                  onValueChange={(value) =>
+                    handleInputChange("Cree_par", value)
+                  }
                   disabled={isSubmitting}
                 >
                   <SelectTrigger>
@@ -293,7 +329,13 @@ export default function DocumentTemplateFormModal({
                     <Label>Titre de la section</Label>
                     <Input
                       value={section.title}
-                      onChange={(e) => handleSectionChange(sectionIndex, "title", e.target.value)}
+                      onChange={(e) =>
+                        handleSectionChange(
+                          sectionIndex,
+                          "title",
+                          e.target.value,
+                        )
+                      }
                       placeholder="Ex: Informations générales"
                       disabled={isSubmitting}
                     />
@@ -317,7 +359,10 @@ export default function DocumentTemplateFormModal({
                     </div>
 
                     {section.fields.map((field, fieldIndex) => (
-                      <div key={fieldIndex} className="p-3 border rounded-lg space-y-3">
+                      <div
+                        key={fieldIndex}
+                        className="p-3 border rounded-lg space-y-3"
+                      >
                         <div className="flex items-center justify-between">
                           <Badge variant="secondary" className="gap-1">
                             {getFieldIcon(field.type)}
@@ -328,7 +373,9 @@ export default function DocumentTemplateFormModal({
                               type="button"
                               variant="ghost"
                               size="sm"
-                              onClick={() => removeField(sectionIndex, fieldIndex)}
+                              onClick={() =>
+                                removeField(sectionIndex, fieldIndex)
+                              }
                               disabled={isSubmitting}
                               className="text-red-600 hover:text-red-700 h-6 w-6 p-0"
                             >
@@ -343,7 +390,14 @@ export default function DocumentTemplateFormModal({
                             <Label className="text-xs">Nom du champ</Label>
                             <Input
                               value={field.name}
-                              onChange={(e) => handleFieldChange(sectionIndex, fieldIndex, "name", e.target.value)}
+                              onChange={(e) =>
+                                handleFieldChange(
+                                  sectionIndex,
+                                  fieldIndex,
+                                  "name",
+                                  e.target.value,
+                                )
+                              }
                               placeholder="Ex: Nom"
                               disabled={isSubmitting}
                               className="h-8 text-sm"
@@ -355,7 +409,14 @@ export default function DocumentTemplateFormModal({
                             <Label className="text-xs">Type</Label>
                             <Select
                               value={field.type}
-                              onValueChange={(value) => handleFieldChange(sectionIndex, fieldIndex, "type", value)}
+                              onValueChange={(value) =>
+                                handleFieldChange(
+                                  sectionIndex,
+                                  fieldIndex,
+                                  "type",
+                                  value,
+                                )
+                              }
                               disabled={isSubmitting}
                             >
                               <SelectTrigger className="h-8 text-sm">
@@ -363,7 +424,10 @@ export default function DocumentTemplateFormModal({
                               </SelectTrigger>
                               <SelectContent>
                                 {fieldTypes.map((type) => (
-                                  <SelectItem key={type.value} value={type.value}>
+                                  <SelectItem
+                                    key={type.value}
+                                    value={type.value}
+                                  >
                                     <div className="flex items-center gap-2">
                                       {getFieldIcon(type.value)}
                                       {type.label}
@@ -380,8 +444,13 @@ export default function DocumentTemplateFormModal({
                             <div className="flex items-center space-x-2 h-8">
                               <Checkbox
                                 checked={field.required || false}
-                                onCheckedChange={(checked) => 
-                                  handleFieldChange(sectionIndex, fieldIndex, "required", checked)
+                                onCheckedChange={(checked) =>
+                                  handleFieldChange(
+                                    sectionIndex,
+                                    fieldIndex,
+                                    "required",
+                                    checked,
+                                  )
                                 }
                                 disabled={isSubmitting}
                               />
@@ -393,10 +462,18 @@ export default function DocumentTemplateFormModal({
                         {/* Options for select fields */}
                         {field.type === "select" && (
                           <div className="space-y-1">
-                            <Label className="text-xs">Options (une par ligne)</Label>
+                            <Label className="text-xs">
+                              Options (une par ligne)
+                            </Label>
                             <Textarea
-                              value={(field.options || []).join('\n')}
-                              onChange={(e) => handleFieldOptionsChange(sectionIndex, fieldIndex, e.target.value)}
+                              value={(field.options || []).join("\n")}
+                              onChange={(e) =>
+                                handleFieldOptionsChange(
+                                  sectionIndex,
+                                  fieldIndex,
+                                  e.target.value,
+                                )
+                              }
                               placeholder="Option 1&#10;Option 2&#10;Option 3"
                               disabled={isSubmitting}
                               rows={3}

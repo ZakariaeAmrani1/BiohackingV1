@@ -79,9 +79,7 @@ export default function Soins() {
   const { toast } = useToast();
 
   // Get unique creators for filter dropdown
-  const creators = Array.from(
-    new Set(soins.map((soin) => soin.Cree_par)),
-  );
+  const creators = Array.from(new Set(soins.map((soin) => soin.Cree_par)));
 
   // Load soins on component mount
   useEffect(() => {
@@ -129,8 +127,7 @@ export default function Soins() {
       const matchesCreator =
         creatorFilter === "tous" || soin.Cree_par === creatorFilter;
 
-      const matchesType =
-        typeFilter === "tous" || soin.Type === typeFilter;
+      const matchesType = typeFilter === "tous" || soin.Type === typeFilter;
 
       return matchesSearch && matchesCreator && matchesType;
     });
@@ -309,22 +306,24 @@ export default function Soins() {
               <Stethoscope className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{statistics.totalServices}</div>
+              <div className="text-2xl font-bold">
+                {statistics.totalServices}
+              </div>
               <p className="text-xs text-muted-foreground">
                 Services disponibles
               </p>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Prix Moyen
-              </CardTitle>
+              <CardTitle className="text-sm font-medium">Prix Moyen</CardTitle>
               <Euro className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{formatPrice(statistics.averagePrice)}</div>
+              <div className="text-2xl font-bold">
+                {formatPrice(statistics.averagePrice)}
+              </div>
               <p className="text-xs text-muted-foreground">
                 Prix moyen par service
               </p>
@@ -339,7 +338,9 @@ export default function Soins() {
               <TrendingUp className="h-4 w-4 text-green-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-green-600">{formatPrice(statistics.highestPrice)}</div>
+              <div className="text-2xl font-bold text-green-600">
+                {formatPrice(statistics.highestPrice)}
+              </div>
               <p className="text-xs text-muted-foreground">
                 Service le plus cher
               </p>
@@ -354,7 +355,9 @@ export default function Soins() {
               <BarChart3 className="h-4 w-4 text-blue-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-blue-600">{formatPrice(statistics.totalRevenue)}</div>
+              <div className="text-2xl font-bold text-blue-600">
+                {formatPrice(statistics.totalRevenue)}
+              </div>
               <p className="text-xs text-muted-foreground">
                 Si tous services utilisés 1x
               </p>
@@ -476,7 +479,9 @@ export default function Soins() {
                             </div>
                           </TableCell>
                           <TableCell>
-                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getSoinTypeColor(soin.Type)}`}>
+                            <span
+                              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getSoinTypeColor(soin.Type)}`}
+                            >
                               {soin.Type}
                             </span>
                           </TableCell>
@@ -557,14 +562,18 @@ export default function Soins() {
                             ID: {soin.id}
                           </p>
                         </div>
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getSoinTypeColor(soin.Type)}`}>
+                        <span
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getSoinTypeColor(soin.Type)}`}
+                        >
                           {soin.Type}
                         </span>
                       </div>
                     </CardHeader>
                     <CardContent className="space-y-4">
                       <div>
-                        <div className="text-sm text-muted-foreground">Prix</div>
+                        <div className="text-sm text-muted-foreground">
+                          Prix
+                        </div>
                         <div className="font-mono text-2xl font-bold">
                           {formatPrice(soin.prix)}
                         </div>
@@ -631,9 +640,7 @@ export default function Soins() {
                   <div className="flex flex-col items-center gap-4">
                     <Stethoscope className="h-12 w-12 text-muted-foreground" />
                     <div>
-                      <h3 className="text-lg font-medium">
-                        Aucun soin trouvé
-                      </h3>
+                      <h3 className="text-lg font-medium">Aucun soin trouvé</h3>
                       <p className="text-muted-foreground">
                         Aucun soin ne correspond aux critères sélectionnés
                       </p>

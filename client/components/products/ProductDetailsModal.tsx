@@ -1,12 +1,4 @@
-import {
-  Package,
-  User,
-  Clock,
-  Edit,
-  Trash2,
-  Euro,
-  Hash,
-} from "lucide-react";
+import { Package, User, Clock, Edit, Trash2, Euro, Hash } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -73,13 +65,9 @@ export default function ProductDetailsModal({
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold">{product.Nom}</h3>
-              <Badge variant={stockStatus.variant}>
-                {stockStatus.status}
-              </Badge>
+              <Badge variant={stockStatus.variant}>{stockStatus.status}</Badge>
             </div>
-            <p className="text-sm text-muted-foreground">
-              ID: {product.id}
-            </p>
+            <p className="text-sm text-muted-foreground">ID: {product.id}</p>
           </div>
 
           <Separator />
@@ -87,7 +75,7 @@ export default function ProductDetailsModal({
           {/* Product Information */}
           <div className="space-y-4">
             <h4 className="font-medium">Informations produit</h4>
-            
+
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1">
                 <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
@@ -98,15 +86,13 @@ export default function ProductDetailsModal({
                   {formatPrice(product.prix)}
                 </div>
               </div>
-              
+
               <div className="space-y-1">
                 <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
                   <Hash className="h-4 w-4" />
                   Stock disponible
                 </div>
-                <div className="text-xl font-bold">
-                  {product.stock} unités
-                </div>
+                <div className="text-xl font-bold">{product.stock} unités</div>
               </div>
             </div>
 
@@ -114,9 +100,7 @@ export default function ProductDetailsModal({
               <div className="text-sm font-medium text-muted-foreground mb-1">
                 Valeur totale du stock
               </div>
-              <div className="text-lg font-bold">
-                {formatPrice(totalValue)}
-              </div>
+              <div className="text-lg font-bold">{formatPrice(totalValue)}</div>
               <div className="text-xs text-muted-foreground">
                 {product.prix} × {product.stock} unités
               </div>
@@ -128,14 +112,14 @@ export default function ProductDetailsModal({
           {/* Administrative Information */}
           <div className="space-y-3">
             <h4 className="font-medium">Informations administratives</h4>
-            
+
             <div className="space-y-2">
               <div className="flex items-center gap-2 text-sm">
                 <User className="h-4 w-4 text-muted-foreground" />
                 <span className="font-medium">Créé par:</span>
                 <span>{product.Cree_par}</span>
               </div>
-              
+
               <div className="flex items-center gap-2 text-sm">
                 <Clock className="h-4 w-4 text-muted-foreground" />
                 <span className="font-medium">Date de création:</span>
@@ -150,7 +134,8 @@ export default function ProductDetailsModal({
             <div className="space-y-2 text-sm">
               {product.stock === 0 && (
                 <div className="text-red-600">
-                  ⚠️ Produit en rupture de stock - Réapprovisionnement urgent requis
+                  ⚠️ Produit en rupture de stock - Réapprovisionnement urgent
+                  requis
                 </div>
               )}
               {product.stock > 0 && product.stock <= 10 && (
@@ -159,15 +144,12 @@ export default function ProductDetailsModal({
                 </div>
               )}
               {product.stock > 10 && (
-                <div className="text-green-600">
-                  ✅ Stock suffisant
-                </div>
+                <div className="text-green-600">✅ Stock suffisant</div>
               )}
-              
+
               <div className="text-muted-foreground">
                 • Seuil d'alerte: 10 unités
-                <br />
-                • Valeur par unité: {formatPrice(product.prix)}
+                <br />• Valeur par unité: {formatPrice(product.prix)}
               </div>
             </div>
           </div>

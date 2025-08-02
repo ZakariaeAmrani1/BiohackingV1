@@ -20,18 +20,18 @@ let mockProducts: Product[] = [
   {
     id: 1,
     Nom: "Paracétamol 500mg",
-    prix: 2.50,
+    prix: 2.5,
     stock: 150,
     Cree_par: "Dr. Smith",
-    created_at: "2024-01-01T10:30:00"
+    created_at: "2024-01-01T10:30:00",
   },
   {
     id: 2,
     Nom: "Bandages élastiques",
-    prix: 8.90,
+    prix: 8.9,
     stock: 45,
     Cree_par: "Dr. Martin",
-    created_at: "2024-01-02T14:20:00"
+    created_at: "2024-01-02T14:20:00",
   },
   {
     id: 3,
@@ -39,48 +39,48 @@ let mockProducts: Product[] = [
     prix: 15.75,
     stock: 25,
     Cree_par: "Dr. Smith",
-    created_at: "2024-01-03T09:15:00"
+    created_at: "2024-01-03T09:15:00",
   },
   {
     id: 4,
     Nom: "Thermomètre digital",
-    prix: 12.30,
+    prix: 12.3,
     stock: 8,
     Cree_par: "Dr. Dubois",
-    created_at: "2024-01-04T16:45:00"
+    created_at: "2024-01-04T16:45:00",
   },
   {
     id: 5,
     Nom: "Gants latex (boîte de 100)",
-    prix: 18.50,
+    prix: 18.5,
     stock: 35,
     Cree_par: "Dr. Martin",
-    created_at: "2024-01-05T11:30:00"
+    created_at: "2024-01-05T11:30:00",
   },
   {
     id: 6,
     Nom: "Compresses stériles",
-    prix: 6.20,
+    prix: 6.2,
     stock: 75,
     Cree_par: "Dr. Smith",
-    created_at: "2024-01-06T13:20:00"
+    created_at: "2024-01-06T13:20:00",
   },
   {
     id: 7,
     Nom: "Désinfectant 500ml",
-    prix: 4.80,
+    prix: 4.8,
     stock: 22,
     Cree_par: "Dr. Dubois",
-    created_at: "2024-01-07T08:10:00"
+    created_at: "2024-01-07T08:10:00",
   },
   {
     id: 8,
     Nom: "Masques chirurgicaux (boîte de 50)",
-    prix: 12.90,
+    prix: 12.9,
     stock: 65,
     Cree_par: "Dr. Martin",
-    created_at: "2024-01-08T15:40:00"
-  }
+    created_at: "2024-01-08T15:40:00",
+  },
 ];
 
 // Simulate API delay
@@ -152,18 +152,21 @@ export class ProductsService {
     return mockProducts.filter(
       (product) =>
         product.Nom.toLowerCase().includes(lowerQuery) ||
-        product.Cree_par.toLowerCase().includes(lowerQuery)
+        product.Cree_par.toLowerCase().includes(lowerQuery),
     );
   }
 
   // Get low stock products (stock <= threshold)
   static async getLowStock(threshold: number = 10): Promise<Product[]> {
     await delay(300);
-    return mockProducts.filter(product => product.stock <= threshold);
+    return mockProducts.filter((product) => product.stock <= threshold);
   }
 
   // Update stock
-  static async updateStock(id: number, newStock: number): Promise<Product | null> {
+  static async updateStock(
+    id: number,
+    newStock: number,
+  ): Promise<Product | null> {
     await delay(500);
 
     const index = mockProducts.findIndex((product) => product.id === id);
@@ -203,13 +206,18 @@ export const getAvailableDoctors = (): string[] => {
 };
 
 export const formatPrice = (price: number): string => {
-  return new Intl.NumberFormat('fr-FR', {
-    style: 'currency',
-    currency: 'EUR'
+  return new Intl.NumberFormat("fr-FR", {
+    style: "currency",
+    currency: "EUR",
   }).format(price);
 };
 
-export const getStockStatus = (stock: number): { status: string; variant: "default" | "secondary" | "destructive" | "outline" } => {
+export const getStockStatus = (
+  stock: number,
+): {
+  status: string;
+  variant: "default" | "secondary" | "destructive" | "outline";
+} => {
   if (stock === 0) {
     return { status: "Rupture", variant: "destructive" };
   } else if (stock <= 10) {
@@ -224,21 +232,24 @@ export const createEmptyProduct = (): ProductFormData => {
     Nom: "",
     prix: 0,
     stock: 0,
-    Cree_par: ""
+    Cree_par: "",
   };
 };
 
 // Calculate total inventory value
 export const calculateTotalValue = (products: Product[]): number => {
-  return products.reduce((total, product) => total + (product.prix * product.stock), 0);
+  return products.reduce(
+    (total, product) => total + product.prix * product.stock,
+    0,
+  );
 };
 
 // Get stock statistics
 export const getStockStatistics = (products: Product[]) => {
   const totalProducts = products.length;
-  const outOfStock = products.filter(p => p.stock === 0).length;
-  const lowStock = products.filter(p => p.stock > 0 && p.stock <= 10).length;
-  const inStock = products.filter(p => p.stock > 10).length;
+  const outOfStock = products.filter((p) => p.stock === 0).length;
+  const lowStock = products.filter((p) => p.stock > 0 && p.stock <= 10).length;
+  const inStock = products.filter((p) => p.stock > 10).length;
   const totalValue = calculateTotalValue(products);
 
   return {
@@ -246,6 +257,6 @@ export const getStockStatistics = (products: Product[]) => {
     outOfStock,
     lowStock,
     inStock,
-    totalValue
+    totalValue,
   };
 };

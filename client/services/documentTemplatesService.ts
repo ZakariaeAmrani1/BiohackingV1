@@ -41,8 +41,8 @@ let mockTemplates: DocumentTemplate[] = [
           fields: [
             { name: "Date de consultation", type: "date", required: true },
             { name: "Motif de consultation", type: "textarea", required: true },
-            { name: "Durée (minutes)", type: "number", required: false }
-          ]
+            { name: "Durée (minutes)", type: "number", required: false },
+          ],
         },
         {
           title: "Examen Clinique",
@@ -50,21 +50,21 @@ let mockTemplates: DocumentTemplate[] = [
             { name: "Tension artérielle", type: "text", required: false },
             { name: "Poids (kg)", type: "number", required: false },
             { name: "Taille (cm)", type: "number", required: false },
-            { name: "Température (°C)", type: "number", required: false }
-          ]
+            { name: "Température (°C)", type: "number", required: false },
+          ],
         },
         {
           title: "Observations",
           fields: [
             { name: "Symptômes observés", type: "textarea", required: false },
             { name: "Diagnostic", type: "textarea", required: false },
-            { name: "Recommandations", type: "textarea", required: false }
-          ]
-        }
-      ]
+            { name: "Recommandations", type: "textarea", required: false },
+          ],
+        },
+      ],
     },
     Cree_par: "Dr. Smith",
-    created_at: "2024-01-01T10:30:00"
+    created_at: "2024-01-01T10:30:00",
   },
   {
     id: 2,
@@ -74,23 +74,43 @@ let mockTemplates: DocumentTemplate[] = [
         {
           title: "État Mental",
           fields: [
-            { name: "Niveau de stress", type: "select", required: true, options: ["Faible", "Modéré", "Élevé", "Très élevé"] },
-            { name: "Humeur générale", type: "select", required: true, options: ["Excellente", "Bonne", "Moyenne", "Mauvaise"] },
-            { name: "Troubles du sommeil", type: "checkbox", required: false }
-          ]
+            {
+              name: "Niveau de stress",
+              type: "select",
+              required: true,
+              options: ["Faible", "Modéré", "Élevé", "Très élevé"],
+            },
+            {
+              name: "Humeur générale",
+              type: "select",
+              required: true,
+              options: ["Excellente", "Bonne", "Moyenne", "Mauvaise"],
+            },
+            { name: "Troubles du sommeil", type: "checkbox", required: false },
+          ],
         },
         {
           title: "Évaluation Cognitive",
           fields: [
-            { name: "Concentration", type: "select", required: false, options: ["Excellente", "Bonne", "Moyenne", "Faible"] },
-            { name: "Mémoire", type: "select", required: false, options: ["Excellente", "Bonne", "Moyenne", "Faible"] },
-            { name: "Notes additionnelles", type: "textarea", required: false }
-          ]
-        }
-      ]
+            {
+              name: "Concentration",
+              type: "select",
+              required: false,
+              options: ["Excellente", "Bonne", "Moyenne", "Faible"],
+            },
+            {
+              name: "Mémoire",
+              type: "select",
+              required: false,
+              options: ["Excellente", "Bonne", "Moyenne", "Faible"],
+            },
+            { name: "Notes additionnelles", type: "textarea", required: false },
+          ],
+        },
+      ],
     },
     Cree_par: "Dr. Martin",
-    created_at: "2024-01-02T14:20:00"
+    created_at: "2024-01-02T14:20:00",
   },
   {
     id: 3,
@@ -102,23 +122,37 @@ let mockTemplates: DocumentTemplate[] = [
           fields: [
             { name: "Type d'intervention", type: "text", required: true },
             { name: "Date de l'opération", type: "date", required: true },
-            { name: "Chirurgien", type: "text", required: true }
-          ]
+            { name: "Chirurgien", type: "text", required: true },
+          ],
         },
         {
           title: "État de Guérison",
           fields: [
-            { name: "Niveau de douleur (1-10)", type: "number", required: false },
-            { name: "Cicatrisation", type: "select", required: false, options: ["Excellente", "Bonne", "Moyenne", "Problématique"] },
-            { name: "Mobilité", type: "select", required: false, options: ["Normale", "Limitée", "Très limitée", "Aucune"] },
-            { name: "Complications", type: "textarea", required: false }
-          ]
-        }
-      ]
+            {
+              name: "Niveau de douleur (1-10)",
+              type: "number",
+              required: false,
+            },
+            {
+              name: "Cicatrisation",
+              type: "select",
+              required: false,
+              options: ["Excellente", "Bonne", "Moyenne", "Problématique"],
+            },
+            {
+              name: "Mobilité",
+              type: "select",
+              required: false,
+              options: ["Normale", "Limitée", "Très limitée", "Aucune"],
+            },
+            { name: "Complications", type: "textarea", required: false },
+          ],
+        },
+      ],
     },
     Cree_par: "Dr. Dubois",
-    created_at: "2024-01-03T09:15:00"
-  }
+    created_at: "2024-01-03T09:15:00",
+  },
 ];
 
 // Simulate API delay
@@ -139,7 +173,9 @@ export class DocumentTemplatesService {
   }
 
   // Create new template
-  static async create(data: DocumentTemplateFormData): Promise<DocumentTemplate> {
+  static async create(
+    data: DocumentTemplateFormData,
+  ): Promise<DocumentTemplate> {
     await delay(800);
 
     const newTemplate: DocumentTemplate = {
@@ -190,13 +226,15 @@ export class DocumentTemplatesService {
     return mockTemplates.filter(
       (template) =>
         template.name.toLowerCase().includes(lowerQuery) ||
-        template.Cree_par.toLowerCase().includes(lowerQuery)
+        template.Cree_par.toLowerCase().includes(lowerQuery),
     );
   }
 }
 
 // Validation functions
-export const validateTemplateData = (data: DocumentTemplateFormData): string[] => {
+export const validateTemplateData = (
+  data: DocumentTemplateFormData,
+): string[] => {
   const errors: string[] = [];
 
   if (!data.name.trim()) {
@@ -207,28 +245,44 @@ export const validateTemplateData = (data: DocumentTemplateFormData): string[] =
     errors.push("Le créateur est obligatoire");
   }
 
-  if (!data.sections_json.sections || data.sections_json.sections.length === 0) {
+  if (
+    !data.sections_json.sections ||
+    data.sections_json.sections.length === 0
+  ) {
     errors.push("Au moins une section est requise");
   } else {
     data.sections_json.sections.forEach((section, sectionIndex) => {
       if (!section.title.trim()) {
-        errors.push(`Le titre de la section ${sectionIndex + 1} est obligatoire`);
+        errors.push(
+          `Le titre de la section ${sectionIndex + 1} est obligatoire`,
+        );
       }
 
       if (!section.fields || section.fields.length === 0) {
-        errors.push(`La section "${section.title}" doit contenir au moins un champ`);
+        errors.push(
+          `La section "${section.title}" doit contenir au moins un champ`,
+        );
       } else {
         section.fields.forEach((field, fieldIndex) => {
           if (!field.name.trim()) {
-            errors.push(`Le nom du champ ${fieldIndex + 1} dans "${section.title}" est obligatoire`);
-          }
-          
-          if (!field.type) {
-            errors.push(`Le type du champ "${field.name}" dans "${section.title}" est obligatoire`);
+            errors.push(
+              `Le nom du champ ${fieldIndex + 1} dans "${section.title}" est obligatoire`,
+            );
           }
 
-          if (field.type === "select" && (!field.options || field.options.length === 0)) {
-            errors.push(`Le champ "${field.name}" de type "select" doit avoir des options`);
+          if (!field.type) {
+            errors.push(
+              `Le type du champ "${field.name}" dans "${section.title}" est obligatoire`,
+            );
+          }
+
+          if (
+            field.type === "select" &&
+            (!field.options || field.options.length === 0)
+          ) {
+            errors.push(
+              `Le champ "${field.name}" de type "select" doit avoir des options`,
+            );
           }
         });
       }
@@ -250,7 +304,7 @@ export const getFieldTypes = (): Array<{ value: string; label: string }> => {
     { value: "textarea", label: "Zone de texte" },
     { value: "date", label: "Date" },
     { value: "select", label: "Liste déroulante" },
-    { value: "checkbox", label: "Case à cocher" }
+    { value: "checkbox", label: "Case à cocher" },
   ];
 };
 
@@ -265,13 +319,13 @@ export const createEmptyTemplate = (): DocumentTemplateFormData => {
             {
               name: "",
               type: "text",
-              required: false
-            }
-          ]
-        }
-      ]
+              required: false,
+            },
+          ],
+        },
+      ],
     },
-    Cree_par: ""
+    Cree_par: "",
   };
 };
 
@@ -282,9 +336,9 @@ export const createEmptySection = (): DocumentSection => {
       {
         name: "",
         type: "text",
-        required: false
-      }
-    ]
+        required: false,
+      },
+    ],
   };
 };
 
@@ -292,6 +346,6 @@ export const createEmptyField = (): DocumentField => {
   return {
     name: "",
     type: "text",
-    required: false
+    required: false,
   };
 };

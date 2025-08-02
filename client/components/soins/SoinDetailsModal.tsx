@@ -17,11 +17,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import {
-  Soin,
-  formatPrice,
-  getSoinTypeColor,
-} from "@/services/soinsService";
+import { Soin, formatPrice, getSoinTypeColor } from "@/services/soinsService";
 
 interface SoinDetailsModalProps {
   isOpen: boolean;
@@ -92,13 +88,13 @@ export default function SoinDetailsModal({
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold">{soin.Nom}</h3>
-              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getSoinTypeColor(soin.Type)}`}>
+              <span
+                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getSoinTypeColor(soin.Type)}`}
+              >
                 {soin.Type}
               </span>
             </div>
-            <p className="text-sm text-muted-foreground">
-              ID: {soin.id}
-            </p>
+            <p className="text-sm text-muted-foreground">ID: {soin.id}</p>
           </div>
 
           <Separator />
@@ -106,7 +102,7 @@ export default function SoinDetailsModal({
           {/* Service Information */}
           <div className="space-y-4">
             <h4 className="font-medium">Informations du service</h4>
-            
+
             <div className="space-y-3">
               <div className="flex items-center gap-2">
                 <Tag className="h-4 w-4 text-muted-foreground" />
@@ -134,8 +130,8 @@ export default function SoinDetailsModal({
                 Information tarifaire
               </div>
               <div className="text-xs text-muted-foreground">
-                Prix affiché hors taxes et frais supplémentaires éventuels.
-                Le tarif peut varier selon la complexité de l'intervention.
+                Prix affiché hors taxes et frais supplémentaires éventuels. Le
+                tarif peut varier selon la complexité de l'intervention.
               </div>
             </div>
           </div>
@@ -145,14 +141,14 @@ export default function SoinDetailsModal({
           {/* Administrative Information */}
           <div className="space-y-3">
             <h4 className="font-medium">Informations administratives</h4>
-            
+
             <div className="space-y-2">
               <div className="flex items-center gap-2 text-sm">
                 <User className="h-4 w-4 text-muted-foreground" />
                 <span className="font-medium">Créé par:</span>
                 <span>{soin.Cree_par}</span>
               </div>
-              
+
               <div className="flex items-center gap-2 text-sm">
                 <Clock className="h-4 w-4 text-muted-foreground" />
                 <span className="font-medium">Date de création:</span>
@@ -168,10 +164,10 @@ export default function SoinDetailsModal({
               <div className="text-muted-foreground">
                 {getTypeDescription(soin.Type)}
               </div>
-              
+
               <div className="flex items-center gap-4 text-xs text-muted-foreground">
                 <span>• Catégorie: {soin.Type}</span>
-                <span>• Code: {soin.id.toString().padStart(4, '0')}</span>
+                <span>• Code: {soin.id.toString().padStart(4, "0")}</span>
               </div>
             </div>
           </div>

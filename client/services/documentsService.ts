@@ -30,11 +30,12 @@ let mockDocuments: Document[] = [
       "Taille (cm)": 175,
       "Température (°C)": 36.5,
       "Symptômes observés": "Aucun symptôme particulier observé",
-      "Diagnostic": "État de santé général bon",
-      "Recommandations": "Maintenir un mode de vie sain, prochain contrôle dans 6 mois"
+      Diagnostic: "État de santé général bon",
+      Recommandations:
+        "Maintenir un mode de vie sain, prochain contrôle dans 6 mois",
     },
     Cree_par: "Dr. Smith",
-    created_at: "2024-01-15T10:30:00"
+    created_at: "2024-01-15T10:30:00",
   },
   {
     id: 2,
@@ -44,12 +45,13 @@ let mockDocuments: Document[] = [
       "Niveau de stress": "Modéré",
       "Humeur générale": "Bonne",
       "Troubles du sommeil": false,
-      "Concentration": "Bonne",
-      "Mémoire": "Excellente",
-      "Notes additionnelles": "Patient montre des signes de fatigue liés au travail"
+      Concentration: "Bonne",
+      Mémoire: "Excellente",
+      "Notes additionnelles":
+        "Patient montre des signes de fatigue liés au travail",
     },
     Cree_par: "Dr. Martin",
-    created_at: "2024-01-20T14:20:00"
+    created_at: "2024-01-20T14:20:00",
   },
   {
     id: 3,
@@ -64,11 +66,11 @@ let mockDocuments: Document[] = [
       "Taille (cm)": 168,
       "Température (°C)": 36.2,
       "Symptômes observés": "Légère douleur au point d'injection",
-      "Diagnostic": "Réaction normale post-vaccination",
-      "Recommandations": "Surveillance des symptômes, paracétamol si nécessaire"
+      Diagnostic: "Réaction normale post-vaccination",
+      Recommandations: "Surveillance des symptômes, paracétamol si nécessaire",
     },
     Cree_par: "Dr. Dubois",
-    created_at: "2024-01-18T09:15:00"
+    created_at: "2024-01-18T09:15:00",
   },
   {
     id: 4,
@@ -77,14 +79,15 @@ let mockDocuments: Document[] = [
     data_json: {
       "Type d'intervention": "Arthroscopie du genou",
       "Date de l'opération": "2023-12-15",
-      "Chirurgien": "Dr. Laurent",
+      Chirurgien: "Dr. Laurent",
       "Niveau de douleur (1-10)": 3,
-      "Cicatrisation": "Bonne",
-      "Mobilité": "Limitée",
-      "Complications": "Aucune complication observée, récupération dans les normes"
+      Cicatrisation: "Bonne",
+      Mobilité: "Limitée",
+      Complications:
+        "Aucune complication observée, récupération dans les normes",
     },
     Cree_par: "Dr. Smith",
-    created_at: "2024-01-10T16:45:00"
+    created_at: "2024-01-10T16:45:00",
   },
   {
     id: 5,
@@ -99,12 +102,13 @@ let mockDocuments: Document[] = [
       "Taille (cm)": 165,
       "Température (°C)": 36.8,
       "Symptômes observés": "Maux de tête fréquents, sensibilité à la lumière",
-      "Diagnostic": "Migraine chronique - ajustement du traitement",
-      "Recommandations": "Nouveau traitement préventif, éviter les déclencheurs identifiés"
+      Diagnostic: "Migraine chronique - ajustement du traitement",
+      Recommandations:
+        "Nouveau traitement préventif, éviter les déclencheurs identifiés",
     },
     Cree_par: "Dr. Dubois",
-    created_at: "2024-01-22T11:30:00"
-  }
+    created_at: "2024-01-22T11:30:00",
+  },
 ];
 
 // Simulate API delay
@@ -120,7 +124,7 @@ export class DocumentsService {
   // Get documents by patient CIN
   static async getByPatientCIN(cin: string): Promise<Document[]> {
     await delay(500);
-    return mockDocuments.filter(doc => doc.CIN === cin);
+    return mockDocuments.filter((doc) => doc.CIN === cin);
   }
 
   // Get document by ID
@@ -180,22 +184,22 @@ export class DocumentsService {
 
     const lowerQuery = query.toLowerCase();
     let filteredDocs = mockDocuments;
-    
+
     if (cin) {
-      filteredDocs = filteredDocs.filter(doc => doc.CIN === cin);
+      filteredDocs = filteredDocs.filter((doc) => doc.CIN === cin);
     }
-    
+
     return filteredDocs.filter(
       (doc) =>
         doc.Cree_par.toLowerCase().includes(lowerQuery) ||
-        JSON.stringify(doc.data_json).toLowerCase().includes(lowerQuery)
+        JSON.stringify(doc.data_json).toLowerCase().includes(lowerQuery),
     );
   }
 
   // Get documents by template ID
   static async getByTemplateId(templateId: number): Promise<Document[]> {
     await delay(300);
-    return mockDocuments.filter(doc => doc.template_id === templateId);
+    return mockDocuments.filter((doc) => doc.template_id === templateId);
   }
 }
 
@@ -232,27 +236,36 @@ export const createEmptyDocumentData = (): DocumentFormData => {
     template_id: 0,
     CIN: "",
     data_json: {},
-    Cree_par: ""
+    Cree_par: "",
   };
 };
 
 // Helper function to get field value from document data
-export const getFieldValue = (data: Record<string, any>, fieldName: string): any => {
+export const getFieldValue = (
+  data: Record<string, any>,
+  fieldName: string,
+): any => {
   return data[fieldName] || "";
 };
 
 // Helper function to set field value in document data
-export const setFieldValue = (data: Record<string, any>, fieldName: string, value: any): Record<string, any> => {
+export const setFieldValue = (
+  data: Record<string, any>,
+  fieldName: string,
+  value: any,
+): Record<string, any> => {
   return {
     ...data,
-    [fieldName]: value
+    [fieldName]: value,
   };
 };
 
 // Helper to format document data for display
-export const formatDocumentData = (data: Record<string, any>): Array<{key: string, value: any}> => {
+export const formatDocumentData = (
+  data: Record<string, any>,
+): Array<{ key: string; value: any }> => {
   return Object.entries(data).map(([key, value]) => ({
     key,
-    value
+    value,
   }));
 };

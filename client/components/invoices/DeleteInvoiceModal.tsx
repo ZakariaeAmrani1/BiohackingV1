@@ -1,4 +1,11 @@
-import { AlertTriangle, Receipt, Euro, Hash, Package, Stethoscope } from "lucide-react";
+import {
+  AlertTriangle,
+  Receipt,
+  Euro,
+  Hash,
+  Package,
+  Stethoscope,
+} from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -10,11 +17,11 @@ import {
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
-import { 
-  FactureWithDetails, 
-  formatPrice, 
+import {
+  FactureWithDetails,
+  formatPrice,
   getStatusColor,
-  TypeBien 
+  TypeBien,
 } from "@/services/invoicesService";
 
 interface DeleteInvoiceModalProps {
@@ -65,7 +72,8 @@ export default function DeleteInvoiceModal({
             Supprimer la facture
           </DialogTitle>
           <DialogDescription>
-            Cette action est irréversible. La facture sera définitivement supprimée.
+            Cette action est irréversible. La facture sera définitivement
+            supprimée.
           </DialogDescription>
         </DialogHeader>
 
@@ -76,12 +84,14 @@ export default function DeleteInvoiceModal({
               <strong>Attention:</strong> Cette action ne peut pas être annulée.
               {isPaidInvoice && (
                 <span className="block mt-1">
-                  <strong>Cette facture a été payée.</strong> Sa suppression pourrait affecter votre comptabilité.
+                  <strong>Cette facture a été payée.</strong> Sa suppression
+                  pourrait affecter votre comptabilité.
                 </span>
               )}
               {hasItems && (
                 <span className="block mt-1">
-                  Cette facture contient {invoice.items.length} article(s) pour un montant de {formatPrice(invoice.prix_total)}.
+                  Cette facture contient {invoice.items.length} article(s) pour
+                  un montant de {formatPrice(invoice.prix_total)}.
                 </span>
               )}
             </AlertDescription>
@@ -93,35 +103,41 @@ export default function DeleteInvoiceModal({
               <Receipt className="h-5 w-5 text-muted-foreground" />
               <span className="font-medium">Facture à supprimer:</span>
             </div>
-            
+
             <div className="space-y-3 ml-7">
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium">Facture:</span>
-                <span className="font-mono">#{invoice.id.toString().padStart(4, '0')}</span>
+                <span className="font-mono">
+                  #{invoice.id.toString().padStart(4, "0")}
+                </span>
               </div>
-              
+
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium">Patient:</span>
                 <span className="font-mono">{invoice.CIN}</span>
               </div>
-              
+
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium">Statut:</span>
-                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${getStatusColor(invoice.statut)}`}>
+                <span
+                  className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${getStatusColor(invoice.statut)}`}
+                >
                   {invoice.statut}
                 </span>
               </div>
-              
+
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium">Date:</span>
-                <span>{new Date(invoice.date).toLocaleDateString("fr-FR")}</span>
+                <span>
+                  {new Date(invoice.date).toLocaleDateString("fr-FR")}
+                </span>
               </div>
-              
+
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium">Créé par:</span>
                 <span>{invoice.Cree_par}</span>
               </div>
-              
+
               <div className="p-3 bg-blue-50 dark:bg-blue-950/20 rounded">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium">Montant total:</span>
@@ -142,7 +158,10 @@ export default function DeleteInvoiceModal({
                 </span>
                 <div className="mt-2 space-y-2">
                   {invoice.items.map((item, index) => (
-                    <div key={item.id} className="flex items-center justify-between text-xs bg-white/50 dark:bg-black/20 p-2 rounded">
+                    <div
+                      key={item.id}
+                      className="flex items-center justify-between text-xs bg-white/50 dark:bg-black/20 p-2 rounded"
+                    >
                       <div className="flex items-center gap-2">
                         {item.type_bien === TypeBien.PRODUIT ? (
                           <Package className="h-3 w-3" />
@@ -151,14 +170,18 @@ export default function DeleteInvoiceModal({
                         )}
                         <span>{item.nom_bien}</span>
                         <Badge variant="outline" className="text-xs px-1">
-                          {item.type_bien === TypeBien.PRODUIT ? "Produit" : "Soin"}
+                          {item.type_bien === TypeBien.PRODUIT
+                            ? "Produit"
+                            : "Soin"}
                         </Badge>
                       </div>
                       <div className="flex items-center gap-2 font-mono">
                         <span>{item.quantite}x</span>
                         <span>{formatPrice(item.prix_unitaire)}</span>
                         <span>=</span>
-                        <span className="font-semibold">{formatPrice(item.prix_unitaire * item.quantite)}</span>
+                        <span className="font-semibold">
+                          {formatPrice(item.prix_unitaire * item.quantite)}
+                        </span>
                       </div>
                     </div>
                   ))}
@@ -175,8 +198,10 @@ export default function DeleteInvoiceModal({
                   ⚠️ Facture payée:
                 </span>
                 <div className="mt-1 text-red-600 dark:text-red-400">
-                  Cette facture a le statut "Payée". Sa suppression pourrait créer des incohérences dans votre comptabilité. 
-                  Assurez-vous que cette action est nécessaire et documentez-la en conséquence.
+                  Cette facture a le statut "Payée". Sa suppression pourrait
+                  créer des incohérences dans votre comptabilité. Assurez-vous
+                  que cette action est nécessaire et documentez-la en
+                  conséquence.
                 </div>
               </div>
             </div>
@@ -188,11 +213,7 @@ export default function DeleteInvoiceModal({
         </div>
 
         <DialogFooter className="gap-2">
-          <Button
-            variant="outline"
-            onClick={onClose}
-            disabled={isLoading}
-          >
+          <Button variant="outline" onClick={onClose} disabled={isLoading}>
             Annuler
           </Button>
           <Button

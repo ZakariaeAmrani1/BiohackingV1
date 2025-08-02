@@ -68,9 +68,11 @@ export default function InvoiceDetailsModal({
   };
 
   const getItemIcon = (type: TypeBien) => {
-    return type === TypeBien.PRODUIT ? 
-      <Package className="h-4 w-4 text-blue-600" /> : 
-      <Stethoscope className="h-4 w-4 text-green-600" />;
+    return type === TypeBien.PRODUIT ? (
+      <Package className="h-4 w-4 text-blue-600" />
+    ) : (
+      <Stethoscope className="h-4 w-4 text-green-600" />
+    );
   };
 
   const getItemTypeLabel = (type: TypeBien) => {
@@ -95,43 +97,55 @@ export default function InvoiceDetailsModal({
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-xl font-semibold">
-                Facture #{invoice.id.toString().padStart(4, '0')}
+                Facture #{invoice.id.toString().padStart(4, "0")}
               </h3>
-              <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(invoice.statut)}`}>
+              <span
+                className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(invoice.statut)}`}
+              >
                 {invoice.statut}
               </span>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <div className="text-sm font-medium text-muted-foreground">Patient</div>
+                <div className="text-sm font-medium text-muted-foreground">
+                  Patient
+                </div>
                 <div className="flex items-center gap-2">
                   <User className="h-4 w-4" />
                   <span className="font-mono">{invoice.CIN}</span>
                   {invoice.patient_name && (
-                    <span className="text-muted-foreground">({invoice.patient_name})</span>
+                    <span className="text-muted-foreground">
+                      ({invoice.patient_name})
+                    </span>
                   )}
                 </div>
               </div>
-              
+
               <div className="space-y-2">
-                <div className="text-sm font-medium text-muted-foreground">Date de la facture</div>
+                <div className="text-sm font-medium text-muted-foreground">
+                  Date de la facture
+                </div>
                 <div className="flex items-center gap-2">
                   <Calendar className="h-4 w-4" />
                   {formatDateOnly(invoice.date)}
                 </div>
               </div>
-              
+
               <div className="space-y-2">
-                <div className="text-sm font-medium text-muted-foreground">Créé par</div>
+                <div className="text-sm font-medium text-muted-foreground">
+                  Créé par
+                </div>
                 <div className="flex items-center gap-2">
                   <User className="h-4 w-4" />
                   {invoice.Cree_par}
                 </div>
               </div>
-              
+
               <div className="space-y-2">
-                <div className="text-sm font-medium text-muted-foreground">Date de création</div>
+                <div className="text-sm font-medium text-muted-foreground">
+                  Date de création
+                </div>
                 <div className="flex items-center gap-2">
                   <Clock className="h-4 w-4" />
                   {formatDate(invoice.created_at)}
@@ -141,7 +155,9 @@ export default function InvoiceDetailsModal({
 
             {invoice.notes && (
               <div className="space-y-2">
-                <div className="text-sm font-medium text-muted-foreground">Notes</div>
+                <div className="text-sm font-medium text-muted-foreground">
+                  Notes
+                </div>
                 <div className="flex items-start gap-2">
                   <FileText className="h-4 w-4 mt-0.5" />
                   <div className="text-sm bg-muted p-3 rounded-lg flex-1">
@@ -157,11 +173,14 @@ export default function InvoiceDetailsModal({
           {/* Invoice Items */}
           <div className="space-y-4">
             <h4 className="font-medium">Articles facturés</h4>
-            
+
             {invoice.items.length > 0 ? (
               <div className="space-y-3">
                 {invoice.items.map((item, index) => (
-                  <Card key={item.id} className="border-l-4 border-l-primary/20">
+                  <Card
+                    key={item.id}
+                    className="border-l-4 border-l-primary/20"
+                  >
                     <CardContent className="p-4">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
@@ -172,20 +191,30 @@ export default function InvoiceDetailsModal({
                               {getItemTypeLabel(item.type_bien)}
                             </Badge>
                           </div>
-                          
+
                           <div className="grid grid-cols-3 gap-4 text-sm">
                             <div>
-                              <span className="text-muted-foreground">Quantité:</span>
+                              <span className="text-muted-foreground">
+                                Quantité:
+                              </span>
                               <div className="font-mono">{item.quantite}</div>
                             </div>
                             <div>
-                              <span className="text-muted-foreground">Prix unitaire:</span>
-                              <div className="font-mono">{formatPrice(item.prix_unitaire)}</div>
+                              <span className="text-muted-foreground">
+                                Prix unitaire:
+                              </span>
+                              <div className="font-mono">
+                                {formatPrice(item.prix_unitaire)}
+                              </div>
                             </div>
                             <div>
-                              <span className="text-muted-foreground">Total ligne:</span>
+                              <span className="text-muted-foreground">
+                                Total ligne:
+                              </span>
                               <div className="font-mono font-semibold">
-                                {formatPrice(item.prix_unitaire * item.quantite)}
+                                {formatPrice(
+                                  item.prix_unitaire * item.quantite,
+                                )}
                               </div>
                             </div>
                           </div>
@@ -194,32 +223,36 @@ export default function InvoiceDetailsModal({
                     </CardContent>
                   </Card>
                 ))}
-                
+
                 {/* Total Section with TVA breakdown */}
                 <Card className="bg-primary/5 border-primary/20">
                   <CardContent className="p-4 space-y-3">
                     <div className="text-sm text-muted-foreground">
-                      Total ({invoice.items.length} article{invoice.items.length > 1 ? 's' : ''})
+                      Total ({invoice.items.length} article
+                      {invoice.items.length > 1 ? "s" : ""})
                     </div>
 
                     <div className="space-y-2">
                       <div className="flex items-center justify-between text-sm">
                         <span>Sous-total (HT):</span>
                         <span className="font-mono font-medium">
-                          {formatPrice(invoice.prix_ht || invoice.prix_total / 1.2)}
+                          {formatPrice(
+                            invoice.prix_ht || invoice.prix_total / 1.2,
+                          )}
                         </span>
                       </div>
                       <div className="flex items-center justify-between text-sm">
                         <span>TVA ({invoice.tva_rate || 20}%):</span>
                         <span className="font-mono font-medium">
-                          {formatPrice(invoice.tva_amount || (invoice.prix_total - (invoice.prix_total / 1.2)))}
+                          {formatPrice(
+                            invoice.tva_amount ||
+                              invoice.prix_total - invoice.prix_total / 1.2,
+                          )}
                         </span>
                       </div>
                       <Separator />
                       <div className="flex items-center justify-between">
-                        <div className="text-lg font-semibold">
-                          Total TTC:
-                        </div>
+                        <div className="text-lg font-semibold">Total TTC:</div>
                         <div className="text-3xl font-bold text-primary font-mono">
                           {formatPrice(invoice.prix_total)}
                         </div>
@@ -240,27 +273,35 @@ export default function InvoiceDetailsModal({
           {/* Summary Information */}
           <div className="space-y-3">
             <h4 className="font-medium">Résumé</h4>
-            
+
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
               <div className="space-y-1">
                 <div className="text-muted-foreground">Articles total</div>
                 <div className="font-semibold">{invoice.items.length}</div>
               </div>
-              
+
               <div className="space-y-1">
                 <div className="text-muted-foreground">Produits</div>
                 <div className="font-semibold">
-                  {invoice.items.filter(item => item.type_bien === TypeBien.PRODUIT).length}
+                  {
+                    invoice.items.filter(
+                      (item) => item.type_bien === TypeBien.PRODUIT,
+                    ).length
+                  }
                 </div>
               </div>
-              
+
               <div className="space-y-1">
                 <div className="text-muted-foreground">Soins</div>
                 <div className="font-semibold">
-                  {invoice.items.filter(item => item.type_bien === TypeBien.SOIN).length}
+                  {
+                    invoice.items.filter(
+                      (item) => item.type_bien === TypeBien.SOIN,
+                    ).length
+                  }
                 </div>
               </div>
-              
+
               <div className="space-y-1">
                 <div className="text-muted-foreground">Quantité totale</div>
                 <div className="font-semibold">
@@ -277,11 +318,14 @@ export default function InvoiceDetailsModal({
               <span className="ml-2">{invoice.statut}</span>
             </div>
             <div className="text-xs text-muted-foreground mt-1">
-              {invoice.statut === "Brouillon" && "Cette facture est en cours de préparation"}
-              {invoice.statut === "Envoyée" && "Cette facture a été envoyée au client"}
+              {invoice.statut === "Brouillon" &&
+                "Cette facture est en cours de préparation"}
+              {invoice.statut === "Envoyée" &&
+                "Cette facture a été envoyée au client"}
               {invoice.statut === "Payée" && "Cette facture a été payée"}
               {invoice.statut === "Annulée" && "Cette facture a été annulée"}
-              {invoice.statut === "En retard" && "Le paiement de cette facture est en retard"}
+              {invoice.statut === "En retard" &&
+                "Le paiement de cette facture est en retard"}
             </div>
           </div>
         </div>

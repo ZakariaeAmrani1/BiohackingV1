@@ -1,11 +1,5 @@
 import { useState, useEffect } from "react";
-import {
-  Stethoscope,
-  AlertTriangle,
-  User,
-  Euro,
-  Tag,
-} from "lucide-react";
+import { Stethoscope, AlertTriangle, User, Euro, Tag } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -74,7 +68,7 @@ export default function SoinFormModal({
   }, [soin, isOpen]);
 
   const handleInputChange = (field: keyof SoinFormData, value: any) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
     if (errors.length > 0) {
       setErrors([]);
     }
@@ -159,7 +153,9 @@ export default function SoinFormModal({
               </Label>
               <Select
                 value={formData.Type}
-                onValueChange={(value) => handleInputChange("Type", value as SoinType)}
+                onValueChange={(value) =>
+                  handleInputChange("Type", value as SoinType)
+                }
                 disabled={isSubmitting}
               >
                 <SelectTrigger>
@@ -186,7 +182,9 @@ export default function SoinFormModal({
                 step="0.01"
                 min="0"
                 value={formData.prix || ""}
-                onChange={(e) => handleInputChange("prix", parseFloat(e.target.value) || 0)}
+                onChange={(e) =>
+                  handleInputChange("prix", parseFloat(e.target.value) || 0)
+                }
                 placeholder="0.00"
                 disabled={isSubmitting}
               />

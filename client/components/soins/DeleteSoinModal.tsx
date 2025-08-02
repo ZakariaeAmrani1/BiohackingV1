@@ -56,7 +56,8 @@ export default function DeleteSoinModal({
             Supprimer le soin
           </DialogTitle>
           <DialogDescription>
-            Cette action est irréversible. Le service sera définitivement supprimé.
+            Cette action est irréversible. Le service sera définitivement
+            supprimé.
           </DialogDescription>
         </DialogHeader>
 
@@ -75,37 +76,39 @@ export default function DeleteSoinModal({
               <Stethoscope className="h-5 w-5 text-muted-foreground" />
               <span className="font-medium">Service à supprimer:</span>
             </div>
-            
+
             <div className="space-y-2 ml-7">
               <div>
                 <span className="text-sm font-medium">Nom:</span>
                 <span className="ml-2">{soin.Nom}</span>
               </div>
-              
+
               <div>
                 <span className="text-sm font-medium">ID:</span>
                 <span className="ml-2 font-mono">#{soin.id}</span>
               </div>
-              
+
               <div className="flex items-center gap-2">
                 <span className="text-sm font-medium">Type:</span>
-                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${getSoinTypeColor(soin.Type)}`}>
+                <span
+                  className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${getSoinTypeColor(soin.Type)}`}
+                >
                   {soin.Type}
                 </span>
               </div>
-              
+
               <div className="p-2 bg-blue-50 dark:bg-blue-950/20 rounded">
                 <span className="text-sm font-medium">Prix:</span>
                 <div className="font-mono font-bold text-blue-700 dark:text-blue-300">
                   {formatPrice(soin.prix)}
                 </div>
               </div>
-              
+
               <div>
                 <span className="text-sm font-medium">Créé par:</span>
                 <span className="ml-2">{soin.Cree_par}</span>
               </div>
-              
+
               <div>
                 <span className="text-sm font-medium">Date de création:</span>
                 <span className="ml-2">{formatDate(soin.created_at)}</span>
@@ -119,11 +122,12 @@ export default function DeleteSoinModal({
                 Impact de la suppression:
               </span>
               <div className="mt-1 text-yellow-600 dark:text-yellow-400">
-                • Ce service ne sera plus disponible pour de nouveaux rendez-vous
+                • Ce service ne sera plus disponible pour de nouveaux
+                rendez-vous
                 <br />
-                • Les rendez-vous existants utilisant ce service ne seront pas affectés
-                <br />
-                • Cette action ne peut pas être annulée
+                • Les rendez-vous existants utilisant ce service ne seront pas
+                affectés
+                <br />• Cette action ne peut pas être annulée
               </div>
             </div>
           </div>
@@ -134,11 +138,7 @@ export default function DeleteSoinModal({
         </div>
 
         <DialogFooter className="gap-2">
-          <Button
-            variant="outline"
-            onClick={onClose}
-            disabled={isLoading}
-          >
+          <Button variant="outline" onClick={onClose} disabled={isLoading}>
             Annuler
           </Button>
           <Button

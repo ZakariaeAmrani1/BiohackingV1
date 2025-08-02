@@ -67,8 +67,11 @@ export default function DocumentFormModal({
   templates,
   isLoading = false,
 }: DocumentFormModalProps) {
-  const [formData, setFormData] = useState<DocumentFormData>(createEmptyDocumentData());
-  const [selectedTemplate, setSelectedTemplate] = useState<DocumentTemplate | null>(null);
+  const [formData, setFormData] = useState<DocumentFormData>(
+    createEmptyDocumentData(),
+  );
+  const [selectedTemplate, setSelectedTemplate] =
+    useState<DocumentTemplate | null>(null);
   const [errors, setErrors] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -84,8 +87,8 @@ export default function DocumentFormModal({
         data_json: document.data_json,
         Cree_par: document.Cree_par,
       });
-      
-      const template = templates.find(t => t.id === document.template_id);
+
+      const template = templates.find((t) => t.id === document.template_id);
       setSelectedTemplate(template || null);
     } else if (patient) {
       setFormData({
@@ -104,13 +107,13 @@ export default function DocumentFormModal({
 
   const handleTemplateChange = (templateId: string) => {
     const numericId = parseInt(templateId);
-    const template = templates.find(t => t.id === numericId);
-    
+    const template = templates.find((t) => t.id === numericId);
+
     setSelectedTemplate(template || null);
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       template_id: numericId,
-      data_json: {} // Reset data when template changes
+      data_json: {}, // Reset data when template changes
     }));
 
     if (errors.length > 0) {
@@ -119,9 +122,9 @@ export default function DocumentFormModal({
   };
 
   const handleFieldChange = (fieldName: string, value: any) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      data_json: setFieldValue(prev.data_json, fieldName, value)
+      data_json: setFieldValue(prev.data_json, fieldName, value),
     }));
 
     if (errors.length > 0) {
@@ -129,8 +132,11 @@ export default function DocumentFormModal({
     }
   };
 
-  const handleBasicFieldChange = (field: keyof DocumentFormData, value: any) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+  const handleBasicFieldChange = (
+    field: keyof DocumentFormData,
+    value: any,
+  ) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
     if (errors.length > 0) {
       setErrors([]);
     }
@@ -138,13 +144,20 @@ export default function DocumentFormModal({
 
   const getFieldIcon = (type: string) => {
     switch (type) {
-      case "text": return <Type className="h-4 w-4" />;
-      case "number": return <Hash className="h-4 w-4" />;
-      case "textarea": return <AlignLeft className="h-4 w-4" />;
-      case "date": return <Calendar className="h-4 w-4" />;
-      case "select": return <List className="h-4 w-4" />;
-      case "checkbox": return <CheckSquare className="h-4 w-4" />;
-      default: return <Type className="h-4 w-4" />;
+      case "text":
+        return <Type className="h-4 w-4" />;
+      case "number":
+        return <Hash className="h-4 w-4" />;
+      case "textarea":
+        return <AlignLeft className="h-4 w-4" />;
+      case "date":
+        return <Calendar className="h-4 w-4" />;
+      case "select":
+        return <List className="h-4 w-4" />;
+      case "checkbox":
+        return <CheckSquare className="h-4 w-4" />;
+      default:
+        return <Type className="h-4 w-4" />;
     }
   };
 
@@ -167,7 +180,12 @@ export default function DocumentFormModal({
           <Input
             type="number"
             value={currentValue || ""}
-            onChange={(e) => handleFieldChange(field.name, e.target.value ? parseFloat(e.target.value) : "")}
+            onChange={(e) =>
+              handleFieldChange(
+                field.name,
+                e.target.value ? parseFloat(e.target.value) : "",
+              )
+            }
             disabled={isSubmitting}
             placeholder={`Saisir ${field.name.toLowerCase()}`}
           />
@@ -202,7 +220,9 @@ export default function DocumentFormModal({
             disabled={isSubmitting}
           >
             <SelectTrigger>
-              <SelectValue placeholder={`Sélectionner ${field.name.toLowerCase()}`} />
+              <SelectValue
+                placeholder={`Sélectionner ${field.name.toLowerCase()}`}
+              />
             </SelectTrigger>
             <SelectContent>
               {field.options?.map((option) => (
@@ -219,7 +239,9 @@ export default function DocumentFormModal({
           <div className="flex items-center space-x-2">
             <Checkbox
               checked={currentValue === true}
-              onCheckedChange={(checked) => handleFieldChange(field.name, checked)}
+              onCheckedChange={(checked) =>
+                handleFieldChange(field.name, checked)
+              }
               disabled={isSubmitting}
             />
             <Label className="text-sm">{field.name}</Label>
@@ -250,9 +272,9 @@ export default function DocumentFormModal({
     // Validate required fields from template
     if (selectedTemplate) {
       const templateErrors: string[] = [];
-      
-      selectedTemplate.sections_json.sections.forEach(section => {
-        section.fields.forEach(field => {
+
+      selectedTemplate.sections_json.sections.forEach((section) => {
+        section.fields.forEach((field) => {
           if (field.required) {
             const value = getFieldValue(formData.data_json, field.name);
             if (!value && value !== 0 && value !== false) {
@@ -317,7 +339,7 @@ export default function DocumentFormModal({
           {/* Basic Information */}
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">Informations de base</h3>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="template_id">Type de document</Label>
@@ -331,7 +353,10 @@ export default function DocumentFormModal({
                   </SelectTrigger>
                   <SelectContent>
                     {templates.map((template) => (
-                      <SelectItem key={template.id} value={template.id.toString()}>
+                      <SelectItem
+                        key={template.id}
+                        value={template.id.toString()}
+                      >
                         {template.name}
                       </SelectItem>
                     ))}
@@ -343,7 +368,9 @@ export default function DocumentFormModal({
                 <Label htmlFor="Cree_par">Créé par</Label>
                 <Select
                   value={formData.Cree_par}
-                  onValueChange={(value) => handleBasicFieldChange("Cree_par", value)}
+                  onValueChange={(value) =>
+                    handleBasicFieldChange("Cree_par", value)
+                  }
                   disabled={isSubmitting}
                 >
                   <SelectTrigger>
@@ -366,7 +393,9 @@ export default function DocumentFormModal({
                 <div className="flex items-center gap-2">
                   <User className="h-4 w-4" />
                   <span className="font-medium">
-                    {patient ? `${patient.prenom} ${patient.nom}` : "Patient non sélectionné"}
+                    {patient
+                      ? `${patient.prenom} ${patient.nom}`
+                      : "Patient non sélectionné"}
                   </span>
                   <span className="text-muted-foreground">
                     ({formData.CIN})
@@ -382,28 +411,32 @@ export default function DocumentFormModal({
           {selectedTemplate && (
             <div className="space-y-4">
               <h3 className="text-lg font-semibold">Données du document</h3>
-              
-              {selectedTemplate.sections_json.sections.map((section, sectionIndex) => (
-                <Card key={sectionIndex}>
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-base">{section.title}</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    {section.fields.map((field, fieldIndex) => (
-                      <div key={fieldIndex} className="space-y-2">
-                        <Label className="flex items-center gap-2">
-                          {getFieldIcon(field.type)}
-                          {field.name}
-                          {field.required && (
-                            <span className="text-red-500">*</span>
-                          )}
-                        </Label>
-                        {renderField(field)}
-                      </div>
-                    ))}
-                  </CardContent>
-                </Card>
-              ))}
+
+              {selectedTemplate.sections_json.sections.map(
+                (section, sectionIndex) => (
+                  <Card key={sectionIndex}>
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-base">
+                        {section.title}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      {section.fields.map((field, fieldIndex) => (
+                        <div key={fieldIndex} className="space-y-2">
+                          <Label className="flex items-center gap-2">
+                            {getFieldIcon(field.type)}
+                            {field.name}
+                            {field.required && (
+                              <span className="text-red-500">*</span>
+                            )}
+                          </Label>
+                          {renderField(field)}
+                        </div>
+                      ))}
+                    </CardContent>
+                  </Card>
+                ),
+              )}
             </div>
           )}
 

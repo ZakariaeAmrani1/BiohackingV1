@@ -25,10 +25,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import {
-  Document,
-  formatDocumentData,
-} from "@/services/documentsService";
+import { Document, formatDocumentData } from "@/services/documentsService";
 import {
   DocumentTemplate,
   DocumentField,
@@ -66,19 +63,31 @@ export default function DocumentDetailsModal({
 
   const getFieldIcon = (type: string) => {
     switch (type) {
-      case "text": return <Type className="h-4 w-4" />;
-      case "number": return <Hash className="h-4 w-4" />;
-      case "textarea": return <AlignLeft className="h-4 w-4" />;
-      case "date": return <Calendar className="h-4 w-4" />;
-      case "select": return <List className="h-4 w-4" />;
-      case "checkbox": return <CheckSquare className="h-4 w-4" />;
-      default: return <Type className="h-4 w-4" />;
+      case "text":
+        return <Type className="h-4 w-4" />;
+      case "number":
+        return <Hash className="h-4 w-4" />;
+      case "textarea":
+        return <AlignLeft className="h-4 w-4" />;
+      case "date":
+        return <Calendar className="h-4 w-4" />;
+      case "select":
+        return <List className="h-4 w-4" />;
+      case "checkbox":
+        return <CheckSquare className="h-4 w-4" />;
+      default:
+        return <Type className="h-4 w-4" />;
     }
   };
 
-  const formatFieldValue = (field: DocumentField, value: any): string | JSX.Element => {
+  const formatFieldValue = (
+    field: DocumentField,
+    value: any,
+  ): string | JSX.Element => {
     if (value === null || value === undefined || value === "") {
-      return <span className="text-muted-foreground italic">Non renseigné</span>;
+      return (
+        <span className="text-muted-foreground italic">Non renseigné</span>
+      );
     }
 
     switch (field.type) {
@@ -93,7 +102,7 @@ export default function DocumentDetailsModal({
             <span>{value ? "Oui" : "Non"}</span>
           </div>
         );
-      
+
       case "date":
         try {
           const date = new Date(value);
@@ -111,9 +120,7 @@ export default function DocumentDetailsModal({
 
       case "textarea":
         return (
-          <div className="whitespace-pre-wrap text-sm">
-            {value.toString()}
-          </div>
+          <div className="whitespace-pre-wrap text-sm">{value.toString()}</div>
         );
 
       default:
@@ -121,10 +128,15 @@ export default function DocumentDetailsModal({
     }
   };
 
-  const renderSectionData = (section: any, sectionData: Record<string, any>) => {
+  const renderSectionData = (
+    section: any,
+    sectionData: Record<string, any>,
+  ) => {
     if (!section.fields || section.fields.length === 0) {
       return (
-        <p className="text-muted-foreground italic">Aucun champ dans cette section</p>
+        <p className="text-muted-foreground italic">
+          Aucun champ dans cette section
+        </p>
       );
     }
 
@@ -132,9 +144,12 @@ export default function DocumentDetailsModal({
       <div className="space-y-3">
         {section.fields.map((field: DocumentField, fieldIndex: number) => {
           const value = sectionData[field.name];
-          
+
           return (
-            <div key={fieldIndex} className="grid grid-cols-1 md:grid-cols-3 gap-2 items-start">
+            <div
+              key={fieldIndex}
+              className="grid grid-cols-1 md:grid-cols-3 gap-2 items-start"
+            >
               <div className="flex items-center gap-2 text-sm font-medium">
                 {getFieldIcon(field.type)}
                 <span>{field.name}</span>
@@ -173,10 +188,12 @@ export default function DocumentDetailsModal({
           {/* Document Information */}
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">Informations générales</h3>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <div className="text-sm font-medium text-muted-foreground">Type de document</div>
+                <div className="text-sm font-medium text-muted-foreground">
+                  Type de document
+                </div>
                 <div className="flex items-center gap-2">
                   <FileText className="h-4 w-4" />
                   <span className="font-medium">
@@ -184,25 +201,31 @@ export default function DocumentDetailsModal({
                   </span>
                 </div>
               </div>
-              
+
               <div className="space-y-2">
-                <div className="text-sm font-medium text-muted-foreground">Patient (CIN)</div>
+                <div className="text-sm font-medium text-muted-foreground">
+                  Patient (CIN)
+                </div>
                 <div className="flex items-center gap-2">
                   <User className="h-4 w-4" />
                   <span className="font-mono">{document.CIN}</span>
                 </div>
               </div>
-              
+
               <div className="space-y-2">
-                <div className="text-sm font-medium text-muted-foreground">Créé par</div>
+                <div className="text-sm font-medium text-muted-foreground">
+                  Créé par
+                </div>
                 <div className="flex items-center gap-2">
                   <User className="h-4 w-4" />
                   {document.Cree_par}
                 </div>
               </div>
-              
+
               <div className="space-y-2">
-                <div className="text-sm font-medium text-muted-foreground">Date de création</div>
+                <div className="text-sm font-medium text-muted-foreground">
+                  Date de création
+                </div>
                 <div className="flex items-center gap-2">
                   <Clock className="h-4 w-4" />
                   {formatDate(document.created_at)}
@@ -210,7 +233,9 @@ export default function DocumentDetailsModal({
               </div>
 
               <div className="space-y-2">
-                <div className="text-sm font-medium text-muted-foreground">ID du document</div>
+                <div className="text-sm font-medium text-muted-foreground">
+                  ID du document
+                </div>
                 <div className="flex items-center gap-2">
                   <Hash className="h-4 w-4" />
                   <span className="font-mono">#{document.id}</span>
@@ -224,7 +249,7 @@ export default function DocumentDetailsModal({
           {/* Document Data */}
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">Données du document</h3>
-            
+
             {template ? (
               template.sections_json.sections.map((section, sectionIndex) => (
                 <Card key={sectionIndex}>
@@ -248,7 +273,10 @@ export default function DocumentDetailsModal({
                 <CardContent>
                   <div className="space-y-3">
                     {documentData.map((item, index) => (
-                      <div key={index} className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                      <div
+                        key={index}
+                        className="grid grid-cols-1 md:grid-cols-3 gap-2"
+                      >
                         <div className="text-sm font-medium">{item.key}</div>
                         <div className="md:col-span-2 text-sm">
                           {typeof item.value === "boolean" ? (
@@ -260,8 +288,12 @@ export default function DocumentDetailsModal({
                               )}
                               <span>{item.value ? "Oui" : "Non"}</span>
                             </div>
-                          ) : item.value === null || item.value === undefined || item.value === "" ? (
-                            <span className="text-muted-foreground italic">Non renseigné</span>
+                          ) : item.value === null ||
+                            item.value === undefined ||
+                            item.value === "" ? (
+                            <span className="text-muted-foreground italic">
+                              Non renseigné
+                            </span>
                           ) : (
                             item.value.toString()
                           )}
@@ -285,10 +317,17 @@ export default function DocumentDetailsModal({
                     <span className="font-medium">Modèle:</span> {template.name}
                   </div>
                   <div>
-                    <span className="font-medium">Créé par:</span> {template.Cree_par}
+                    <span className="font-medium">Créé par:</span>{" "}
+                    {template.Cree_par}
                   </div>
                   <div>
-                    <span className="font-medium">Structure:</span> {template.sections_json.sections.length} section(s), {template.sections_json.sections.reduce((total, section) => total + section.fields.length, 0)} champ(s)
+                    <span className="font-medium">Structure:</span>{" "}
+                    {template.sections_json.sections.length} section(s),{" "}
+                    {template.sections_json.sections.reduce(
+                      (total, section) => total + section.fields.length,
+                      0,
+                    )}{" "}
+                    champ(s)
                   </div>
                 </div>
               </div>

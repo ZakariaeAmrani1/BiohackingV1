@@ -59,25 +59,39 @@ export default function DocumentTemplateDetailsModal({
 
   const getFieldIcon = (type: string) => {
     switch (type) {
-      case "text": return <Type className="h-4 w-4" />;
-      case "number": return <Hash className="h-4 w-4" />;
-      case "textarea": return <AlignLeft className="h-4 w-4" />;
-      case "date": return <Calendar className="h-4 w-4" />;
-      case "select": return <List className="h-4 w-4" />;
-      case "checkbox": return <CheckSquare className="h-4 w-4" />;
-      default: return <Type className="h-4 w-4" />;
+      case "text":
+        return <Type className="h-4 w-4" />;
+      case "number":
+        return <Hash className="h-4 w-4" />;
+      case "textarea":
+        return <AlignLeft className="h-4 w-4" />;
+      case "date":
+        return <Calendar className="h-4 w-4" />;
+      case "select":
+        return <List className="h-4 w-4" />;
+      case "checkbox":
+        return <CheckSquare className="h-4 w-4" />;
+      default:
+        return <Type className="h-4 w-4" />;
     }
   };
 
   const getFieldTypeLabel = (type: string) => {
     switch (type) {
-      case "text": return "Texte";
-      case "number": return "Nombre";
-      case "textarea": return "Zone de texte";
-      case "date": return "Date";
-      case "select": return "Liste déroulante";
-      case "checkbox": return "Case à cocher";
-      default: return type;
+      case "text":
+        return "Texte";
+      case "number":
+        return "Nombre";
+      case "textarea":
+        return "Zone de texte";
+      case "date":
+        return "Date";
+      case "select":
+        return "Liste déroulante";
+      case "checkbox":
+        return "Case à cocher";
+      default:
+        return type;
     }
   };
 
@@ -97,7 +111,7 @@ export default function DocumentTemplateDetailsModal({
           {getFieldTypeLabel(field.type)}
         </Badge>
       </div>
-      
+
       {field.type === "select" && field.options && field.options.length > 0 && (
         <div className="text-sm text-muted-foreground">
           <span className="font-medium">Options:</span>
@@ -115,7 +129,7 @@ export default function DocumentTemplateDetailsModal({
 
   const totalFields = template.sections_json.sections.reduce(
     (total, section) => total + section.fields.length,
-    0
+    0,
   );
 
   return (
@@ -135,38 +149,44 @@ export default function DocumentTemplateDetailsModal({
           {/* Template Information */}
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">Informations générales</h3>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <div className="text-sm font-medium text-muted-foreground">Nom du modèle</div>
+                <div className="text-sm font-medium text-muted-foreground">
+                  Nom du modèle
+                </div>
                 <div className="text-lg font-medium">{template.name}</div>
               </div>
-              
+
               <div className="space-y-2">
-                <div className="text-sm font-medium text-muted-foreground">Créé par</div>
+                <div className="text-sm font-medium text-muted-foreground">
+                  Créé par
+                </div>
                 <div className="flex items-center gap-2">
                   <User className="h-4 w-4" />
                   {template.Cree_par}
                 </div>
               </div>
-              
+
               <div className="space-y-2">
-                <div className="text-sm font-medium text-muted-foreground">Date de création</div>
+                <div className="text-sm font-medium text-muted-foreground">
+                  Date de création
+                </div>
                 <div className="flex items-center gap-2">
                   <Clock className="h-4 w-4" />
                   {formatDate(template.created_at)}
                 </div>
               </div>
-              
+
               <div className="space-y-2">
-                <div className="text-sm font-medium text-muted-foreground">Statistiques</div>
+                <div className="text-sm font-medium text-muted-foreground">
+                  Statistiques
+                </div>
                 <div className="flex gap-2">
                   <Badge variant="secondary">
                     {template.sections_json.sections.length} section(s)
                   </Badge>
-                  <Badge variant="outline">
-                    {totalFields} champ(s)
-                  </Badge>
+                  <Badge variant="outline">{totalFields} champ(s)</Badge>
                 </div>
               </div>
             </div>
@@ -177,7 +197,7 @@ export default function DocumentTemplateDetailsModal({
           {/* Sections */}
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">Structure du document</h3>
-            
+
             {template.sections_json.sections.map((section, sectionIndex) => (
               <Card key={sectionIndex}>
                 <CardHeader className="pb-3">
@@ -191,9 +211,7 @@ export default function DocumentTemplateDetailsModal({
                 </CardHeader>
                 <CardContent className="space-y-3">
                   {section.fields.map((field, fieldIndex) => (
-                    <div key={fieldIndex}>
-                      {renderFieldDetails(field)}
-                    </div>
+                    <div key={fieldIndex}>{renderFieldDetails(field)}</div>
                   ))}
                 </CardContent>
               </Card>
