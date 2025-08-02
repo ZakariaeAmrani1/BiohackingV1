@@ -19,6 +19,7 @@ import {
   Zap,
   Globe,
   HardDrive,
+  DollarSign,
 } from "lucide-react";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -652,6 +653,53 @@ export default function Settings() {
                           handleAppSettingChange('autoSave', checked)
                         }
                       />
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <DollarSign className="h-5 w-5" />
+                  Devise et format
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div>
+                  <Label className="text-base font-medium">Devise</Label>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    Choisissez la devise utilisée dans l'application
+                  </p>
+                  <Select
+                    value={appSettings.currency}
+                    onValueChange={(value) => handleAppSettingChange('currency', value)}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {AppSettingsService.getCurrencyOptions().map(currency => (
+                        <SelectItem key={currency.value} value={currency.value}>
+                          <div className="flex items-center gap-2">
+                            <span className="font-mono text-sm font-semibold">
+                              {currency.symbol}
+                            </span>
+                            <span>{currency.label}</span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+
+                  <div className="mt-4 p-3 bg-muted/50 rounded-lg">
+                    <div className="text-sm">
+                      <span className="font-medium">Aperçu:</span>
+                      <div className="mt-1 space-y-1">
+                        <div>Prix: <span className="font-mono">1 234,56 {AppSettingsService.getCurrentCurrencySymbol()}</span></div>
+                        <div>Total: <span className="font-mono">15 678,90 {AppSettingsService.getCurrentCurrencySymbol()}</span></div>
+                      </div>
                     </div>
                   </div>
                 </div>
