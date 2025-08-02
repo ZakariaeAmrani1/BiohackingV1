@@ -412,7 +412,7 @@ export default function DocumentFormModal({
             <div className="space-y-4">
               <h3 className="text-lg font-semibold">Données du document</h3>
 
-              {selectedTemplate.sections_json.sections.map(
+              {selectedTemplate.sections_json?.sections?.map(
                 (section, sectionIndex) => (
                   <Card key={sectionIndex}>
                     <CardHeader className="pb-3">
