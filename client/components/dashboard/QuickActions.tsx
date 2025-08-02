@@ -27,7 +27,7 @@ import { AppointmentFormData, AppointmentsService } from "@/services/appointment
 import { ClientFormData, ClientsService } from "@/services/clientsService";
 import { ProductFormData, ProductsService } from "@/services/productsService";
 import { SoinFormData, SoinsService } from "@/services/soinsService";
-import { InvoiceFormData, InvoicesService } from "@/services/invoicesService";
+import { FactureFormData, InvoicesService } from "@/services/invoicesService";
 import { DocumentFormData, DocumentsService } from "@/services/documentsService";
 import { DocumentTemplateFormData, DocumentTemplatesService, DocumentTemplate } from "@/services/documentTemplatesService";
 
