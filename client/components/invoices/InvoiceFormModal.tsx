@@ -225,7 +225,7 @@ export default function InvoiceFormModal({
     return client ? `${client.prenom} ${client.nom}` : cin;
   };
 
-  const total = calculateInvoiceTotal(formData.items);
+  const totals = calculateInvoiceTotals(formData.items);
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
