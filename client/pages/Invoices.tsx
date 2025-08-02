@@ -520,7 +520,7 @@ export default function Invoices() {
                       <TableHead>Facture</TableHead>
                       <TableHead>Patient</TableHead>
                       <TableHead>Date</TableHead>
-                      <TableHead>Montant</TableHead>
+                      <TableHead>Montant TTC</TableHead>
                       <TableHead>Statut</TableHead>
                       <TableHead>Créé par</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
