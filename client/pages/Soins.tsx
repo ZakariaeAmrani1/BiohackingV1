@@ -457,90 +457,93 @@ export default function Soins() {
                   <TableLoader columns={6} rows={6} />
                 ) : (
                   <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Soin</TableHead>
-                      <TableHead>Type</TableHead>
-                      <TableHead>Prix</TableHead>
-                      <TableHead>Créé par</TableHead>
-                      <TableHead>Créé le</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredSoins.length > 0 ? (
-                      filteredSoins.map((soin) => (
-                        <TableRow key={soin.id} className="hover:bg-muted/50">
-                          <TableCell>
-                            <div className="flex items-center gap-2">
-                              <Stethoscope className="h-4 w-4 text-primary" />
-                              <div>
-                                <div className="font-medium">{soin.Nom}</div>
-                                <div className="text-sm text-muted-foreground">
-                                  ID: {soin.id}
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Soin</TableHead>
+                        <TableHead>Type</TableHead>
+                        <TableHead>Prix</TableHead>
+                        <TableHead>Créé par</TableHead>
+                        <TableHead>Créé le</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredSoins.length > 0 ? (
+                        filteredSoins.map((soin) => (
+                          <TableRow key={soin.id} className="hover:bg-muted/50">
+                            <TableCell>
+                              <div className="flex items-center gap-2">
+                                <Stethoscope className="h-4 w-4 text-primary" />
+                                <div>
+                                  <div className="font-medium">{soin.Nom}</div>
+                                  <div className="text-sm text-muted-foreground">
+                                    ID: {soin.id}
+                                  </div>
                                 </div>
                               </div>
+                            </TableCell>
+                            <TableCell>
+                              <span
+                                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getSoinTypeColor(soin.Type)}`}
+                              >
+                                {soin.Type}
+                              </span>
+                            </TableCell>
+                            <TableCell className="font-mono">
+                              {formatPrice(soin.prix)}
+                            </TableCell>
+                            <TableCell>{soin.Cree_par}</TableCell>
+                            <TableCell>{formatDate(soin.created_at)}</TableCell>
+                            <TableCell className="text-right">
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    className="h-8 w-8 p-0"
+                                  >
+                                    <ChevronDown className="h-4 w-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuItem
+                                    className="gap-2"
+                                    onClick={() => openDetailsModal(soin)}
+                                  >
+                                    <Eye className="h-4 w-4" />
+                                    Voir détails
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem
+                                    className="gap-2"
+                                    onClick={() => openEditModal(soin)}
+                                  >
+                                    <Edit className="h-4 w-4" />
+                                    Modifier
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem
+                                    className="gap-2 text-red-600"
+                                    onClick={() => openDeleteModal(soin)}
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                    Supprimer
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      ) : (
+                        <TableRow>
+                          <TableCell colSpan={6} className="text-center py-8">
+                            <div className="flex flex-col items-center gap-2">
+                              <Stethoscope className="h-8 w-8 text-muted-foreground" />
+                              <p className="text-muted-foreground">
+                                Aucun soin trouvé avec les critères sélectionnés
+                              </p>
                             </div>
                           </TableCell>
-                          <TableCell>
-                            <span
-                              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getSoinTypeColor(soin.Type)}`}
-                            >
-                              {soin.Type}
-                            </span>
-                          </TableCell>
-                          <TableCell className="font-mono">
-                            {formatPrice(soin.prix)}
-                          </TableCell>
-                          <TableCell>{soin.Cree_par}</TableCell>
-                          <TableCell>{formatDate(soin.created_at)}</TableCell>
-                          <TableCell className="text-right">
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" className="h-8 w-8 p-0">
-                                  <ChevronDown className="h-4 w-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuItem
-                                  className="gap-2"
-                                  onClick={() => openDetailsModal(soin)}
-                                >
-                                  <Eye className="h-4 w-4" />
-                                  Voir détails
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                  className="gap-2"
-                                  onClick={() => openEditModal(soin)}
-                                >
-                                  <Edit className="h-4 w-4" />
-                                  Modifier
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                  className="gap-2 text-red-600"
-                                  onClick={() => openDeleteModal(soin)}
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                  Supprimer
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </TableCell>
                         </TableRow>
-                      ))
-                    ) : (
-                      <TableRow>
-                        <TableCell colSpan={6} className="text-center py-8">
-                          <div className="flex flex-col items-center gap-2">
-                            <Stethoscope className="h-8 w-8 text-muted-foreground" />
-                            <p className="text-muted-foreground">
-                              Aucun soin trouvé avec les critères sélectionnés
-                            </p>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  </TableBody>
+                      )}
+                    </TableBody>
                   </Table>
                 )}
               </div>

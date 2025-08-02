@@ -397,104 +397,108 @@ export default function DocumentTypes() {
                   <TableLoader columns={6} rows={6} />
                 ) : (
                   <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Nom du modèle</TableHead>
-                      <TableHead>Sections</TableHead>
-                      <TableHead>Champs</TableHead>
-                      <TableHead>Créé par</TableHead>
-                      <TableHead>Créé le</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredTemplates.length > 0 ? (
-                      filteredTemplates.map((template) => (
-                        <TableRow
-                          key={template.id}
-                          className="hover:bg-muted/50"
-                        >
-                          <TableCell>
-                            <div className="flex items-center gap-2">
-                              <FileText className="h-4 w-4 text-primary" />
-                              <div>
-                                <div className="font-medium">
-                                  {template.name}
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Nom du modèle</TableHead>
+                        <TableHead>Sections</TableHead>
+                        <TableHead>Champs</TableHead>
+                        <TableHead>Créé par</TableHead>
+                        <TableHead>Créé le</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredTemplates.length > 0 ? (
+                        filteredTemplates.map((template) => (
+                          <TableRow
+                            key={template.id}
+                            className="hover:bg-muted/50"
+                          >
+                            <TableCell>
+                              <div className="flex items-center gap-2">
+                                <FileText className="h-4 w-4 text-primary" />
+                                <div>
+                                  <div className="font-medium">
+                                    {template.name}
+                                  </div>
                                 </div>
                               </div>
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant="secondary">
+                                {getSectionCount(template)} section(s)
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant="outline">
+                                {getFieldCount(template)} champ(s)
+                              </Badge>
+                            </TableCell>
+                            <TableCell>{template.Cree_par}</TableCell>
+                            <TableCell>
+                              {formatDate(template.created_at)}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    className="h-8 w-8 p-0"
+                                  >
+                                    <ChevronDown className="h-4 w-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuItem
+                                    className="gap-2"
+                                    onClick={() => openDetailsModal(template)}
+                                  >
+                                    <Eye className="h-4 w-4" />
+                                    Voir détails
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem
+                                    className="gap-2"
+                                    onClick={() => openEditModal(template)}
+                                  >
+                                    <Edit className="h-4 w-4" />
+                                    Modifier
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem
+                                    className="gap-2"
+                                    onClick={() =>
+                                      handleDuplicateTemplate(template)
+                                    }
+                                    disabled={isSubmitting}
+                                  >
+                                    <Copy className="h-4 w-4" />
+                                    Dupliquer
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem
+                                    className="gap-2 text-red-600"
+                                    onClick={() => openDeleteModal(template)}
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                    Supprimer
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      ) : (
+                        <TableRow>
+                          <TableCell colSpan={6} className="text-center py-8">
+                            <div className="flex flex-col items-center gap-2">
+                              <FileText className="h-8 w-8 text-muted-foreground" />
+                              <p className="text-muted-foreground">
+                                Aucun modèle trouvé avec les critères
+                                sélectionnés
+                              </p>
                             </div>
                           </TableCell>
-                          <TableCell>
-                            <Badge variant="secondary">
-                              {getSectionCount(template)} section(s)
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant="outline">
-                              {getFieldCount(template)} champ(s)
-                            </Badge>
-                          </TableCell>
-                          <TableCell>{template.Cree_par}</TableCell>
-                          <TableCell>
-                            {formatDate(template.created_at)}
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" className="h-8 w-8 p-0">
-                                  <ChevronDown className="h-4 w-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuItem
-                                  className="gap-2"
-                                  onClick={() => openDetailsModal(template)}
-                                >
-                                  <Eye className="h-4 w-4" />
-                                  Voir détails
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                  className="gap-2"
-                                  onClick={() => openEditModal(template)}
-                                >
-                                  <Edit className="h-4 w-4" />
-                                  Modifier
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                  className="gap-2"
-                                  onClick={() =>
-                                    handleDuplicateTemplate(template)
-                                  }
-                                  disabled={isSubmitting}
-                                >
-                                  <Copy className="h-4 w-4" />
-                                  Dupliquer
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                  className="gap-2 text-red-600"
-                                  onClick={() => openDeleteModal(template)}
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                  Supprimer
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </TableCell>
                         </TableRow>
-                      ))
-                    ) : (
-                      <TableRow>
-                        <TableCell colSpan={6} className="text-center py-8">
-                          <div className="flex flex-col items-center gap-2">
-                            <FileText className="h-8 w-8 text-muted-foreground" />
-                            <p className="text-muted-foreground">
-                              Aucun modèle trouvé avec les critères sélectionnés
-                            </p>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  </TableBody>
+                      )}
+                    </TableBody>
                   </Table>
                 )}
               </div>

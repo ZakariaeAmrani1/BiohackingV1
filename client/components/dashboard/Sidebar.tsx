@@ -67,7 +67,10 @@ export default function Sidebar() {
   }, [isCollapsed]);
 
   useEffect(() => {
-    localStorage.setItem("sidebar-expanded-dropdowns", JSON.stringify(expandedDropdowns));
+    localStorage.setItem(
+      "sidebar-expanded-dropdowns",
+      JSON.stringify(expandedDropdowns),
+    );
   }, [expandedDropdowns]);
 
   const toggleDropdown = (itemName: string) => {
@@ -109,10 +112,10 @@ export default function Sidebar() {
                   isCollapsed && isDark
                     ? "https://cdn.builder.io/api/v1/image/assets%2Fd10fa76c4c4f4ba5b5e5c227a43b88a3%2F3f9200fdbe85411c888de06f4fddabc4?format=webp&width=800"
                     : isDark
-                    ? "https://cdn.builder.io/api/v1/image/assets%2Fd10fa76c4c4f4ba5b5e5c227a43b88a3%2F0959c370406340f6bd9464107f56613b?format=webp&width=800"
-                    : isCollapsed
-                    ? "https://cdn.builder.io/api/v1/image/assets%2F7aa559df90fe4ddaa64a743a97acfd66%2F0e48021fb78c480987c1e833adc83cec?format=webp&width=800"
-                    : "https://cdn.builder.io/api/v1/image/assets%2F7fd7290220b94e06a6f7cd5d150de493%2Fce1def9ea6774ec0bb2758b12ced93f9?format=webp&width=500"
+                      ? "https://cdn.builder.io/api/v1/image/assets%2Fd10fa76c4c4f4ba5b5e5c227a43b88a3%2F0959c370406340f6bd9464107f56613b?format=webp&width=800"
+                      : isCollapsed
+                        ? "https://cdn.builder.io/api/v1/image/assets%2F7aa559df90fe4ddaa64a743a97acfd66%2F0e48021fb78c480987c1e833adc83cec?format=webp&width=800"
+                        : "https://cdn.builder.io/api/v1/image/assets%2F7fd7290220b94e06a6f7cd5d150de493%2Fce1def9ea6774ec0bb2758b12ced93f9?format=webp&width=500"
                 }
                 alt="BioHacking Logo"
                 className="w-full h-full object-contain"

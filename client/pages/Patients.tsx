@@ -451,92 +451,100 @@ export default function Patients() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                    {filteredClients.length > 0 ? (
-                      filteredClients.map((client) => (
-                        <TableRow key={client.id} className="hover:bg-muted/50">
-                          <TableCell>
-                            <div>
-                              <div className="font-medium">
-                                {client.prenom} {client.nom}
+                      {filteredClients.length > 0 ? (
+                        filteredClients.map((client) => (
+                          <TableRow
+                            key={client.id}
+                            className="hover:bg-muted/50"
+                          >
+                            <TableCell>
+                              <div>
+                                <div className="font-medium">
+                                  {client.prenom} {client.nom}
+                                </div>
+                                <div className="text-sm text-muted-foreground">
+                                  {client.email}
+                                </div>
                               </div>
-                              <div className="text-sm text-muted-foreground">
-                                {client.email}
+                            </TableCell>
+                            <TableCell className="font-mono text-sm">
+                              {client.CIN}
+                            </TableCell>
+                            <TableCell>
+                              {calculateAge(client.date_naissance)} ans
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant="outline" className="gap-1">
+                                <Heart className="h-3 w-3" />
+                                {client.groupe_sanguin}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              <div className="text-sm">
+                                <div>{client.numero_telephone}</div>
                               </div>
+                            </TableCell>
+                            <TableCell>{client.Cree_par}</TableCell>
+                            <TableCell>
+                              {formatDate(client.created_at)}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    className="h-8 w-8 p-0"
+                                  >
+                                    <ChevronDown className="h-4 w-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuItem
+                                    className="gap-2"
+                                    onClick={() => openDetailsModal(client)}
+                                  >
+                                    <Eye className="h-4 w-4" />
+                                    Voir dossier
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem
+                                    className="gap-2"
+                                    onClick={() => navigateToDocuments(client)}
+                                  >
+                                    <FileText className="h-4 w-4" />
+                                    Voir les documents
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem
+                                    className="gap-2"
+                                    onClick={() => openEditModal(client)}
+                                  >
+                                    <Edit className="h-4 w-4" />
+                                    Modifier
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem
+                                    className="gap-2 text-red-600"
+                                    onClick={() => openDeleteModal(client)}
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                    Supprimer
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      ) : (
+                        <TableRow>
+                          <TableCell colSpan={8} className="text-center py-8">
+                            <div className="flex flex-col items-center gap-2">
+                              <Users className="h-8 w-8 text-muted-foreground" />
+                              <p className="text-muted-foreground">
+                                Aucun patient trouvé avec les critères
+                                sélectionnés
+                              </p>
                             </div>
-                          </TableCell>
-                          <TableCell className="font-mono text-sm">
-                            {client.CIN}
-                          </TableCell>
-                          <TableCell>
-                            {calculateAge(client.date_naissance)} ans
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant="outline" className="gap-1">
-                              <Heart className="h-3 w-3" />
-                              {client.groupe_sanguin}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            <div className="text-sm">
-                              <div>{client.numero_telephone}</div>
-                            </div>
-                          </TableCell>
-                          <TableCell>{client.Cree_par}</TableCell>
-                          <TableCell>{formatDate(client.created_at)}</TableCell>
-                          <TableCell className="text-right">
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" className="h-8 w-8 p-0">
-                                  <ChevronDown className="h-4 w-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuItem
-                                  className="gap-2"
-                                  onClick={() => openDetailsModal(client)}
-                                >
-                                  <Eye className="h-4 w-4" />
-                                  Voir dossier
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                  className="gap-2"
-                                  onClick={() => navigateToDocuments(client)}
-                                >
-                                  <FileText className="h-4 w-4" />
-                                  Voir les documents
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                  className="gap-2"
-                                  onClick={() => openEditModal(client)}
-                                >
-                                  <Edit className="h-4 w-4" />
-                                  Modifier
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                  className="gap-2 text-red-600"
-                                  onClick={() => openDeleteModal(client)}
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                  Supprimer
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
                           </TableCell>
                         </TableRow>
-                      ))
-                    ) : (
-                      <TableRow>
-                        <TableCell colSpan={8} className="text-center py-8">
-                          <div className="flex flex-col items-center gap-2">
-                            <Users className="h-8 w-8 text-muted-foreground" />
-                            <p className="text-muted-foreground">
-                              Aucun patient trouvé avec les critères
-                              sélectionnés
-                            </p>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    )}
+                      )}
                     </TableBody>
                   </Table>
                 )}

@@ -78,52 +78,70 @@ export default function StatsCards() {
 
         // Calculate today's appointments
         const today = new Date();
-        const todayStr = today.toISOString().split('T')[0];
-        const todayAppointments = appointments.filter(apt => 
-          apt.date_rendez_vous.startsWith(todayStr)
+        const todayStr = today.toISOString().split("T")[0];
+        const todayAppointments = appointments.filter((apt) =>
+          apt.date_rendez_vous.startsWith(todayStr),
         );
 
         // Calculate monthly revenue (this month)
         const currentMonth = new Date().getMonth();
         const currentYear = new Date().getFullYear();
-        const monthlyInvoices = invoices.filter(invoice => {
+        const monthlyInvoices = invoices.filter((invoice) => {
           const invoiceDate = new Date(invoice.date);
-          return invoiceDate.getMonth() === currentMonth && 
-                 invoiceDate.getFullYear() === currentYear;
+          return (
+            invoiceDate.getMonth() === currentMonth &&
+            invoiceDate.getFullYear() === currentYear
+          );
         });
-        const monthlyRevenue = monthlyInvoices.reduce((sum, invoice) => 
-          sum + invoice.prix_total, 0
+        const monthlyRevenue = monthlyInvoices.reduce(
+          (sum, invoice) => sum + invoice.prix_total,
+          0,
         );
 
         // Calculate previous month revenue for comparison
         const prevMonth = currentMonth === 0 ? 11 : currentMonth - 1;
         const prevYear = currentMonth === 0 ? currentYear - 1 : currentYear;
-        const prevMonthInvoices = invoices.filter(invoice => {
+        const prevMonthInvoices = invoices.filter((invoice) => {
           const invoiceDate = new Date(invoice.date);
-          return invoiceDate.getMonth() === prevMonth && 
-                 invoiceDate.getFullYear() === prevYear;
+          return (
+            invoiceDate.getMonth() === prevMonth &&
+            invoiceDate.getFullYear() === prevYear
+          );
         });
-        const prevMonthRevenue = prevMonthInvoices.reduce((sum, invoice) => 
-          sum + invoice.prix_total, 0
+        const prevMonthRevenue = prevMonthInvoices.reduce(
+          (sum, invoice) => sum + invoice.prix_total,
+          0,
         );
-        
-        const revenueChange = prevMonthRevenue > 0 
-          ? ((monthlyRevenue - prevMonthRevenue) / prevMonthRevenue * 100).toFixed(1)
-          : "0";
+
+        const revenueChange =
+          prevMonthRevenue > 0
+            ? (
+                ((monthlyRevenue - prevMonthRevenue) / prevMonthRevenue) *
+                100
+              ).toFixed(1)
+            : "0";
 
         // Calculate payment success rate
-        const paidInvoices = invoices.filter(inv => inv.statut === FactureStatut.PAYEE);
-        const paymentRate = invoices.length > 0 
-          ? ((paidInvoices.length / invoices.length) * 100).toFixed(1)
-          : "0";
+        const paidInvoices = invoices.filter(
+          (inv) => inv.statut === FactureStatut.PAYEE,
+        );
+        const paymentRate =
+          invoices.length > 0
+            ? ((paidInvoices.length / invoices.length) * 100).toFixed(1)
+            : "0";
 
         // Previous month payment rate for comparison
-        const prevMonthPaidInvoices = prevMonthInvoices.filter(inv => inv.statut === FactureStatut.PAYEE);
-        const prevPaymentRate = prevMonthInvoices.length > 0 
-          ? (prevMonthPaidInvoices.length / prevMonthInvoices.length) * 100
-          : 0;
+        const prevMonthPaidInvoices = prevMonthInvoices.filter(
+          (inv) => inv.statut === FactureStatut.PAYEE,
+        );
+        const prevPaymentRate =
+          prevMonthInvoices.length > 0
+            ? (prevMonthPaidInvoices.length / prevMonthInvoices.length) * 100
+            : 0;
         const currentPaymentRateNum = parseFloat(paymentRate);
-        const paymentRateChange = (currentPaymentRateNum - prevPaymentRate).toFixed(1);
+        const paymentRateChange = (
+          currentPaymentRateNum - prevPaymentRate
+        ).toFixed(1);
 
         setStats([
           {
@@ -147,7 +165,7 @@ export default function StatsCards() {
           {
             title: "Revenus Mensuels",
             value: CurrencyService.formatCurrency(monthlyRevenue),
-            change: `${parseFloat(revenueChange) >= 0 ? '+' : ''}${revenueChange}%`,
+            change: `${parseFloat(revenueChange) >= 0 ? "+" : ""}${revenueChange}%`,
             trend: parseFloat(revenueChange) >= 0 ? "up" : "down",
             icon: DollarSign,
             description: "Comparé au mois dernier",
@@ -156,7 +174,7 @@ export default function StatsCards() {
           {
             title: "Factures Payées",
             value: `${paymentRate}%`,
-            change: `${parseFloat(paymentRateChange) >= 0 ? '+' : ''}${paymentRateChange}%`,
+            change: `${parseFloat(paymentRateChange) >= 0 ? "+" : ""}${paymentRateChange}%`,
             trend: parseFloat(paymentRateChange) >= 0 ? "up" : "down",
             icon: Activity,
             description: "Taux de paiement",
@@ -164,7 +182,7 @@ export default function StatsCards() {
           },
         ]);
       } catch (error) {
-        console.error('Error loading dashboard stats:', error);
+        console.error("Error loading dashboard stats:", error);
         // Keep loading state or show error
       }
     };

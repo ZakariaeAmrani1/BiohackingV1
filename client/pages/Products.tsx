@@ -468,106 +468,106 @@ export default function Products() {
                   <TableLoader columns={7} rows={6} />
                 ) : (
                   <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Produit</TableHead>
-                      <TableHead>Prix</TableHead>
-                      <TableHead>Stock</TableHead>
-                      <TableHead>État</TableHead>
-                      <TableHead>Créé par</TableHead>
-                      <TableHead>Créé le</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredProducts.length > 0 ? (
-                      filteredProducts.map((product) => {
-                        const stockStatus = getStockStatus(product.stock);
-                        return (
-                          <TableRow
-                            key={product.id}
-                            className="hover:bg-muted/50"
-                          >
-                            <TableCell>
-                              <div className="flex items-center gap-2">
-                                <Package className="h-4 w-4 text-primary" />
-                                <div>
-                                  <div className="font-medium">
-                                    {product.Nom}
-                                  </div>
-                                  <div className="text-sm text-muted-foreground">
-                                    ID: {product.id}
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Produit</TableHead>
+                        <TableHead>Prix</TableHead>
+                        <TableHead>Stock</TableHead>
+                        <TableHead>État</TableHead>
+                        <TableHead>Créé par</TableHead>
+                        <TableHead>Créé le</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredProducts.length > 0 ? (
+                        filteredProducts.map((product) => {
+                          const stockStatus = getStockStatus(product.stock);
+                          return (
+                            <TableRow
+                              key={product.id}
+                              className="hover:bg-muted/50"
+                            >
+                              <TableCell>
+                                <div className="flex items-center gap-2">
+                                  <Package className="h-4 w-4 text-primary" />
+                                  <div>
+                                    <div className="font-medium">
+                                      {product.Nom}
+                                    </div>
+                                    <div className="text-sm text-muted-foreground">
+                                      ID: {product.id}
+                                    </div>
                                   </div>
                                 </div>
-                              </div>
-                            </TableCell>
-                            <TableCell className="font-mono">
-                              {formatPrice(product.prix)}
-                            </TableCell>
-                            <TableCell className="font-mono">
-                              {product.stock} unités
-                            </TableCell>
-                            <TableCell>
-                              <Badge variant={stockStatus.variant}>
-                                {stockStatus.status}
-                              </Badge>
-                            </TableCell>
-                            <TableCell>{product.Cree_par}</TableCell>
-                            <TableCell>
-                              {formatDate(product.created_at)}
-                            </TableCell>
-                            <TableCell className="text-right">
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button
-                                    variant="ghost"
-                                    className="h-8 w-8 p-0"
-                                  >
-                                    <ChevronDown className="h-4 w-4" />
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                  <DropdownMenuItem
-                                    className="gap-2"
-                                    onClick={() => openDetailsModal(product)}
-                                  >
-                                    <Eye className="h-4 w-4" />
-                                    Voir détails
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem
-                                    className="gap-2"
-                                    onClick={() => openEditModal(product)}
-                                  >
-                                    <Edit className="h-4 w-4" />
-                                    Modifier
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem
-                                    className="gap-2 text-red-600"
-                                    onClick={() => openDeleteModal(product)}
-                                  >
-                                    <Trash2 className="h-4 w-4" />
-                                    Supprimer
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            </TableCell>
-                          </TableRow>
-                        );
-                      })
-                    ) : (
-                      <TableRow>
-                        <TableCell colSpan={7} className="text-center py-8">
-                          <div className="flex flex-col items-center gap-2">
-                            <Package className="h-8 w-8 text-muted-foreground" />
-                            <p className="text-muted-foreground">
-                              Aucun produit trouvé avec les critères
-                              sélectionnés
-                            </p>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  </TableBody>
+                              </TableCell>
+                              <TableCell className="font-mono">
+                                {formatPrice(product.prix)}
+                              </TableCell>
+                              <TableCell className="font-mono">
+                                {product.stock} unités
+                              </TableCell>
+                              <TableCell>
+                                <Badge variant={stockStatus.variant}>
+                                  {stockStatus.status}
+                                </Badge>
+                              </TableCell>
+                              <TableCell>{product.Cree_par}</TableCell>
+                              <TableCell>
+                                {formatDate(product.created_at)}
+                              </TableCell>
+                              <TableCell className="text-right">
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button
+                                      variant="ghost"
+                                      className="h-8 w-8 p-0"
+                                    >
+                                      <ChevronDown className="h-4 w-4" />
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end">
+                                    <DropdownMenuItem
+                                      className="gap-2"
+                                      onClick={() => openDetailsModal(product)}
+                                    >
+                                      <Eye className="h-4 w-4" />
+                                      Voir détails
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                      className="gap-2"
+                                      onClick={() => openEditModal(product)}
+                                    >
+                                      <Edit className="h-4 w-4" />
+                                      Modifier
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                      className="gap-2 text-red-600"
+                                      onClick={() => openDeleteModal(product)}
+                                    >
+                                      <Trash2 className="h-4 w-4" />
+                                      Supprimer
+                                    </DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })
+                      ) : (
+                        <TableRow>
+                          <TableCell colSpan={7} className="text-center py-8">
+                            <div className="flex flex-col items-center gap-2">
+                              <Package className="h-8 w-8 text-muted-foreground" />
+                              <p className="text-muted-foreground">
+                                Aucun produit trouvé avec les critères
+                                sélectionnés
+                              </p>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
                   </Table>
                 )}
               </div>

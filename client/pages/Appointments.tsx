@@ -485,14 +485,19 @@ export default function Appointments() {
                             <TableCell className="text-right">
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                  <Button variant="ghost" className="h-8 w-8 p-0">
+                                  <Button
+                                    variant="ghost"
+                                    className="h-8 w-8 p-0"
+                                  >
                                     <ChevronDown className="h-4 w-4" />
                                   </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
                                   <DropdownMenuItem
                                     className="gap-2"
-                                    onClick={() => openDetailsModal(appointment)}
+                                    onClick={() =>
+                                      openDetailsModal(appointment)
+                                    }
                                   >
                                     <Eye className="h-4 w-4" />
                                     Voir détails

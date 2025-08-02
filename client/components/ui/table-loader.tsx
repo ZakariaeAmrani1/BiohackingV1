@@ -1,5 +1,12 @@
 import { Skeleton } from "@/components/ui/skeleton";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 interface TableLoaderProps {
   columns: number;
@@ -7,7 +14,11 @@ interface TableLoaderProps {
   showHeader?: boolean;
 }
 
-export function TableLoader({ columns, rows = 6, showHeader = true }: TableLoaderProps) {
+export function TableLoader({
+  columns,
+  rows = 6,
+  showHeader = true,
+}: TableLoaderProps) {
   return (
     <div className="relative overflow-hidden">
       <Table>
@@ -31,14 +42,18 @@ export function TableLoader({ columns, rows = 6, showHeader = true }: TableLoade
                     {colIndex === 0 && (
                       <Skeleton className="h-8 w-8 rounded-full flex-shrink-0" />
                     )}
-                    <Skeleton 
+                    <Skeleton
                       className={`h-4 ${
-                        colIndex === 0 ? 'w-[100px]' :
-                        colIndex === 1 ? 'w-[140px]' :
-                        colIndex === 2 ? 'w-[80px]' :
-                        colIndex === 3 ? 'w-[60px]' :
-                        'w-[90px]'
-                      }`} 
+                        colIndex === 0
+                          ? "w-[100px]"
+                          : colIndex === 1
+                            ? "w-[140px]"
+                            : colIndex === 2
+                              ? "w-[80px]"
+                              : colIndex === 3
+                                ? "w-[60px]"
+                                : "w-[90px]"
+                      }`}
                     />
                   </div>
                 </TableCell>
@@ -47,18 +62,18 @@ export function TableLoader({ columns, rows = 6, showHeader = true }: TableLoade
           ))}
         </TableBody>
       </Table>
-      
+
       {/* Animated overlay for extra loading effect */}
       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-pulse pointer-events-none" />
     </div>
   );
 }
 
-export function TableLoaderCard({ 
-  title, 
-  columns, 
+export function TableLoaderCard({
+  title,
+  columns,
   rows = 6,
-  showHeader = true 
+  showHeader = true,
 }: TableLoaderProps & { title: string }) {
   return (
     <div className="space-y-4">
@@ -72,13 +87,13 @@ export function TableLoaderCard({
           <Skeleton className="h-9 w-[32px]" />
         </div>
       </div>
-      
+
       <div className="flex space-x-2 mb-4">
         <Skeleton className="h-9 w-[200px]" />
         <Skeleton className="h-9 w-[120px]" />
         <Skeleton className="h-9 w-[80px]" />
       </div>
-      
+
       <div className="border rounded-md">
         <TableLoader columns={columns} rows={rows} showHeader={showHeader} />
       </div>
