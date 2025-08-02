@@ -207,4 +207,48 @@
   .scrollbar-none::-webkit-scrollbar {
     display: none;
   }
+
+  /* App Settings Custom Classes */
+  .compact-mode {
+    --spacing-scale: 0.75;
+  }
+
+  .compact-mode .p-4 {
+    padding: calc(1rem * var(--spacing-scale));
+  }
+
+  .compact-mode .p-6 {
+    padding: calc(1.5rem * var(--spacing-scale));
+  }
+
+  .compact-mode .space-y-4 > * + * {
+    margin-top: calc(1rem * var(--spacing-scale));
+  }
+
+  .compact-mode .space-y-6 > * + * {
+    margin-top: calc(1.5rem * var(--spacing-scale));
+  }
+
+  .no-animations * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+  }
+
+  /* Font size overrides */
+  .text-sm {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+  }
+
+  .text-base {
+    font-size: 1rem;
+    line-height: 1.5rem;
+  }
+
+  .text-lg {
+    font-size: 1.125rem;
+    line-height: 1.75rem;
+  }
 }
