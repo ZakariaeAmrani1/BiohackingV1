@@ -44,6 +44,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/components/ui/use-toast";
+import { TableLoader, GridLoader } from "@/components/ui/table-loader";
 import ProductFormModal from "@/components/products/ProductFormModal";
 import ProductDetailsModal from "@/components/products/ProductDetailsModal";
 import DeleteProductModal from "@/components/products/DeleteProductModal";
