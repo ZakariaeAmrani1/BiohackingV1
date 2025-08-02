@@ -1,7 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import {
-  Users,
+  Stethoscope,
   Search,
   Plus,
   Eye,
@@ -12,10 +11,11 @@ import {
   Table as TableIcon,
   Clock,
   User,
-  Mail,
-  Phone,
-  Heart,
-  FileText,
+  Settings,
+  Euro,
+  TrendingUp,
+  Activity,
+  BarChart3,
 } from "lucide-react";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -44,54 +44,52 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/components/ui/use-toast";
-import ClientFormModal from "@/components/clients/ClientFormModal";
-import ClientDetailsModal from "@/components/clients/ClientDetailsModal";
-import DeleteClientModal from "@/components/clients/DeleteClientModal";
+import SoinFormModal from "@/components/soins/SoinFormModal";
+import SoinDetailsModal from "@/components/soins/SoinDetailsModal";
+import DeleteSoinModal from "@/components/soins/DeleteSoinModal";
 import {
-  ClientsService,
-  Client,
-  ClientFormData,
-  calculateAge,
-  getBloodGroups,
-} from "@/services/clientsService";
+  SoinsService,
+  Soin,
+  SoinFormData,
+  SoinType,
+  getAvailableDoctors,
+  formatPrice,
+  getSoinTypes,
+  getSoinTypeColor,
+  getRevenueStatistics,
+} from "@/services/soinsService";
 
-export default function Patients() {
-  const navigate = useNavigate();
+export default function Soins() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [bloodGroupFilter, setBloodGroupFilter] = useState<string>("tous");
   const [creatorFilter, setCreatorFilter] = useState<string>("tous");
-  const [ageFilter, setAgeFilter] = useState<string>("tous");
+  const [typeFilter, setTypeFilter] = useState<string>("tous");
   const [viewMode, setViewMode] = useState<"table" | "cards">("table");
 
   // Data state
-  const [clients, setClients] = useState<Client[]>([]);
+  const [soins, setSoins] = useState<Soin[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   // Modal states
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [selectedClient, setSelectedClient] = useState<Client | null>(null);
+  const [selectedSoin, setSelectedSoin] = useState<Soin | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { toast } = useToast();
 
-  // Get unique creators and blood groups for filter dropdowns
-  const creators = Array.from(
-    new Set(clients.map((client) => client.Cree_par)),
-  );
-  const bloodGroups = getBloodGroups();
+  // Get unique creators for filter dropdown
+  const creators = Array.from(new Set(soins.map((soin) => soin.Cree_par)));
 
-  // Load clients on component mount
+  // Load soins on component mount
   useEffect(() => {
-    loadClients();
+    loadSoins();
   }, []);
 
   // Add escape key handler to force close modals if stuck
   useEffect(() => {
     const handleEscapeKey = (event: KeyboardEvent) => {
       if (event.key === "Escape" && event.ctrlKey) {
-        // Ctrl+Escape force closes all modals
         forceCloseAllModals();
       }
     };
@@ -102,15 +100,15 @@ export default function Patients() {
     };
   }, []);
 
-  const loadClients = async () => {
+  const loadSoins = async () => {
     try {
       setIsLoading(true);
-      const data = await ClientsService.getAll();
-      setClients(data);
+      const data = await SoinsService.getAll();
+      setSoins(data);
     } catch (error) {
       toast({
         title: "Erreur",
-        description: "Impossible de charger les patients",
+        description: "Impossible de charger les soins",
         variant: "destructive",
       });
     } finally {
@@ -119,57 +117,37 @@ export default function Patients() {
   };
 
   // Filter and search logic
-  const filteredClients = useMemo(() => {
-    return clients.filter((client) => {
+  const filteredSoins = useMemo(() => {
+    return soins.filter((soin) => {
       const matchesSearch =
-        client.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        client.prenom.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        client.CIN.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        client.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        client.numero_telephone.includes(searchTerm);
-
-      const matchesBloodGroup =
-        bloodGroupFilter === "tous" ||
-        client.groupe_sanguin === bloodGroupFilter;
+        soin.Nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        soin.Type.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        soin.Cree_par.toLowerCase().includes(searchTerm.toLowerCase());
 
       const matchesCreator =
-        creatorFilter === "tous" || client.Cree_par === creatorFilter;
+        creatorFilter === "tous" || soin.Cree_par === creatorFilter;
 
-      let matchesAge = true;
-      if (ageFilter !== "tous") {
-        const age = calculateAge(client.date_naissance);
-        switch (ageFilter) {
-          case "enfant":
-            matchesAge = age < 18;
-            break;
-          case "adulte":
-            matchesAge = age >= 18 && age < 65;
-            break;
-          case "senior":
-            matchesAge = age >= 65;
-            break;
-        }
-      }
+      const matchesType = typeFilter === "tous" || soin.Type === typeFilter;
 
-      return matchesSearch && matchesBloodGroup && matchesCreator && matchesAge;
+      return matchesSearch && matchesCreator && matchesType;
     });
-  }, [searchTerm, bloodGroupFilter, creatorFilter, ageFilter, clients]);
+  }, [searchTerm, creatorFilter, typeFilter, soins]);
 
   // CRUD Operations
-  const handleCreateClient = async (data: ClientFormData) => {
+  const handleCreateSoin = async (data: SoinFormData) => {
     try {
       setIsSubmitting(true);
-      await ClientsService.create(data);
-      await loadClients();
+      await SoinsService.create(data);
+      await loadSoins();
       closeFormModal();
       toast({
         title: "Succès",
-        description: "Le patient a été créé avec succès",
+        description: "Le soin a été créé avec succès",
       });
     } catch (error) {
       toast({
         title: "Erreur",
-        description: "Impossible de créer le patient",
+        description: "Impossible de créer le soin",
         variant: "destructive",
       });
       throw error;
@@ -178,22 +156,22 @@ export default function Patients() {
     }
   };
 
-  const handleUpdateClient = async (data: ClientFormData) => {
-    if (!selectedClient) return;
+  const handleUpdateSoin = async (data: SoinFormData) => {
+    if (!selectedSoin) return;
 
     try {
       setIsSubmitting(true);
-      await ClientsService.update(selectedClient.id, data);
-      await loadClients();
+      await SoinsService.update(selectedSoin.id, data);
+      await loadSoins();
       closeFormModal();
       toast({
         title: "Succès",
-        description: "Le patient a été modifié avec succès",
+        description: "Le soin a été modifié avec succès",
       });
     } catch (error) {
       toast({
         title: "Erreur",
-        description: "Impossible de modifier le patient",
+        description: "Impossible de modifier le soin",
         variant: "destructive",
       });
       throw error;
@@ -202,22 +180,22 @@ export default function Patients() {
     }
   };
 
-  const handleDeleteClient = async () => {
-    if (!selectedClient) return;
+  const handleDeleteSoin = async () => {
+    if (!selectedSoin) return;
 
     try {
       setIsSubmitting(true);
-      await ClientsService.delete(selectedClient.id);
-      await loadClients();
+      await SoinsService.delete(selectedSoin.id);
+      await loadSoins();
       closeDeleteModal();
       toast({
         title: "Succès",
-        description: "Le patient a été supprim�� avec succès",
+        description: "Le soin a été supprimé avec succès",
       });
     } catch (error) {
       toast({
         title: "Erreur",
-        description: "Impossible de supprimer le patient",
+        description: "Impossible de supprimer le soin",
         variant: "destructive",
       });
       throw error;
@@ -228,71 +206,65 @@ export default function Patients() {
 
   // Modal handlers
   const openCreateModal = () => {
-    setSelectedClient(null);
+    setSelectedSoin(null);
     setIsFormModalOpen(true);
   };
 
-  const openEditModal = (client: Client) => {
-    // Close any open modals first
+  const openEditModal = (soin: Soin) => {
     closeModals();
     setTimeout(() => {
-      setSelectedClient(client);
+      setSelectedSoin(soin);
       setIsFormModalOpen(true);
     }, 100);
   };
 
-  const openDetailsModal = (client: Client) => {
+  const openDetailsModal = (soin: Soin) => {
     closeModals();
     setTimeout(() => {
-      setSelectedClient(client);
+      setSelectedSoin(soin);
       setIsDetailsModalOpen(true);
     }, 100);
   };
 
-  const openDeleteModal = (client: Client) => {
+  const openDeleteModal = (soin: Soin) => {
     closeModals();
     setTimeout(() => {
-      setSelectedClient(client);
+      setSelectedSoin(soin);
       setIsDeleteModalOpen(true);
     }, 100);
   };
 
-  const navigateToDocuments = (client: Client) => {
-    navigate(`/patients/${client.CIN}/documents`);
-  };
-
-  // Force close all modals - can be used as emergency escape
+  // Force close all modals
   const forceCloseAllModals = () => {
     setIsFormModalOpen(false);
     setIsDetailsModalOpen(false);
     setIsDeleteModalOpen(false);
-    setSelectedClient(null);
+    setSelectedSoin(null);
     setIsSubmitting(false);
   };
 
   const closeModals = () => {
-    // Use setTimeout to ensure proper cleanup order
     setTimeout(() => {
       setIsFormModalOpen(false);
       setIsDetailsModalOpen(false);
       setIsDeleteModalOpen(false);
-      setSelectedClient(null);
+      setSelectedSoin(null);
     }, 0);
   };
 
   const closeFormModal = () => {
     setIsFormModalOpen(false);
-    setSelectedClient(null);
+    setSelectedSoin(null);
   };
 
   const closeDetailsModal = () => {
     setIsDetailsModalOpen(false);
-    setSelectedClient(null);
+    setSelectedSoin(null);
   };
 
   const closeDeleteModal = () => {
     setIsDeleteModalOpen(false);
-    setSelectedClient(null);
+    setSelectedSoin(null);
   };
 
   const formatDate = (dateString: string) => {
@@ -304,16 +276,8 @@ export default function Patients() {
     });
   };
 
-  const formatDateTime = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("fr-FR", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
+  // Get statistics
+  const statistics = getRevenueStatistics(soins);
 
   return (
     <DashboardLayout>
@@ -321,15 +285,84 @@ export default function Patients() {
         {/* Header */}
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Patients</h1>
+            <h1 className="text-3xl font-bold tracking-tight">Soins</h1>
             <p className="text-muted-foreground">
-              Gestion des dossiers patients et informations médicales
+              Gestion des services et soins médicaux
             </p>
           </div>
           <Button className="gap-2" onClick={openCreateModal}>
             <Plus className="h-4 w-4" />
-            Nouveau Patient
+            Nouveau Soin
           </Button>
+        </div>
+
+        {/* Statistics Cards */}
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Total Services
+              </CardTitle>
+              <Stethoscope className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {statistics.totalServices}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Services disponibles
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Prix Moyen</CardTitle>
+              <Euro className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {formatPrice(statistics.averagePrice)}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Prix moyen par service
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Prix Maximum
+              </CardTitle>
+              <TrendingUp className="h-4 w-4 text-green-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-green-600">
+                {formatPrice(statistics.highestPrice)}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Service le plus cher
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Revenu Potentiel
+              </CardTitle>
+              <BarChart3 className="h-4 w-4 text-blue-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-blue-600">
+                {formatPrice(statistics.totalRevenue)}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Si tous services utilisés 1x
+              </p>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Search and Filters */}
@@ -338,31 +371,28 @@ export default function Patients() {
             <CardTitle className="text-lg">Rechercher et Filtrer</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
               {/* Search */}
-              <div className="relative lg:col-span-2">
+              <div className="relative lg:col-span-1">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
-                  placeholder="Rechercher par nom, CIN, email..."
+                  placeholder="Rechercher un soin..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10"
                 />
               </div>
 
-              {/* Blood Group Filter */}
-              <Select
-                value={bloodGroupFilter}
-                onValueChange={setBloodGroupFilter}
-              >
+              {/* Type Filter */}
+              <Select value={typeFilter} onValueChange={setTypeFilter}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Groupe sanguin" />
+                  <SelectValue placeholder="Type de soin" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="tous">Tous les groupes</SelectItem>
-                  {bloodGroups.map((group) => (
-                    <SelectItem key={group} value={group}>
-                      {group}
+                  <SelectItem value="tous">Tous les types</SelectItem>
+                  {getSoinTypes().map((type) => (
+                    <SelectItem key={type} value={type}>
+                      {type}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -383,52 +413,41 @@ export default function Patients() {
                 </SelectContent>
               </Select>
 
-              {/* Age Filter */}
-              <Select value={ageFilter} onValueChange={setAgeFilter}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Tranche d'âge" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="tous">Tous les âges</SelectItem>
-                  <SelectItem value="enfant">Enfants (&lt; 18 ans)</SelectItem>
-                  <SelectItem value="adulte">Adultes (18-65 ans)</SelectItem>
-                  <SelectItem value="senior">Seniors (&gt; 65 ans)</SelectItem>
-                </SelectContent>
-              </Select>
+              {/* View Toggle */}
+              <div className="flex rounded-lg border border-border p-1">
+                <Button
+                  variant={viewMode === "table" ? "default" : "ghost"}
+                  size="sm"
+                  onClick={() => setViewMode("table")}
+                  className="h-8 gap-2 flex-1"
+                >
+                  <TableIcon className="h-4 w-4" />
+                  Tableau
+                </Button>
+                <Button
+                  variant={viewMode === "cards" ? "default" : "ghost"}
+                  size="sm"
+                  onClick={() => setViewMode("cards")}
+                  className="h-8 gap-2 flex-1"
+                >
+                  <LayoutGrid className="h-4 w-4" />
+                  Cartes
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>
 
-        {/* Results Summary and View Toggle */}
+        {/* Results Summary */}
         <div className="flex items-center justify-between">
           <p className="text-sm text-muted-foreground">
             {isLoading
               ? "Chargement..."
-              : `${filteredClients.length} patient(s) trouvé(s)`}
+              : `${filteredSoins.length} soin(s) trouvé(s)`}
           </p>
-          <div className="flex rounded-lg border border-border p-1">
-            <Button
-              variant={viewMode === "table" ? "default" : "ghost"}
-              size="sm"
-              onClick={() => setViewMode("table")}
-              className="h-8 gap-2"
-            >
-              <TableIcon className="h-4 w-4" />
-              Tableau
-            </Button>
-            <Button
-              variant={viewMode === "cards" ? "default" : "ghost"}
-              size="sm"
-              onClick={() => setViewMode("cards")}
-              className="h-8 gap-2"
-            >
-              <LayoutGrid className="h-4 w-4" />
-              Cartes
-            </Button>
-          </div>
         </div>
 
-        {/* Clients Display - Table or Cards */}
+        {/* Soins Display - Table or Cards */}
         {viewMode === "table" ? (
           <Card>
             <CardContent className="p-0">
@@ -436,49 +455,41 @@ export default function Patients() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Patient</TableHead>
-                      <TableHead>CIN</TableHead>
-                      <TableHead>Âge</TableHead>
-                      <TableHead>Groupe sanguin</TableHead>
-                      <TableHead>Contact</TableHead>
+                      <TableHead>Soin</TableHead>
+                      <TableHead>Type</TableHead>
+                      <TableHead>Prix</TableHead>
                       <TableHead>Créé par</TableHead>
                       <TableHead>Créé le</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredClients.length > 0 ? (
-                      filteredClients.map((client) => (
-                        <TableRow key={client.id} className="hover:bg-muted/50">
+                    {filteredSoins.length > 0 ? (
+                      filteredSoins.map((soin) => (
+                        <TableRow key={soin.id} className="hover:bg-muted/50">
                           <TableCell>
-                            <div>
-                              <div className="font-medium">
-                                {client.prenom} {client.nom}
-                              </div>
-                              <div className="text-sm text-muted-foreground">
-                                {client.email}
+                            <div className="flex items-center gap-2">
+                              <Stethoscope className="h-4 w-4 text-primary" />
+                              <div>
+                                <div className="font-medium">{soin.Nom}</div>
+                                <div className="text-sm text-muted-foreground">
+                                  ID: {soin.id}
+                                </div>
                               </div>
                             </div>
                           </TableCell>
-                          <TableCell className="font-mono text-sm">
-                            {client.CIN}
-                          </TableCell>
                           <TableCell>
-                            {calculateAge(client.date_naissance)} ans
+                            <span
+                              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getSoinTypeColor(soin.Type)}`}
+                            >
+                              {soin.Type}
+                            </span>
                           </TableCell>
-                          <TableCell>
-                            <Badge variant="outline" className="gap-1">
-                              <Heart className="h-3 w-3" />
-                              {client.groupe_sanguin}
-                            </Badge>
+                          <TableCell className="font-mono">
+                            {formatPrice(soin.prix)}
                           </TableCell>
-                          <TableCell>
-                            <div className="text-sm">
-                              <div>{client.numero_telephone}</div>
-                            </div>
-                          </TableCell>
-                          <TableCell>{client.Cree_par}</TableCell>
-                          <TableCell>{formatDate(client.created_at)}</TableCell>
+                          <TableCell>{soin.Cree_par}</TableCell>
+                          <TableCell>{formatDate(soin.created_at)}</TableCell>
                           <TableCell className="text-right">
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
@@ -489,28 +500,21 @@ export default function Patients() {
                               <DropdownMenuContent align="end">
                                 <DropdownMenuItem
                                   className="gap-2"
-                                  onClick={() => openDetailsModal(client)}
+                                  onClick={() => openDetailsModal(soin)}
                                 >
                                   <Eye className="h-4 w-4" />
-                                  Voir dossier
+                                  Voir détails
                                 </DropdownMenuItem>
                                 <DropdownMenuItem
                                   className="gap-2"
-                                  onClick={() => navigateToDocuments(client)}
-                                >
-                                  <FileText className="h-4 w-4" />
-                                  Voir les documents
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                  className="gap-2"
-                                  onClick={() => openEditModal(client)}
+                                  onClick={() => openEditModal(soin)}
                                 >
                                   <Edit className="h-4 w-4" />
                                   Modifier
                                 </DropdownMenuItem>
                                 <DropdownMenuItem
                                   className="gap-2 text-red-600"
-                                  onClick={() => openDeleteModal(client)}
+                                  onClick={() => openDeleteModal(soin)}
                                 >
                                   <Trash2 className="h-4 w-4" />
                                   Supprimer
@@ -522,12 +526,11 @@ export default function Patients() {
                       ))
                     ) : (
                       <TableRow>
-                        <TableCell colSpan={8} className="text-center py-8">
+                        <TableCell colSpan={6} className="text-center py-8">
                           <div className="flex flex-col items-center gap-2">
-                            <Users className="h-8 w-8 text-muted-foreground" />
+                            <Stethoscope className="h-8 w-8 text-muted-foreground" />
                             <p className="text-muted-foreground">
-                              Aucun patient trouvé avec les critères
-                              sélectionnés
+                              Aucun soin trouvé avec les critères sélectionnés
                             </p>
                           </div>
                         </TableCell>
@@ -541,58 +544,56 @@ export default function Patients() {
         ) : (
           /* Cards View */
           <div className="space-y-6">
-            {filteredClients.length > 0 ? (
+            {filteredSoins.length > 0 ? (
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {filteredClients.map((client) => (
+                {filteredSoins.map((soin) => (
                   <Card
-                    key={client.id}
+                    key={soin.id}
                     className="hover:shadow-md transition-shadow"
                   >
                     <CardHeader className="pb-3">
                       <div className="flex items-start justify-between">
                         <div className="space-y-1">
-                          <CardTitle className="text-lg">
-                            {client.prenom} {client.nom}
+                          <CardTitle className="text-lg flex items-center gap-2">
+                            <Stethoscope className="h-5 w-5 text-primary" />
+                            {soin.Nom}
                           </CardTitle>
-                          <p className="text-sm text-muted-foreground font-mono">
-                            CIN: {client.CIN}
+                          <p className="text-sm text-muted-foreground">
+                            ID: {soin.id}
                           </p>
                         </div>
-                        <Badge variant="outline" className="gap-1">
-                          <Heart className="h-3 w-3" />
-                          {client.groupe_sanguin}
-                        </Badge>
+                        <span
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getSoinTypeColor(soin.Type)}`}
+                        >
+                          {soin.Type}
+                        </span>
                       </div>
                     </CardHeader>
                     <CardContent className="space-y-4">
+                      <div>
+                        <div className="text-sm text-muted-foreground">
+                          Prix
+                        </div>
+                        <div className="font-mono text-2xl font-bold">
+                          {formatPrice(soin.prix)}
+                        </div>
+                      </div>
+
                       <div className="space-y-2">
-                        <div className="flex items-center gap-2 text-sm">
-                          <Clock className="h-4 w-4 text-muted-foreground" />
-                          <span className="font-medium">Âge:</span>
-                          <span>{calculateAge(client.date_naissance)} ans</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-sm">
-                          <Mail className="h-4 w-4 text-muted-foreground" />
-                          <span className="font-medium">Email:</span>
-                          <span className="truncate">{client.email}</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-sm">
-                          <Phone className="h-4 w-4 text-muted-foreground" />
-                          <span className="font-medium">Tél:</span>
-                          <span>{client.numero_telephone}</span>
-                        </div>
                         <div className="flex items-center gap-2 text-sm">
                           <User className="h-4 w-4 text-muted-foreground" />
                           <span className="font-medium">Créé par:</span>
-                          <span>{client.Cree_par}</span>
+                          <span>{soin.Cree_par}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm">
+                          <Clock className="h-4 w-4 text-muted-foreground" />
+                          <span className="font-medium">Créé le:</span>
+                          <span>{formatDate(soin.created_at)}</span>
                         </div>
                       </div>
 
                       <div className="border-t pt-3">
-                        <div className="flex items-center justify-between">
-                          <p className="text-xs text-muted-foreground">
-                            Ajouté le {formatDate(client.created_at)}
-                          </p>
+                        <div className="flex items-center justify-end">
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                               <Button
@@ -600,34 +601,27 @@ export default function Patients() {
                                 size="sm"
                                 className="h-8 w-8 p-0"
                               >
-                                <ChevronDown className="h-4 w-4" />
+                                <Settings className="h-4 w-4" />
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
                               <DropdownMenuItem
                                 className="gap-2"
-                                onClick={() => openDetailsModal(client)}
+                                onClick={() => openDetailsModal(soin)}
                               >
                                 <Eye className="h-4 w-4" />
-                                Voir dossier
+                                Voir détails
                               </DropdownMenuItem>
                               <DropdownMenuItem
                                 className="gap-2"
-                                onClick={() => navigateToDocuments(client)}
-                              >
-                                <FileText className="h-4 w-4" />
-                                Voir les documents
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
-                                className="gap-2"
-                                onClick={() => openEditModal(client)}
+                                onClick={() => openEditModal(soin)}
                               >
                                 <Edit className="h-4 w-4" />
                                 Modifier
                               </DropdownMenuItem>
                               <DropdownMenuItem
                                 className="gap-2 text-red-600"
-                                onClick={() => openDeleteModal(client)}
+                                onClick={() => openDeleteModal(soin)}
                               >
                                 <Trash2 className="h-4 w-4" />
                                 Supprimer
@@ -644,13 +638,11 @@ export default function Patients() {
               <Card>
                 <CardContent className="text-center py-12">
                   <div className="flex flex-col items-center gap-4">
-                    <Users className="h-12 w-12 text-muted-foreground" />
+                    <Stethoscope className="h-12 w-12 text-muted-foreground" />
                     <div>
-                      <h3 className="text-lg font-medium">
-                        Aucun patient trouvé
-                      </h3>
+                      <h3 className="text-lg font-medium">Aucun soin trouvé</h3>
                       <p className="text-muted-foreground">
-                        Aucun patient ne correspond aux critères sélectionnés
+                        Aucun soin ne correspond aux critères sélectionnés
                       </p>
                     </div>
                   </div>
@@ -661,27 +653,27 @@ export default function Patients() {
         )}
 
         {/* Modals */}
-        <ClientFormModal
+        <SoinFormModal
           isOpen={isFormModalOpen}
           onClose={closeFormModal}
-          onSubmit={selectedClient ? handleUpdateClient : handleCreateClient}
-          client={selectedClient}
+          onSubmit={selectedSoin ? handleUpdateSoin : handleCreateSoin}
+          soin={selectedSoin}
           isLoading={isSubmitting}
         />
 
-        <ClientDetailsModal
+        <SoinDetailsModal
           isOpen={isDetailsModalOpen}
           onClose={closeDetailsModal}
-          client={selectedClient}
+          soin={selectedSoin}
           onEdit={openEditModal}
           onDelete={openDeleteModal}
         />
 
-        <DeleteClientModal
+        <DeleteSoinModal
           isOpen={isDeleteModalOpen}
           onClose={closeDeleteModal}
-          onConfirm={handleDeleteClient}
-          client={selectedClient}
+          onConfirm={handleDeleteSoin}
+          soin={selectedSoin}
           isLoading={isSubmitting}
         />
       </div>
