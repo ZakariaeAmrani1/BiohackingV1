@@ -34,6 +34,7 @@ export default function MobileNav() {
   const [open, setOpen] = useState(false);
   const location = useLocation();
   const { user, logout } = useAuth();
+  const { isDark } = useTheme();
 
   return (
     <div className="lg:hidden border-b border-border bg-card">
