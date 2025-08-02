@@ -4,6 +4,7 @@ export interface AppSettings {
   compactMode: boolean;
   showAnimations: boolean;
   language: 'fr' | 'en' | 'nl';
+  currency: string;
   autoSave: boolean;
   notifications: {
     desktop: boolean;
@@ -19,6 +20,7 @@ const defaultSettings: AppSettings = {
   compactMode: false,
   showAnimations: true,
   language: 'fr',
+  currency: 'DH',
   autoSave: true,
   notifications: {
     desktop: true,
@@ -74,7 +76,7 @@ export class AppSettingsService {
   // Apply settings to the DOM
   static applySettings(settings: AppSettings): void {
     const root = document.documentElement;
-    
+
     // Apply theme
     if (settings.theme === 'dark') {
       root.classList.add('dark');
@@ -89,7 +91,7 @@ export class AppSettingsService {
         root.classList.remove('dark');
       }
     }
-    
+
     // Apply font size
     root.classList.remove('text-sm', 'text-base', 'text-lg');
     switch (settings.fontSize) {
@@ -102,20 +104,28 @@ export class AppSettingsService {
       default:
         root.classList.add('text-base');
     }
-    
+
     // Apply compact mode
     if (settings.compactMode) {
       root.classList.add('compact-mode');
     } else {
       root.classList.remove('compact-mode');
     }
-    
+
     // Apply animations
     if (!settings.showAnimations) {
       root.classList.add('no-animations');
     } else {
       root.classList.remove('no-animations');
     }
+
+    // Store currency in CSS custom property for global access
+    root.style.setProperty('--app-currency', settings.currency);
+
+    // Dispatch currency change event for components to listen
+    window.dispatchEvent(new CustomEvent('currencyChanged', {
+      detail: { currency: settings.currency }
+    }));
   }
 
   // Initialize settings on app start
@@ -199,6 +209,25 @@ export class AppSettingsService {
       { value: 'en', label: 'English' },
       { value: 'nl', label: 'Nederlands' },
     ];
+  }
+
+  // Get currency options
+  static getCurrencyOptions(): { value: string; label: string; symbol: string }[] {
+    return [
+      { value: 'DH', label: 'Dirham marocain (DH)', symbol: 'DH' },
+      { value: 'EUR', label: 'Euro (€)', symbol: '€' },
+      { value: 'USD', label: 'Dollar américain ($)', symbol: '$' },
+      { value: 'GBP', label: 'Livre sterling (£)', symbol: '£' },
+      { value: 'CAD', label: 'Dollar canadien (C$)', symbol: 'C$' },
+      { value: 'CHF', label: 'Franc suisse (CHF)', symbol: 'CHF' },
+    ];
+  }
+
+  // Get current currency symbol
+  static getCurrentCurrencySymbol(): string {
+    const currencyOptions = this.getCurrencyOptions();
+    const currentCurrency = currencyOptions.find(c => c.value === currentSettings.currency);
+    return currentCurrency?.symbol || currentSettings.currency;
   }
 
   // Export settings
