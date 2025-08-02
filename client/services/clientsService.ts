@@ -197,15 +197,15 @@ export class ClientsService {
 
     // Log activity
     ActivitiesService.logActivity(
-      'patient',
-      'created',
+      "patient",
+      "created",
       newClient.id,
       `${newClient.prenom} ${newClient.nom}`,
       data.Cree_par,
     );
 
     // Dispatch custom event for real-time updates
-    window.dispatchEvent(new CustomEvent('activityLogged'));
+    window.dispatchEvent(new CustomEvent("activityLogged"));
 
     return newClient;
   }
@@ -229,15 +229,15 @@ export class ClientsService {
 
     // Log activity
     ActivitiesService.logActivity(
-      'patient',
-      'updated',
+      "patient",
+      "updated",
       id,
       `${updatedClient.prenom} ${updatedClient.nom}`,
       data.Cree_par,
     );
 
     // Dispatch custom event for real-time updates
-    window.dispatchEvent(new CustomEvent('activityLogged'));
+    window.dispatchEvent(new CustomEvent("activityLogged"));
 
     return updatedClient;
   }
@@ -254,15 +254,15 @@ export class ClientsService {
 
     // Log activity
     ActivitiesService.logActivity(
-      'patient',
-      'deleted',
+      "patient",
+      "deleted",
       id,
       `${deletedClient.prenom} ${deletedClient.nom}`,
-      'System', // Could be improved to track actual user
+      "System", // Could be improved to track actual user
     );
 
     // Dispatch custom event for real-time updates
-    window.dispatchEvent(new CustomEvent('activityLogged'));
+    window.dispatchEvent(new CustomEvent("activityLogged"));
 
     return true;
   }

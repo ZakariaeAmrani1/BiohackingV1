@@ -8,7 +8,7 @@ import {
   Receipt,
   FileText,
   FileType,
-  RefreshCw
+  RefreshCw,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -35,7 +35,9 @@ export default function RecentActivities() {
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const loadActivities = () => {
-    const recentActivities = ActivitiesService.getRecentActivities(8) as ActivityWithDisplay[];
+    const recentActivities = ActivitiesService.getRecentActivities(
+      8,
+    ) as ActivityWithDisplay[];
     setActivities(recentActivities);
   };
 
@@ -64,14 +66,14 @@ export default function RecentActivities() {
     };
 
     // Listen for custom activity events
-    window.addEventListener('activityLogged', handleActivityUpdate);
+    window.addEventListener("activityLogged", handleActivityUpdate);
 
     return () => {
-      window.removeEventListener('activityLogged', handleActivityUpdate);
+      window.removeEventListener("activityLogged", handleActivityUpdate);
     };
   }, []);
 
-  const getActivityIcon = (type: Activity['type']) => {
+  const getActivityIcon = (type: Activity["type"]) => {
     return ACTIVITY_ICONS[type] || FileText;
   };
 
@@ -88,7 +90,9 @@ export default function RecentActivities() {
           disabled={isRefreshing}
           className="h-8 w-8 p-0"
         >
-          <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+          <RefreshCw
+            className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`}
+          />
         </Button>
       </CardHeader>
       <CardContent>
@@ -98,7 +102,9 @@ export default function RecentActivities() {
               const Icon = getActivityIcon(activity.type);
               return (
                 <div key={activity.id} className="flex items-start gap-3">
-                  <div className={`rounded-full p-2 bg-accent ${activity.config?.color || 'text-gray-500'}`}>
+                  <div
+                    className={`rounded-full p-2 bg-accent ${activity.config?.color || "text-gray-500"}`}
+                  >
                     <Icon className="h-4 w-4" />
                   </div>
                   <div className="flex-1 min-w-0">

@@ -23,13 +23,23 @@ import DocumentFormModal from "@/components/documents/DocumentFormModal";
 import DocumentTemplateFormModal from "@/components/documentTemplates/DocumentTemplateFormModal";
 
 // Import services for creating entities
-import { AppointmentFormData, AppointmentsService } from "@/services/appointmentsService";
+import {
+  AppointmentFormData,
+  AppointmentsService,
+} from "@/services/appointmentsService";
 import { ClientFormData, ClientsService } from "@/services/clientsService";
 import { ProductFormData, ProductsService } from "@/services/productsService";
 import { SoinFormData, SoinsService } from "@/services/soinsService";
 import { FactureFormData, InvoicesService } from "@/services/invoicesService";
-import { DocumentFormData, DocumentsService } from "@/services/documentsService";
-import { DocumentTemplateFormData, DocumentTemplatesService, DocumentTemplate } from "@/services/documentTemplatesService";
+import {
+  DocumentFormData,
+  DocumentsService,
+} from "@/services/documentsService";
+import {
+  DocumentTemplateFormData,
+  DocumentTemplatesService,
+  DocumentTemplate,
+} from "@/services/documentTemplatesService";
 
 interface QuickAction {
   title: string;
@@ -54,7 +64,9 @@ export default function QuickActions() {
   });
 
   const [isSubmitting, setIsSubmitting] = useState<Record<string, boolean>>({});
-  const [documentTemplates, setDocumentTemplates] = useState<DocumentTemplate[]>([]);
+  const [documentTemplates, setDocumentTemplates] = useState<
+    DocumentTemplate[]
+  >([]);
 
   // Load document templates when component mounts
   useEffect(() => {
@@ -123,17 +135,17 @@ export default function QuickActions() {
   ];
 
   const openModal = (modalKey: string) => {
-    setOpenModals(prev => ({ ...prev, [modalKey]: true }));
+    setOpenModals((prev) => ({ ...prev, [modalKey]: true }));
   };
 
   const closeModal = (modalKey: string) => {
-    setOpenModals(prev => ({ ...prev, [modalKey]: false }));
+    setOpenModals((prev) => ({ ...prev, [modalKey]: false }));
   };
 
   // CRUD handlers
   const handleCreateAppointment = async (data: AppointmentFormData) => {
     try {
-      setIsSubmitting(prev => ({ ...prev, appointment: true }));
+      setIsSubmitting((prev) => ({ ...prev, appointment: true }));
       await AppointmentsService.create(data);
       closeModal("appointment");
       toast({
@@ -148,13 +160,13 @@ export default function QuickActions() {
       });
       throw error;
     } finally {
-      setIsSubmitting(prev => ({ ...prev, appointment: false }));
+      setIsSubmitting((prev) => ({ ...prev, appointment: false }));
     }
   };
 
   const handleCreateClient = async (data: ClientFormData) => {
     try {
-      setIsSubmitting(prev => ({ ...prev, patient: true }));
+      setIsSubmitting((prev) => ({ ...prev, patient: true }));
       await ClientsService.create(data);
       closeModal("patient");
       toast({
@@ -169,13 +181,13 @@ export default function QuickActions() {
       });
       throw error;
     } finally {
-      setIsSubmitting(prev => ({ ...prev, patient: false }));
+      setIsSubmitting((prev) => ({ ...prev, patient: false }));
     }
   };
 
   const handleCreateProduct = async (data: ProductFormData) => {
     try {
-      setIsSubmitting(prev => ({ ...prev, product: true }));
+      setIsSubmitting((prev) => ({ ...prev, product: true }));
       await ProductsService.create(data);
       closeModal("product");
       toast({
@@ -190,13 +202,13 @@ export default function QuickActions() {
       });
       throw error;
     } finally {
-      setIsSubmitting(prev => ({ ...prev, product: false }));
+      setIsSubmitting((prev) => ({ ...prev, product: false }));
     }
   };
 
   const handleCreateSoin = async (data: SoinFormData) => {
     try {
-      setIsSubmitting(prev => ({ ...prev, soin: true }));
+      setIsSubmitting((prev) => ({ ...prev, soin: true }));
       await SoinsService.create(data);
       closeModal("soin");
       toast({
@@ -211,13 +223,13 @@ export default function QuickActions() {
       });
       throw error;
     } finally {
-      setIsSubmitting(prev => ({ ...prev, soin: false }));
+      setIsSubmitting((prev) => ({ ...prev, soin: false }));
     }
   };
 
   const handleCreateInvoice = async (data: FactureFormData) => {
     try {
-      setIsSubmitting(prev => ({ ...prev, invoice: true }));
+      setIsSubmitting((prev) => ({ ...prev, invoice: true }));
       await InvoicesService.create(data);
       closeModal("invoice");
       toast({
@@ -232,13 +244,13 @@ export default function QuickActions() {
       });
       throw error;
     } finally {
-      setIsSubmitting(prev => ({ ...prev, invoice: false }));
+      setIsSubmitting((prev) => ({ ...prev, invoice: false }));
     }
   };
 
   const handleCreateDocument = async (data: DocumentFormData) => {
     try {
-      setIsSubmitting(prev => ({ ...prev, document: true }));
+      setIsSubmitting((prev) => ({ ...prev, document: true }));
       await DocumentsService.create(data);
       closeModal("document");
       toast({
@@ -253,13 +265,15 @@ export default function QuickActions() {
       });
       throw error;
     } finally {
-      setIsSubmitting(prev => ({ ...prev, document: false }));
+      setIsSubmitting((prev) => ({ ...prev, document: false }));
     }
   };
 
-  const handleCreateDocumentTemplate = async (data: DocumentTemplateFormData) => {
+  const handleCreateDocumentTemplate = async (
+    data: DocumentTemplateFormData,
+  ) => {
     try {
-      setIsSubmitting(prev => ({ ...prev, documentTemplate: true }));
+      setIsSubmitting((prev) => ({ ...prev, documentTemplate: true }));
       await DocumentTemplatesService.create(data);
       closeModal("documentTemplate");
       toast({
@@ -274,7 +288,7 @@ export default function QuickActions() {
       });
       throw error;
     } finally {
-      setIsSubmitting(prev => ({ ...prev, documentTemplate: false }));
+      setIsSubmitting((prev) => ({ ...prev, documentTemplate: false }));
     }
   };
 
@@ -282,7 +296,9 @@ export default function QuickActions() {
     <>
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg font-semibold">Actions Rapides</CardTitle>
+          <CardTitle className="text-lg font-semibold">
+            Actions Rapides
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid gap-3 sm:grid-cols-1">

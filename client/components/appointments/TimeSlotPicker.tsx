@@ -51,7 +51,10 @@ export default function TimeSlotPicker({
   // Load time slots when selected date changes
   useEffect(() => {
     if (selectedDate) {
-      const slots = generateTimeSlotsForDate(selectedDate, excludeAppointmentId);
+      const slots = generateTimeSlotsForDate(
+        selectedDate,
+        excludeAppointmentId,
+      );
       setTimeSlots(slots);
     } else {
       setTimeSlots([]);
@@ -71,7 +74,7 @@ export default function TimeSlotPicker({
     const dates = getAvailableDates(
       currentWeekStart,
       14, // Load 2 weeks ahead
-      excludeAppointmentId
+      excludeAppointmentId,
     );
     setAvailableDates(dates);
   };
@@ -89,7 +92,7 @@ export default function TimeSlotPicker({
   const navigateWeek = (direction: "prev" | "next") => {
     const newWeekStart = new Date(currentWeekStart);
     newWeekStart.setDate(
-      currentWeekStart.getDate() + (direction === "next" ? 7 : -7)
+      currentWeekStart.getDate() + (direction === "next" ? 7 : -7),
     );
     setCurrentWeekStart(newWeekStart);
   };
@@ -107,7 +110,7 @@ export default function TimeSlotPicker({
   const isDateAvailable = (date: Date): boolean => {
     return availableDates.some(
       (d) =>
-        d.date.toDateString() === date.toDateString() && d.hasAvailableSlots
+        d.date.toDateString() === date.toDateString() && d.hasAvailableSlots,
     );
   };
 
@@ -125,7 +128,7 @@ export default function TimeSlotPicker({
   const formatWeekRange = (): string => {
     const weekEnd = new Date(currentWeekStart);
     weekEnd.setDate(currentWeekStart.getDate() + 6);
-    
+
     return `${currentWeekStart.toLocaleDateString("fr-FR", {
       day: "2-digit",
       month: "short",
@@ -201,13 +204,17 @@ export default function TimeSlotPicker({
                     isPast && "opacity-50 cursor-not-allowed",
                     isWeekend && "bg-muted/50",
                     !isAvailable && !isPast && "opacity-60",
-                    isAvailable && !isPast && "hover:bg-primary/10"
+                    isAvailable && !isPast && "hover:bg-primary/10",
                   )}
-                  onClick={() => !isPast && isAvailable && handleDateSelect(date)}
+                  onClick={() =>
+                    !isPast && isAvailable && handleDateSelect(date)
+                  }
                   disabled={disabled || isPast || !isAvailable}
                 >
                   <span className="text-sm font-medium">{date.getDate()}</span>
-                  <span className="text-xs">{formatDate(date).split(" ")[1]}</span>
+                  <span className="text-xs">
+                    {formatDate(date).split(" ")[1]}
+                  </span>
                   {isAvailable && !isPast && (
                     <div className="w-1 h-1 bg-green-500 rounded-full mt-1" />
                   )}
@@ -224,7 +231,8 @@ export default function TimeSlotPicker({
           <CardHeader className="pb-3">
             <CardTitle className="text-lg flex items-center gap-2">
               <Clock className="h-5 w-5" />
-              Créneaux disponibles - {selectedDate.toLocaleDateString("fr-FR", {
+              Créneaux disponibles -{" "}
+              {selectedDate.toLocaleDateString("fr-FR", {
                 weekday: "long",
                 day: "2-digit",
                 month: "long",
@@ -240,14 +248,19 @@ export default function TimeSlotPicker({
                     key={index}
                     type="button"
                     variant={
-                      value === slot.datetime ? "default" :
-                      slot.available ? "outline" : "ghost"
+                      value === slot.datetime
+                        ? "default"
+                        : slot.available
+                          ? "outline"
+                          : "ghost"
                     }
                     className={cn(
                       "h-10 text-sm",
-                      !slot.available && "opacity-50 cursor-not-allowed bg-muted",
+                      !slot.available &&
+                        "opacity-50 cursor-not-allowed bg-muted",
                       slot.available && "hover:bg-primary/10",
-                      value === slot.datetime && "bg-primary text-primary-foreground"
+                      value === slot.datetime &&
+                        "bg-primary text-primary-foreground",
                     )}
                     onClick={() => handleTimeSlotSelect(slot)}
                     disabled={disabled || !slot.available}
@@ -279,7 +292,9 @@ export default function TimeSlotPicker({
               day: "2-digit",
               month: "long",
               year: "numeric",
-            })} à {new Date(value).toLocaleTimeString("fr-FR", {
+            })}{" "}
+            à{" "}
+            {new Date(value).toLocaleTimeString("fr-FR", {
               hour: "2-digit",
               minute: "2-digit",
             })}

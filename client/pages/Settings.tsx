@@ -48,20 +48,17 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { 
-  User as UserType, 
-  UserFormData, 
-  PasswordChangeData, 
-  UserService 
+import {
+  User as UserType,
+  UserFormData,
+  PasswordChangeData,
+  UserService,
 } from "@/services/userService";
-import { 
-  AppSettings, 
-  AppSettingsService 
-} from "@/services/appSettingsService";
+import { AppSettings, AppSettingsService } from "@/services/appSettingsService";
 
 export default function Settings() {
   const { toast } = useToast();
-  
+
   // User profile state
   const [user, setUser] = useState<UserType | null>(null);
   const [userFormData, setUserFormData] = useState<UserFormData>({
@@ -79,15 +76,15 @@ export default function Settings() {
     newPassword: "",
     confirmPassword: "",
   });
-  
+
   // App settings state
   const [appSettings, setAppSettings] = useState<AppSettings>({
-    theme: 'system',
-    fontSize: 'medium',
+    theme: "system",
+    fontSize: "medium",
     compactMode: false,
     showAnimations: true,
-    language: 'fr',
-    currency: 'DH',
+    language: "fr",
+    currency: "DH",
     autoSave: true,
     notifications: {
       desktop: true,
@@ -95,7 +92,7 @@ export default function Settings() {
       email: true,
     },
   });
-  
+
   // UI state
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -106,13 +103,13 @@ export default function Settings() {
   const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
   const [importData, setImportData] = useState("");
-  
+
   // Load data on component mount
   useEffect(() => {
     loadUserProfile();
     loadAppSettings();
   }, []);
-  
+
   const loadUserProfile = async () => {
     try {
       const userData = await UserService.getCurrentUser();
@@ -121,7 +118,7 @@ export default function Settings() {
         CIN: userData.CIN,
         nom: userData.nom,
         prenom: userData.prenom,
-        date_naissance: userData.date_naissance.split('T')[0],
+        date_naissance: userData.date_naissance.split("T")[0],
         adresse: userData.adresse,
         numero_telephone: userData.numero_telephone,
         email: userData.email,
@@ -135,7 +132,7 @@ export default function Settings() {
       });
     }
   };
-  
+
   const loadAppSettings = async () => {
     try {
       const settings = await AppSettingsService.getSettings();
@@ -148,24 +145,30 @@ export default function Settings() {
       });
     }
   };
-  
+
   const handleUserFormChange = (field: keyof UserFormData, value: string) => {
-    setUserFormData(prev => ({ ...prev, [field]: value }));
+    setUserFormData((prev) => ({ ...prev, [field]: value }));
     if (profileErrors.length > 0) {
       setProfileErrors([]);
     }
   };
-  
-  const handlePasswordChange = (field: keyof PasswordChangeData, value: string) => {
-    setPasswordData(prev => ({ ...prev, [field]: value }));
+
+  const handlePasswordChange = (
+    field: keyof PasswordChangeData,
+    value: string,
+  ) => {
+    setPasswordData((prev) => ({ ...prev, [field]: value }));
   };
-  
-  const handleAppSettingChange = async (setting: keyof AppSettings, value: any) => {
+
+  const handleAppSettingChange = async (
+    setting: keyof AppSettings,
+    value: any,
+  ) => {
     try {
       const newSettings = { ...appSettings, [setting]: value };
       setAppSettings(newSettings);
       await AppSettingsService.updateSettings({ [setting]: value });
-      
+
       toast({
         title: "Paramètre mis à jour",
         description: "Le paramètre a été sauvegardé automatiquement",
@@ -178,14 +181,19 @@ export default function Settings() {
       });
     }
   };
-  
-  const handleNotificationChange = async (key: keyof AppSettings['notifications'], value: boolean) => {
+
+  const handleNotificationChange = async (
+    key: keyof AppSettings["notifications"],
+    value: boolean,
+  ) => {
     try {
       const newNotifications = { ...appSettings.notifications, [key]: value };
       const newSettings = { ...appSettings, notifications: newNotifications };
       setAppSettings(newSettings);
-      await AppSettingsService.updateSettings({ notifications: newNotifications });
-      
+      await AppSettingsService.updateSettings({
+        notifications: newNotifications,
+      });
+
       toast({
         title: "Paramètre de notification mis à jour",
         description: "Le paramètre a été sauvegardé automatiquement",
@@ -198,14 +206,14 @@ export default function Settings() {
       });
     }
   };
-  
+
   const handleSaveProfile = async () => {
     const errors = UserService.validateUserData(userFormData);
     if (errors.length > 0) {
       setProfileErrors(errors);
       return;
     }
-    
+
     setIsLoading(true);
     try {
       const updatedUser = await UserService.updateProfile(userFormData);
@@ -224,7 +232,7 @@ export default function Settings() {
       setIsLoading(false);
     }
   };
-  
+
   const handleChangePassword = async () => {
     setIsLoading(true);
     try {
@@ -249,7 +257,7 @@ export default function Settings() {
       setIsLoading(false);
     }
   };
-  
+
   const handleResetSettings = async () => {
     setIsLoading(true);
     try {
@@ -258,7 +266,8 @@ export default function Settings() {
       setIsResetDialogOpen(false);
       toast({
         title: "Paramètres réinitialisés",
-        description: "Tous les paramètres ont été remis à leurs valeurs par défaut",
+        description:
+          "Tous les paramètres ont été remis à leurs valeurs par défaut",
       });
     } catch (error) {
       toast({
@@ -270,20 +279,20 @@ export default function Settings() {
       setIsLoading(false);
     }
   };
-  
+
   const handleExportSettings = async () => {
     try {
       const settingsJson = await AppSettingsService.exportSettings();
-      const blob = new Blob([settingsJson], { type: 'application/json' });
+      const blob = new Blob([settingsJson], { type: "application/json" });
       const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
+      const a = document.createElement("a");
       a.href = url;
-      a.download = 'biohacking-clinic-settings.json';
+      a.download = "biohacking-clinic-settings.json";
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-      
+
       toast({
         title: "Paramètres exportés",
         description: "Le fichier de paramètres a été téléchargé",
@@ -296,7 +305,7 @@ export default function Settings() {
       });
     }
   };
-  
+
   const handleImportSettings = async () => {
     setIsLoading(true);
     try {
@@ -318,13 +327,17 @@ export default function Settings() {
       setIsLoading(false);
     }
   };
-  
-  const getThemeIcon = (theme: AppSettings['theme']) => {
+
+  const getThemeIcon = (theme: AppSettings["theme"]) => {
     switch (theme) {
-      case 'light': return Sun;
-      case 'dark': return Moon;
-      case 'system': return Monitor;
-      default: return Monitor;
+      case "light":
+        return Sun;
+      case "dark":
+        return Moon;
+      case "system":
+        return Monitor;
+      default:
+        return Monitor;
     }
   };
 
@@ -387,7 +400,9 @@ export default function Settings() {
                     <Input
                       id="CIN"
                       value={userFormData.CIN}
-                      onChange={(e) => handleUserFormChange("CIN", e.target.value)}
+                      onChange={(e) =>
+                        handleUserFormChange("CIN", e.target.value)
+                      }
                       placeholder="Numéro CIN"
                     />
                   </div>
@@ -396,13 +411,15 @@ export default function Settings() {
                     <Label htmlFor="role">Rôle</Label>
                     <Select
                       value={userFormData.role}
-                      onValueChange={(value) => handleUserFormChange("role", value as UserType['role'])}
+                      onValueChange={(value) =>
+                        handleUserFormChange("role", value as UserType["role"])
+                      }
                     >
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        {UserService.getAvailableRoles().map(role => (
+                        {UserService.getAvailableRoles().map((role) => (
                           <SelectItem key={role.value} value={role.value}>
                             {role.label}
                           </SelectItem>
@@ -416,7 +433,9 @@ export default function Settings() {
                     <Input
                       id="prenom"
                       value={userFormData.prenom}
-                      onChange={(e) => handleUserFormChange("prenom", e.target.value)}
+                      onChange={(e) =>
+                        handleUserFormChange("prenom", e.target.value)
+                      }
                       placeholder="Votre prénom"
                     />
                   </div>
@@ -426,7 +445,9 @@ export default function Settings() {
                     <Input
                       id="nom"
                       value={userFormData.nom}
-                      onChange={(e) => handleUserFormChange("nom", e.target.value)}
+                      onChange={(e) =>
+                        handleUserFormChange("nom", e.target.value)
+                      }
                       placeholder="Votre nom"
                     />
                   </div>
@@ -437,7 +458,9 @@ export default function Settings() {
                       id="date_naissance"
                       type="date"
                       value={userFormData.date_naissance}
-                      onChange={(e) => handleUserFormChange("date_naissance", e.target.value)}
+                      onChange={(e) =>
+                        handleUserFormChange("date_naissance", e.target.value)
+                      }
                     />
                   </div>
 
@@ -447,7 +470,9 @@ export default function Settings() {
                       id="email"
                       type="email"
                       value={userFormData.email}
-                      onChange={(e) => handleUserFormChange("email", e.target.value)}
+                      onChange={(e) =>
+                        handleUserFormChange("email", e.target.value)
+                      }
                       placeholder="votre@email.com"
                     />
                   </div>
@@ -457,7 +482,9 @@ export default function Settings() {
                     <Input
                       id="numero_telephone"
                       value={userFormData.numero_telephone}
-                      onChange={(e) => handleUserFormChange("numero_telephone", e.target.value)}
+                      onChange={(e) =>
+                        handleUserFormChange("numero_telephone", e.target.value)
+                      }
                       placeholder="+32 2 123 45 67"
                     />
                   </div>
@@ -468,24 +495,26 @@ export default function Settings() {
                   <Textarea
                     id="adresse"
                     value={userFormData.adresse}
-                    onChange={(e) => handleUserFormChange("adresse", e.target.value)}
+                    onChange={(e) =>
+                      handleUserFormChange("adresse", e.target.value)
+                    }
                     placeholder="Votre adresse complète"
                     rows={3}
                   />
                 </div>
 
                 <div className="flex gap-4">
-                  <Button 
-                    onClick={handleSaveProfile} 
+                  <Button
+                    onClick={handleSaveProfile}
                     disabled={isLoading}
                     className="gap-2"
                   >
                     <Save className="h-4 w-4" />
                     {isLoading ? "Sauvegarde..." : "Sauvegarder le profil"}
                   </Button>
-                  
-                  <Button 
-                    variant="outline" 
+
+                  <Button
+                    variant="outline"
                     onClick={() => setIsPasswordDialogOpen(true)}
                     className="gap-2"
                   >
@@ -504,7 +533,8 @@ export default function Settings() {
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                     <div>
-                      <span className="font-medium">ID utilisateur:</span> {user.id}
+                      <span className="font-medium">ID utilisateur:</span>{" "}
+                      {user.id}
                     </div>
                     <div>
                       <span className="font-medium">Rôle:</span>{" "}
@@ -514,7 +544,7 @@ export default function Settings() {
                     </div>
                     <div>
                       <span className="font-medium">Membre depuis:</span>{" "}
-                      {new Date(user.created_at).toLocaleDateString('fr-FR')}
+                      {new Date(user.created_at).toLocaleDateString("fr-FR")}
                     </div>
                     <div>
                       <span className="font-medium">Nom d'affichage:</span>{" "}
@@ -543,22 +573,26 @@ export default function Settings() {
                       Choisissez l'apparence de l'interface utilisateur
                     </p>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                      {AppSettingsService.getThemeOptions().map(option => {
+                      {AppSettingsService.getThemeOptions().map((option) => {
                         const Icon = getThemeIcon(option.value);
                         return (
                           <div
                             key={option.value}
                             className={`relative rounded-lg border p-4 cursor-pointer hover:bg-accent transition-colors ${
-                              appSettings.theme === option.value 
-                                ? 'border-primary bg-accent' 
-                                : 'border-border'
+                              appSettings.theme === option.value
+                                ? "border-primary bg-accent"
+                                : "border-border"
                             }`}
-                            onClick={() => handleAppSettingChange('theme', option.value)}
+                            onClick={() =>
+                              handleAppSettingChange("theme", option.value)
+                            }
                           >
                             <div className="flex items-center gap-3">
                               <Icon className="h-5 w-5" />
                               <div>
-                                <div className="font-medium">{option.label}</div>
+                                <div className="font-medium">
+                                  {option.label}
+                                </div>
                                 <div className="text-sm text-muted-foreground">
                                   {option.description}
                                 </div>
@@ -576,20 +610,24 @@ export default function Settings() {
                   <Separator />
 
                   <div>
-                    <Label className="text-base font-medium">Taille de police</Label>
+                    <Label className="text-base font-medium">
+                      Taille de police
+                    </Label>
                     <p className="text-sm text-muted-foreground mb-3">
                       Ajustez la taille du texte pour améliorer la lisibilité
                     </p>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                      {AppSettingsService.getFontSizeOptions().map(option => (
+                      {AppSettingsService.getFontSizeOptions().map((option) => (
                         <div
                           key={option.value}
                           className={`relative rounded-lg border p-4 cursor-pointer hover:bg-accent transition-colors ${
-                            appSettings.fontSize === option.value 
-                              ? 'border-primary bg-accent' 
-                              : 'border-border'
+                            appSettings.fontSize === option.value
+                              ? "border-primary bg-accent"
+                              : "border-border"
                           }`}
-                          onClick={() => handleAppSettingChange('fontSize', option.value)}
+                          onClick={() =>
+                            handleAppSettingChange("fontSize", option.value)
+                          }
                         >
                           <div className="flex items-center gap-3">
                             <Type className="h-5 w-5" />
@@ -613,45 +651,51 @@ export default function Settings() {
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <div>
-                        <Label className="text-base font-medium">Mode compact</Label>
+                        <Label className="text-base font-medium">
+                          Mode compact
+                        </Label>
                         <p className="text-sm text-muted-foreground">
                           Réduit l'espacement pour afficher plus de contenu
                         </p>
                       </div>
                       <Switch
                         checked={appSettings.compactMode}
-                        onCheckedChange={(checked) => 
-                          handleAppSettingChange('compactMode', checked)
+                        onCheckedChange={(checked) =>
+                          handleAppSettingChange("compactMode", checked)
                         }
                       />
                     </div>
 
                     <div className="flex items-center justify-between">
                       <div>
-                        <Label className="text-base font-medium">Animations</Label>
+                        <Label className="text-base font-medium">
+                          Animations
+                        </Label>
                         <p className="text-sm text-muted-foreground">
                           Active les animations et transitions
                         </p>
                       </div>
                       <Switch
                         checked={appSettings.showAnimations}
-                        onCheckedChange={(checked) => 
-                          handleAppSettingChange('showAnimations', checked)
+                        onCheckedChange={(checked) =>
+                          handleAppSettingChange("showAnimations", checked)
                         }
                       />
                     </div>
 
                     <div className="flex items-center justify-between">
                       <div>
-                        <Label className="text-base font-medium">Sauvegarde automatique</Label>
+                        <Label className="text-base font-medium">
+                          Sauvegarde automatique
+                        </Label>
                         <p className="text-sm text-muted-foreground">
                           Sauvegarde automatiquement vos modifications
                         </p>
                       </div>
                       <Switch
                         checked={appSettings.autoSave}
-                        onCheckedChange={(checked) => 
-                          handleAppSettingChange('autoSave', checked)
+                        onCheckedChange={(checked) =>
+                          handleAppSettingChange("autoSave", checked)
                         }
                       />
                     </div>
@@ -675,22 +719,29 @@ export default function Settings() {
                   </p>
                   <Select
                     value={appSettings.currency}
-                    onValueChange={(value) => handleAppSettingChange('currency', value)}
+                    onValueChange={(value) =>
+                      handleAppSettingChange("currency", value)
+                    }
                   >
                     <SelectTrigger className="w-full">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {AppSettingsService.getCurrencyOptions().map(currency => (
-                        <SelectItem key={currency.value} value={currency.value}>
-                          <div className="flex items-center gap-2">
-                            <span className="font-mono text-sm font-semibold">
-                              {currency.symbol}
-                            </span>
-                            <span>{currency.label}</span>
-                          </div>
-                        </SelectItem>
-                      ))}
+                      {AppSettingsService.getCurrencyOptions().map(
+                        (currency) => (
+                          <SelectItem
+                            key={currency.value}
+                            value={currency.value}
+                          >
+                            <div className="flex items-center gap-2">
+                              <span className="font-mono text-sm font-semibold">
+                                {currency.symbol}
+                              </span>
+                              <span>{currency.label}</span>
+                            </div>
+                          </SelectItem>
+                        ),
+                      )}
                     </SelectContent>
                   </Select>
 
@@ -698,8 +749,20 @@ export default function Settings() {
                     <div className="text-sm">
                       <span className="font-medium">Aperçu:</span>
                       <div className="mt-1 space-y-1">
-                        <div>Prix: <span className="font-mono">1 234,56 {AppSettingsService.getCurrentCurrencySymbol()}</span></div>
-                        <div>Total: <span className="font-mono">15 678,90 {AppSettingsService.getCurrentCurrencySymbol()}</span></div>
+                        <div>
+                          Prix:{" "}
+                          <span className="font-mono">
+                            1 234,56{" "}
+                            {AppSettingsService.getCurrentCurrencySymbol()}
+                          </span>
+                        </div>
+                        <div>
+                          Total:{" "}
+                          <span className="font-mono">
+                            15 678,90{" "}
+                            {AppSettingsService.getCurrentCurrencySymbol()}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -720,45 +783,51 @@ export default function Settings() {
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <Label className="text-base font-medium">Notifications bureau</Label>
+                    <Label className="text-base font-medium">
+                      Notifications bureau
+                    </Label>
                     <p className="text-sm text-muted-foreground">
                       Affiche des notifications sur votre bureau
                     </p>
                   </div>
                   <Switch
                     checked={appSettings.notifications.desktop}
-                    onCheckedChange={(checked) => 
-                      handleNotificationChange('desktop', checked)
+                    onCheckedChange={(checked) =>
+                      handleNotificationChange("desktop", checked)
                     }
                   />
                 </div>
 
                 <div className="flex items-center justify-between">
                   <div>
-                    <Label className="text-base font-medium">Sons de notification</Label>
+                    <Label className="text-base font-medium">
+                      Sons de notification
+                    </Label>
                     <p className="text-sm text-muted-foreground">
                       Joue un son lors des notifications
                     </p>
                   </div>
                   <Switch
                     checked={appSettings.notifications.sound}
-                    onCheckedChange={(checked) => 
-                      handleNotificationChange('sound', checked)
+                    onCheckedChange={(checked) =>
+                      handleNotificationChange("sound", checked)
                     }
                   />
                 </div>
 
                 <div className="flex items-center justify-between">
                   <div>
-                    <Label className="text-base font-medium">Notifications email</Label>
+                    <Label className="text-base font-medium">
+                      Notifications email
+                    </Label>
                     <p className="text-sm text-muted-foreground">
                       Reçoit des notifications par email
                     </p>
                   </div>
                   <Switch
                     checked={appSettings.notifications.email}
-                    onCheckedChange={(checked) => 
-                      handleNotificationChange('email', checked)
+                    onCheckedChange={(checked) =>
+                      handleNotificationChange("email", checked)
                     }
                   />
                 </div>
@@ -810,12 +879,16 @@ export default function Settings() {
         </Tabs>
 
         {/* Password Change Dialog */}
-        <Dialog open={isPasswordDialogOpen} onOpenChange={setIsPasswordDialogOpen}>
+        <Dialog
+          open={isPasswordDialogOpen}
+          onOpenChange={setIsPasswordDialogOpen}
+        >
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Changer le mot de passe</DialogTitle>
               <DialogDescription>
-                Entrez votre mot de passe actuel et choisissez un nouveau mot de passe
+                Entrez votre mot de passe actuel et choisissez un nouveau mot de
+                passe
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
@@ -826,7 +899,9 @@ export default function Settings() {
                     id="currentPassword"
                     type={showPassword ? "text" : "password"}
                     value={passwordData.currentPassword}
-                    onChange={(e) => handlePasswordChange("currentPassword", e.target.value)}
+                    onChange={(e) =>
+                      handlePasswordChange("currentPassword", e.target.value)
+                    }
                   />
                   <Button
                     type="button"
@@ -843,7 +918,7 @@ export default function Settings() {
                   </Button>
                 </div>
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="newPassword">Nouveau mot de passe</Label>
                 <div className="relative">
@@ -851,7 +926,9 @@ export default function Settings() {
                     id="newPassword"
                     type={showNewPassword ? "text" : "password"}
                     value={passwordData.newPassword}
-                    onChange={(e) => handlePasswordChange("newPassword", e.target.value)}
+                    onChange={(e) =>
+                      handlePasswordChange("newPassword", e.target.value)
+                    }
                   />
                   <Button
                     type="button"
@@ -868,15 +945,19 @@ export default function Settings() {
                   </Button>
                 </div>
               </div>
-              
+
               <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirmer le nouveau mot de passe</Label>
+                <Label htmlFor="confirmPassword">
+                  Confirmer le nouveau mot de passe
+                </Label>
                 <div className="relative">
                   <Input
                     id="confirmPassword"
                     type={showConfirmPassword ? "text" : "password"}
                     value={passwordData.confirmPassword}
-                    onChange={(e) => handlePasswordChange("confirmPassword", e.target.value)}
+                    onChange={(e) =>
+                      handlePasswordChange("confirmPassword", e.target.value)
+                    }
                   />
                   <Button
                     type="button"
@@ -901,10 +982,7 @@ export default function Settings() {
               >
                 Annuler
               </Button>
-              <Button
-                onClick={handleChangePassword}
-                disabled={isLoading}
-              >
+              <Button onClick={handleChangePassword} disabled={isLoading}>
                 {isLoading ? "Modification..." : "Changer le mot de passe"}
               </Button>
             </DialogFooter>
@@ -917,8 +995,9 @@ export default function Settings() {
             <DialogHeader>
               <DialogTitle>Réinitialiser les paramètres</DialogTitle>
               <DialogDescription>
-                Êtes-vous sûr de vouloir réinitialiser tous les paramètres à leurs valeurs par défaut ?
-                Cette action ne peut pas être annulée.
+                Êtes-vous sûr de vouloir réinitialiser tous les paramètres à
+                leurs valeurs par défaut ? Cette action ne peut pas être
+                annulée.
               </DialogDescription>
             </DialogHeader>
             <DialogFooter>

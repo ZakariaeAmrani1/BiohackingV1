@@ -1,4 +1,4 @@
-import { User } from './userService';
+import { User } from "./userService";
 
 export interface LoginCredentials {
   email: string;
@@ -15,10 +15,10 @@ export interface RegisterData {
   email: string;
   password: string;
   confirmPassword: string;
-  role: User['role'];
+  role: User["role"];
 }
 
-export interface AuthUser extends Omit<User, 'password'> {
+export interface AuthUser extends Omit<User, "password"> {
   token: string;
 }
 
@@ -53,8 +53,8 @@ const mockUsers: (User & { password: string })[] = [
 ];
 
 // Storage keys
-const TOKEN_KEY = 'biohacking-clinic-token';
-const USER_KEY = 'biohacking-clinic-user';
+const TOKEN_KEY = "biohacking-clinic-token";
+const USER_KEY = "biohacking-clinic-user";
 
 // Simulate API delay
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -66,7 +66,7 @@ export class AuthService {
       userId: user.id,
       email: user.email,
       role: user.role,
-      exp: Date.now() + (24 * 60 * 60 * 1000), // 24 hours
+      exp: Date.now() + 24 * 60 * 60 * 1000, // 24 hours
     };
     return btoa(JSON.stringify(payload));
   }
@@ -92,15 +92,15 @@ export class AuthService {
     await delay(800); // Simulate API call
 
     const user = mockUsers.find(
-      u => u.email.toLowerCase() === credentials.email.toLowerCase()
+      (u) => u.email.toLowerCase() === credentials.email.toLowerCase(),
     );
 
     if (!user) {
-      throw new Error('Email ou mot de passe incorrect');
+      throw new Error("Email ou mot de passe incorrect");
     }
 
     if (user.password !== credentials.password) {
-      throw new Error('Email ou mot de passe incorrect');
+      throw new Error("Email ou mot de passe incorrect");
     }
 
     const token = this.generateToken(user);
@@ -137,21 +137,23 @@ export class AuthService {
 
     // Check if user already exists
     const existingUser = mockUsers.find(
-      u => u.email.toLowerCase() === data.email.toLowerCase() || u.CIN === data.CIN
+      (u) =>
+        u.email.toLowerCase() === data.email.toLowerCase() ||
+        u.CIN === data.CIN,
     );
 
     if (existingUser) {
       if (existingUser.email.toLowerCase() === data.email.toLowerCase()) {
-        throw new Error('Un utilisateur avec cet email existe déjà');
+        throw new Error("Un utilisateur avec cet email existe déjà");
       }
       if (existingUser.CIN === data.CIN) {
-        throw new Error('Un utilisateur avec ce CIN existe déjà');
+        throw new Error("Un utilisateur avec ce CIN existe déjà");
       }
     }
 
     // Create new user
     const newUser: User & { password: string } = {
-      id: Math.max(...mockUsers.map(u => u.id)) + 1,
+      id: Math.max(...mockUsers.map((u) => u.id)) + 1,
       CIN: data.CIN,
       nom: data.nom,
       prenom: data.prenom,
@@ -241,58 +243,61 @@ export class AuthService {
     const errors: string[] = [];
 
     if (!data.CIN.trim()) {
-      errors.push('Le CIN est obligatoire');
+      errors.push("Le CIN est obligatoire");
     }
 
     if (!data.nom.trim()) {
-      errors.push('Le nom est obligatoire');
+      errors.push("Le nom est obligatoire");
     }
 
     if (!data.prenom.trim()) {
-      errors.push('Le prénom est obligatoire');
+      errors.push("Le prénom est obligatoire");
     }
 
     if (!data.date_naissance) {
-      errors.push('La date de naissance est obligatoire');
+      errors.push("La date de naissance est obligatoire");
     }
 
     if (!data.adresse.trim()) {
-      errors.push('L\'adresse est obligatoire');
+      errors.push("L'adresse est obligatoire");
     }
 
     if (!data.numero_telephone.trim()) {
-      errors.push('Le numéro de téléphone est obligatoire');
+      errors.push("Le numéro de téléphone est obligatoire");
     }
 
     if (!data.email.trim()) {
-      errors.push('L\'email est obligatoire');
+      errors.push("L'email est obligatoire");
     } else if (!/\S+@\S+\.\S+/.test(data.email)) {
-      errors.push('L\'email n\'est pas valide');
+      errors.push("L'email n'est pas valide");
     }
 
     if (!data.password) {
-      errors.push('Le mot de passe est obligatoire');
+      errors.push("Le mot de passe est obligatoire");
     } else if (data.password.length < 6) {
-      errors.push('Le mot de passe doit contenir au moins 6 caractères');
+      errors.push("Le mot de passe doit contenir au moins 6 caractères");
     }
 
     if (data.password !== data.confirmPassword) {
-      errors.push('Les mots de passe ne correspondent pas');
+      errors.push("Les mots de passe ne correspondent pas");
     }
 
     return errors;
   }
 
   // Get default login credentials for demo
-  static getDefaultCredentials(): { admin: LoginCredentials; doctor: LoginCredentials } {
+  static getDefaultCredentials(): {
+    admin: LoginCredentials;
+    doctor: LoginCredentials;
+  } {
     return {
       admin: {
-        email: 'admin@biohacking-clinic.be',
-        password: 'admin123',
+        email: "admin@biohacking-clinic.be",
+        password: "admin123",
       },
       doctor: {
-        email: 'doctor@biohacking-clinic.be',
-        password: 'doctor123',
+        email: "doctor@biohacking-clinic.be",
+        password: "doctor123",
       },
     };
   }

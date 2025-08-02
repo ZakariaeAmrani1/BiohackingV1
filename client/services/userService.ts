@@ -8,7 +8,7 @@ export interface User {
   numero_telephone: string;
   email: string;
   password?: string; // Optional for security
-  role: 'admin' | 'doctor' | 'nurse' | 'receptionist';
+  role: "admin" | "doctor" | "nurse" | "receptionist";
   created_at: string;
 }
 
@@ -20,7 +20,7 @@ export interface UserFormData {
   adresse: string;
   numero_telephone: string;
   email: string;
-  role: User['role'];
+  role: User["role"];
 }
 
 export interface PasswordChangeData {
@@ -58,14 +58,14 @@ export class UserService {
   // Update user profile
   static async updateProfile(data: UserFormData): Promise<User> {
     await delay(800);
-    
+
     const updatedUser: User = {
       ...currentUser,
       ...data,
     };
 
     currentUser = updatedUser;
-    
+
     // Return user without password
     const { password, ...userWithoutPassword } = updatedUser;
     return userWithoutPassword as User;
@@ -74,20 +74,20 @@ export class UserService {
   // Change password
   static async changePassword(data: PasswordChangeData): Promise<boolean> {
     await delay(800);
-    
+
     // In a real app, you'd verify the current password against the hash
     // For demo purposes, we'll just validate the format
     if (data.newPassword !== data.confirmPassword) {
       throw new Error("Les mots de passe ne correspondent pas");
     }
-    
+
     if (data.newPassword.length < 8) {
       throw new Error("Le mot de passe doit contenir au moins 8 caractères");
     }
-    
+
     // In real app, you'd hash the password before storing
     currentUser.password = data.newPassword;
-    
+
     return true;
   }
 
@@ -129,12 +129,12 @@ export class UserService {
   }
 
   // Get available roles
-  static getAvailableRoles(): { value: User['role']; label: string }[] {
+  static getAvailableRoles(): { value: User["role"]; label: string }[] {
     return [
-      { value: 'admin', label: 'Administrateur' },
-      { value: 'doctor', label: 'Médecin' },
-      { value: 'nurse', label: 'Infirmier/ère' },
-      { value: 'receptionist', label: 'Réceptionniste' },
+      { value: "admin", label: "Administrateur" },
+      { value: "doctor", label: "Médecin" },
+      { value: "nurse", label: "Infirmier/ère" },
+      { value: "receptionist", label: "Réceptionniste" },
     ];
   }
 
@@ -144,8 +144,8 @@ export class UserService {
   }
 
   // Get role display name
-  static getRoleDisplayName(role: User['role']): string {
+  static getRoleDisplayName(role: User["role"]): string {
     const roles = this.getAvailableRoles();
-    return roles.find(r => r.value === role)?.label || role;
+    return roles.find((r) => r.value === role)?.label || role;
   }
 }

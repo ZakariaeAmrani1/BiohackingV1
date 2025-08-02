@@ -1,7 +1,14 @@
 export interface Activity {
   id: string;
-  type: 'appointment' | 'patient' | 'product' | 'soin' | 'invoice' | 'document' | 'document_template';
-  action: 'created' | 'updated' | 'deleted' | 'completed' | 'cancelled';
+  type:
+    | "appointment"
+    | "patient"
+    | "product"
+    | "soin"
+    | "invoice"
+    | "document"
+    | "document_template";
+  action: "created" | "updated" | "deleted" | "completed" | "cancelled";
   title: string;
   description: string;
   entityId: number;
@@ -25,7 +32,10 @@ const ACTIVITY_CONFIGS = {
   },
   patient: {
     created: { title: "Nouveau patient enregistré", color: "text-purple-500" },
-    updated: { title: "Informations patient mises à jour", color: "text-purple-600" },
+    updated: {
+      title: "Informations patient mises à jour",
+      color: "text-purple-600",
+    },
     deleted: { title: "Patient supprimé", color: "text-red-500" },
   },
   product: {
@@ -49,7 +59,10 @@ const ACTIVITY_CONFIGS = {
     deleted: { title: "Document supprimé", color: "text-red-500" },
   },
   document_template: {
-    created: { title: "Nouveau modèle de document créé", color: "text-pink-500" },
+    created: {
+      title: "Nouveau modèle de document créé",
+      color: "text-pink-500",
+    },
     updated: { title: "Modèle de document modifié", color: "text-pink-600" },
     deleted: { title: "Modèle de document supprimé", color: "text-red-500" },
   },
@@ -71,25 +84,28 @@ export class ActivitiesService {
     const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
     if (diffMins < 1) return "à l'instant";
-    if (diffMins < 60) return `il y a ${diffMins} minute${diffMins > 1 ? 's' : ''}`;
-    if (diffHours < 24) return `il y a ${diffHours} heure${diffHours > 1 ? 's' : ''}`;
-    if (diffDays < 7) return `il y a ${diffDays} jour${diffDays > 1 ? 's' : ''}`;
-    
-    return activityTime.toLocaleDateString('fr-FR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
+    if (diffMins < 60)
+      return `il y a ${diffMins} minute${diffMins > 1 ? "s" : ""}`;
+    if (diffHours < 24)
+      return `il y a ${diffHours} heure${diffHours > 1 ? "s" : ""}`;
+    if (diffDays < 7)
+      return `il y a ${diffDays} jour${diffDays > 1 ? "s" : ""}`;
+
+    return activityTime.toLocaleDateString("fr-FR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
     });
   }
 
   // Log a new activity
   static logActivity(
-    type: Activity['type'],
-    action: Activity['action'],
+    type: Activity["type"],
+    action: Activity["action"],
     entityId: number,
     entityName: string,
     createdBy: string,
-    metadata?: Record<string, any>
+    metadata?: Record<string, any>,
   ): void {
     const config = ACTIVITY_CONFIGS[type]?.[action];
     if (!config) return;
@@ -115,53 +131,56 @@ export class ActivitiesService {
       activities = activities.slice(0, 100);
     }
 
-    console.log('Activity logged:', activity);
+    console.log("Activity logged:", activity);
   }
 
   // Generate description based on activity type and metadata
   private static generateDescription(
-    type: Activity['type'],
-    action: Activity['action'],
+    type: Activity["type"],
+    action: Activity["action"],
     entityName: string,
-    metadata?: Record<string, any>
+    metadata?: Record<string, any>,
   ): string {
     switch (type) {
-      case 'appointment':
-        const patientName = metadata?.patientName || 'Patient';
-        const appointmentType = metadata?.appointmentType || 'Consultation';
-        if (action === 'created') return `${patientName} - ${appointmentType}`;
-        if (action === 'updated') return `${patientName} - ${appointmentType}`;
-        if (action === 'cancelled') return `${patientName} - ${appointmentType}`;
+      case "appointment":
+        const patientName = metadata?.patientName || "Patient";
+        const appointmentType = metadata?.appointmentType || "Consultation";
+        if (action === "created") return `${patientName} - ${appointmentType}`;
+        if (action === "updated") return `${patientName} - ${appointmentType}`;
+        if (action === "cancelled")
+          return `${patientName} - ${appointmentType}`;
         return `${patientName} - ${appointmentType}`;
 
-      case 'patient':
-        if (action === 'created') return `${entityName} ajouté au système`;
-        if (action === 'updated') return `Profil de ${entityName} mis à jour`;
+      case "patient":
+        if (action === "created") return `${entityName} ajouté au système`;
+        if (action === "updated") return `Profil de ${entityName} mis à jour`;
         return `Patient ${entityName}`;
 
-      case 'product':
-        if (action === 'created') return `${entityName} ajouté au catalogue`;
-        if (action === 'updated') return `${entityName} modifié dans le catalogue`;
+      case "product":
+        if (action === "created") return `${entityName} ajouté au catalogue`;
+        if (action === "updated")
+          return `${entityName} modifié dans le catalogue`;
         return `Produit ${entityName}`;
 
-      case 'soin':
-        if (action === 'created') return `${entityName} ajouté aux soins disponibles`;
-        if (action === 'updated') return `${entityName} modifié`;
+      case "soin":
+        if (action === "created")
+          return `${entityName} ajouté aux soins disponibles`;
+        if (action === "updated") return `${entityName} modifié`;
         return `Soin ${entityName}`;
 
-      case 'invoice':
-        const clientName = metadata?.clientName || 'Client';
-        const amount = metadata?.amount ? ` - ${metadata.amount}€` : '';
-        if (action === 'created') return `Facture pour ${clientName}${amount}`;
+      case "invoice":
+        const clientName = metadata?.clientName || "Client";
+        const amount = metadata?.amount ? ` - ${metadata.amount}€` : "";
+        if (action === "created") return `Facture pour ${clientName}${amount}`;
         return `Facture ${entityName} - ${clientName}`;
 
-      case 'document':
-        const patientDoc = metadata?.patientName || 'Patient';
-        const docType = metadata?.documentType || 'Document';
+      case "document":
+        const patientDoc = metadata?.patientName || "Patient";
+        const docType = metadata?.documentType || "Document";
         return `${docType} pour ${patientDoc}`;
 
-      case 'document_template':
-        if (action === 'created') return `Modèle "${entityName}" créé`;
+      case "document_template":
+        if (action === "created") return `Modèle "${entityName}" créé`;
         return `Modèle "${entityName}"`;
 
       default:
@@ -171,34 +190,40 @@ export class ActivitiesService {
 
   // Get recent activities for display
   static getRecentActivities(limit: number = 10): Activity[] {
-    return activities.slice(0, limit).map(activity => ({
+    return activities.slice(0, limit).map((activity) => ({
       ...activity,
       relativeTime: this.formatRelativeTime(activity.timestamp),
-      config: ACTIVITY_CONFIGS[activity.type]?.[activity.action]
+      config: ACTIVITY_CONFIGS[activity.type]?.[activity.action],
     }));
   }
 
   // Get activities by type
-  static getActivitiesByType(type: Activity['type'], limit: number = 20): Activity[] {
+  static getActivitiesByType(
+    type: Activity["type"],
+    limit: number = 20,
+  ): Activity[] {
     return activities
-      .filter(activity => activity.type === type)
+      .filter((activity) => activity.type === type)
       .slice(0, limit)
-      .map(activity => ({
+      .map((activity) => ({
         ...activity,
         relativeTime: this.formatRelativeTime(activity.timestamp),
-        config: ACTIVITY_CONFIGS[activity.type]?.[activity.action]
+        config: ACTIVITY_CONFIGS[activity.type]?.[activity.action],
       }));
   }
 
   // Get activities by user
-  static getActivitiesByUser(createdBy: string, limit: number = 20): Activity[] {
+  static getActivitiesByUser(
+    createdBy: string,
+    limit: number = 20,
+  ): Activity[] {
     return activities
-      .filter(activity => activity.createdBy === createdBy)
+      .filter((activity) => activity.createdBy === createdBy)
       .slice(0, limit)
-      .map(activity => ({
+      .map((activity) => ({
         ...activity,
         relativeTime: this.formatRelativeTime(activity.timestamp),
-        config: ACTIVITY_CONFIGS[activity.type]?.[activity.action]
+        config: ACTIVITY_CONFIGS[activity.type]?.[activity.action],
       }));
   }
 
@@ -211,41 +236,52 @@ export class ActivitiesService {
   static initializeSampleActivities(): void {
     const sampleActivities = [
       {
-        type: 'appointment' as const,
-        action: 'created' as const,
+        type: "appointment" as const,
+        action: "created" as const,
         entityId: 1,
-        entityName: 'RV-001',
-        createdBy: 'Dr. Smith',
-        metadata: { patientName: 'Marie Laurent', appointmentType: 'Consultation Biohacking' }
+        entityName: "RV-001",
+        createdBy: "Dr. Smith",
+        metadata: {
+          patientName: "Marie Laurent",
+          appointmentType: "Consultation Biohacking",
+        },
       },
       {
-        type: 'patient' as const,
-        action: 'created' as const,
+        type: "patient" as const,
+        action: "created" as const,
         entityId: 2,
-        entityName: 'Pierre Martin',
-        createdBy: 'Dr. Dubois',
+        entityName: "Pierre Martin",
+        createdBy: "Dr. Dubois",
       },
       {
-        type: 'appointment' as const,
-        action: 'completed' as const,
+        type: "appointment" as const,
+        action: "completed" as const,
         entityId: 3,
-        entityName: 'RV-002',
-        createdBy: 'Dr. Martin',
-        metadata: { patientName: 'Sophie Wilson', appointmentType: 'Thérapie IV' }
-      }
+        entityName: "RV-002",
+        createdBy: "Dr. Martin",
+        metadata: {
+          patientName: "Sophie Wilson",
+          appointmentType: "Thérapie IV",
+        },
+      },
     ];
 
     // Add sample activities with different timestamps
     sampleActivities.forEach((sample, index) => {
       const timestamp = new Date();
       timestamp.setMinutes(timestamp.getMinutes() - (index + 1) * 15);
-      
+
       const activity: Activity = {
         id: this.generateId(),
         type: sample.type,
         action: sample.action,
         title: ACTIVITY_CONFIGS[sample.type][sample.action].title,
-        description: this.generateDescription(sample.type, sample.action, sample.entityName, sample.metadata),
+        description: this.generateDescription(
+          sample.type,
+          sample.action,
+          sample.entityName,
+          sample.metadata,
+        ),
         entityId: sample.entityId,
         entityName: sample.entityName,
         timestamp: timestamp.toISOString(),

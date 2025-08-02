@@ -372,7 +372,9 @@ export default function AppointmentFormModal({
             </Label>
             <TimeSlotPicker
               value={formData.date_rendez_vous}
-              onChange={(datetime) => handleInputChange("date_rendez_vous", datetime)}
+              onChange={(datetime) =>
+                handleInputChange("date_rendez_vous", datetime)
+              }
               excludeAppointmentId={appointment?.id}
               disabled={isSubmitting}
             />

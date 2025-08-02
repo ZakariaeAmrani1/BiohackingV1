@@ -116,15 +116,15 @@ export class ProductsService {
 
     // Log activity
     ActivitiesService.logActivity(
-      'product',
-      'created',
+      "product",
+      "created",
       newProduct.id,
       newProduct.Nom,
       data.Cree_par,
     );
 
     // Dispatch custom event for real-time updates
-    window.dispatchEvent(new CustomEvent('activityLogged'));
+    window.dispatchEvent(new CustomEvent("activityLogged"));
 
     return newProduct;
   }
@@ -222,7 +222,7 @@ export const getAvailableDoctors = (): string[] => {
 
 export const formatPrice = (price: number): string => {
   // Import dynamically to avoid circular dependencies
-  return require('./currencyService').CurrencyService.formatCurrency(price);
+  return require("./currencyService").CurrencyService.formatCurrency(price);
 };
 
 export const getStockStatus = (

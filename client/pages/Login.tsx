@@ -33,7 +33,7 @@ export default function Login() {
   const defaultCredentials = AuthService.getDefaultCredentials();
 
   const handleInputChange = (field: keyof LoginCredentials, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
     if (errors.length > 0) {
       setErrors([]);
     }
@@ -41,17 +41,17 @@ export default function Login() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     const newErrors: string[] = [];
-    
+
     if (!formData.email.trim()) {
       newErrors.push("L'email est obligatoire");
     }
-    
+
     if (!formData.password) {
       newErrors.push("Le mot de passe est obligatoire");
     }
-    
+
     if (newErrors.length > 0) {
       setErrors(newErrors);
       return;
@@ -68,7 +68,7 @@ export default function Login() {
     }
   };
 
-  const handleDemoLogin = async (role: 'admin' | 'doctor') => {
+  const handleDemoLogin = async (role: "admin" | "doctor") => {
     const credentials = defaultCredentials[role];
     setFormData(credentials);
     setIsLoading(true);
@@ -92,7 +92,9 @@ export default function Login() {
             </div>
           </div>
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Biohacking Clinic</h1>
+            <h1 className="text-3xl font-bold tracking-tight">
+              Biohacking Clinic
+            </h1>
             <p className="text-muted-foreground mt-2">
               Connectez-vous à votre compte pour accéder au système de gestion
             </p>
@@ -111,7 +113,7 @@ export default function Login() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => handleDemoLogin('admin')}
+                onClick={() => handleDemoLogin("admin")}
                 disabled={isLoading}
                 className="justify-start gap-2"
               >
@@ -124,7 +126,7 @@ export default function Login() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => handleDemoLogin('doctor')}
+                onClick={() => handleDemoLogin("doctor")}
                 disabled={isLoading}
                 className="justify-start gap-2"
               >
@@ -186,7 +188,9 @@ export default function Login() {
                     type={showPassword ? "text" : "password"}
                     placeholder="Votre mot de passe"
                     value={formData.password}
-                    onChange={(e) => handleInputChange("password", e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("password", e.target.value)
+                    }
                     className="pl-10 pr-10"
                     disabled={isLoading}
                   />
@@ -207,9 +211,9 @@ export default function Login() {
                 </div>
               </div>
 
-              <Button 
-                type="submit" 
-                className="w-full gap-2" 
+              <Button
+                type="submit"
+                className="w-full gap-2"
                 disabled={isLoading}
               >
                 {isLoading ? (
@@ -229,8 +233,8 @@ export default function Login() {
             <div className="mt-6 text-center">
               <p className="text-sm text-muted-foreground">
                 Pas encore de compte ?{" "}
-                <Link 
-                  to="/register" 
+                <Link
+                  to="/register"
                   className="font-medium text-primary hover:underline"
                 >
                   Créer un compte

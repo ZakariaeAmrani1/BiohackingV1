@@ -158,19 +158,19 @@ export class AppointmentsService {
 
     // Log activity
     ActivitiesService.logActivity(
-      'appointment',
-      'created',
+      "appointment",
+      "created",
       newAppointment.id,
-      `RV-${newAppointment.id.toString().padStart(3, '0')}`,
+      `RV-${newAppointment.id.toString().padStart(3, "0")}`,
       data.Cree_par,
       {
         patientName: newAppointment.patient_nom,
-        appointmentType: data.sujet
-      }
+        appointmentType: data.sujet,
+      },
     );
 
     // Dispatch custom event for real-time updates
-    window.dispatchEvent(new CustomEvent('activityLogged'));
+    window.dispatchEvent(new CustomEvent("activityLogged"));
 
     return newAppointment;
   }
@@ -206,19 +206,19 @@ export class AppointmentsService {
 
     // Log activity
     ActivitiesService.logActivity(
-      'appointment',
-      'updated',
+      "appointment",
+      "updated",
       id,
-      `RV-${id.toString().padStart(3, '0')}`,
+      `RV-${id.toString().padStart(3, "0")}`,
       data.Cree_par,
       {
         patientName: updatedAppointment.patient_nom,
-        appointmentType: data.sujet
-      }
+        appointmentType: data.sujet,
+      },
     );
 
     // Dispatch custom event for real-time updates
-    window.dispatchEvent(new CustomEvent('activityLogged'));
+    window.dispatchEvent(new CustomEvent("activityLogged"));
 
     return updatedAppointment;
   }
@@ -235,19 +235,19 @@ export class AppointmentsService {
 
     // Log activity
     ActivitiesService.logActivity(
-      'appointment',
-      'deleted',
+      "appointment",
+      "deleted",
       id,
-      `RV-${id.toString().padStart(3, '0')}`,
-      'System', // We don't have user context in delete, could be improved
+      `RV-${id.toString().padStart(3, "0")}`,
+      "System", // We don't have user context in delete, could be improved
       {
         patientName: deletedAppointment.patient_nom,
-        appointmentType: deletedAppointment.sujet
-      }
+        appointmentType: deletedAppointment.sujet,
+      },
     );
 
     // Dispatch custom event for real-time updates
-    window.dispatchEvent(new CustomEvent('activityLogged'));
+    window.dispatchEvent(new CustomEvent("activityLogged"));
 
     return true;
   }
@@ -300,7 +300,7 @@ export class AppointmentsService {
 // Utility functions for validation
 export const validateAppointmentData = (
   data: AppointmentFormData,
-  excludeAppointmentId?: number
+  excludeAppointmentId?: number,
 ): string[] => {
   const errors: string[] = [];
 
@@ -323,7 +323,9 @@ export const validateAppointmentData = (
 
     // Check if the selected time slot is available
     if (!isTimeSlotAvailable(data.date_rendez_vous, excludeAppointmentId)) {
-      errors.push("Ce créneau horaire n'est plus disponible. Veuillez sélectionner un autre créneau.");
+      errors.push(
+        "Ce créneau horaire n'est plus disponible. Veuillez sélectionner un autre créneau.",
+      );
     }
   }
 
@@ -374,20 +376,19 @@ const WORKING_HOURS = {
 // Generate time slots for a specific date
 export const generateTimeSlotsForDate = (
   date: Date,
-  excludeAppointmentId?: number
+  excludeAppointmentId?: number,
 ): TimeSlot[] => {
   const slots: TimeSlot[] = [];
-  const dateStr = date.toISOString().split('T')[0]; // YYYY-MM-DD format
+  const dateStr = date.toISOString().split("T")[0]; // YYYY-MM-DD format
 
   // Get existing appointments for this date (excluding the one being edited if applicable)
-  const existingAppointments = mockAppointments.filter(
-    (apt) => {
-      const aptDate = new Date(apt.date_rendez_vous).toISOString().split('T')[0];
-      const isOnSameDate = aptDate === dateStr;
-      const isNotExcluded = !excludeAppointmentId || apt.id !== excludeAppointmentId;
-      return isOnSameDate && isNotExcluded;
-    }
-  );
+  const existingAppointments = mockAppointments.filter((apt) => {
+    const aptDate = new Date(apt.date_rendez_vous).toISOString().split("T")[0];
+    const isOnSameDate = aptDate === dateStr;
+    const isNotExcluded =
+      !excludeAppointmentId || apt.id !== excludeAppointmentId;
+    return isOnSameDate && isNotExcluded;
+  });
 
   // Generate slots from working hours
   for (let hour = WORKING_HOURS.start; hour < WORKING_HOURS.end; hour++) {
@@ -395,11 +396,15 @@ export const generateTimeSlotsForDate = (
     slotDate.setHours(hour, 0, 0, 0);
 
     // Check if this slot conflicts with existing appointments
-    const slotEnd = new Date(slotDate.getTime() + WORKING_HOURS.appointmentDuration * 60000);
+    const slotEnd = new Date(
+      slotDate.getTime() + WORKING_HOURS.appointmentDuration * 60000,
+    );
 
     const isAvailable = !existingAppointments.some((apt) => {
       const aptStart = new Date(apt.date_rendez_vous);
-      const aptEnd = new Date(aptStart.getTime() + WORKING_HOURS.appointmentDuration * 60000);
+      const aptEnd = new Date(
+        aptStart.getTime() + WORKING_HOURS.appointmentDuration * 60000,
+      );
 
       // Check for overlap: slot overlaps with appointment if:
       // slot starts before appointment ends AND slot ends after appointment starts
@@ -408,10 +413,10 @@ export const generateTimeSlotsForDate = (
 
     slots.push({
       datetime: slotDate.toISOString().slice(0, 16), // YYYY-MM-DDTHH:MM format
-      time: slotDate.toLocaleTimeString('fr-FR', {
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false
+      time: slotDate.toLocaleTimeString("fr-FR", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
       }),
       available: isAvailable,
     });
@@ -424,7 +429,7 @@ export const generateTimeSlotsForDate = (
 export const getAvailableDates = (
   startDate: Date = new Date(),
   daysAhead: number = 30,
-  excludeAppointmentId?: number
+  excludeAppointmentId?: number,
 ): { date: Date; hasAvailableSlots: boolean }[] => {
   const dates: { date: Date; hasAvailableSlots: boolean }[] = [];
 
@@ -439,7 +444,7 @@ export const getAvailableDates = (
     }
 
     const slots = generateTimeSlotsForDate(date, excludeAppointmentId);
-    const hasAvailableSlots = slots.some(slot => slot.available);
+    const hasAvailableSlots = slots.some((slot) => slot.available);
 
     dates.push({
       date,
@@ -453,10 +458,10 @@ export const getAvailableDates = (
 // Check if a specific datetime is available
 export const isTimeSlotAvailable = (
   datetime: string,
-  excludeAppointmentId?: number
+  excludeAppointmentId?: number,
 ): boolean => {
   const slotDate = new Date(datetime);
   const slots = generateTimeSlotsForDate(slotDate, excludeAppointmentId);
-  const slot = slots.find(s => s.datetime === datetime);
+  const slot = slots.find((s) => s.datetime === datetime);
   return slot?.available ?? false;
 };
