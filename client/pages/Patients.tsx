@@ -613,6 +613,13 @@ export default function Patients() {
                               </DropdownMenuItem>
                               <DropdownMenuItem
                                 className="gap-2"
+                                onClick={() => navigateToDocuments(client)}
+                              >
+                                <FileText className="h-4 w-4" />
+                                Voir les documents
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                className="gap-2"
                                 onClick={() => openEditModal(client)}
                               >
                                 <Edit className="h-4 w-4" />
