@@ -20,6 +20,7 @@ import {
   Globe,
   HardDrive,
   DollarSign,
+  Building2,
 } from "lucide-react";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -56,6 +57,11 @@ import {
   UserService,
 } from "@/services/userService";
 import { AppSettings, AppSettingsService } from "@/services/appSettingsService";
+import {
+  Entreprise,
+  EntrepriseFormData,
+  EntrepriseService,
+} from "@/services/entrepriseService";
 
 export default function Settings() {
   const { toast } = useToast();
@@ -94,6 +100,19 @@ export default function Settings() {
     },
   });
 
+  // Entreprise state
+  const [entreprise, setEntreprise] = useState<Entreprise | null>(null);
+  const [entrepriseFormData, setEntrepriseFormData] = useState<EntrepriseFormData>({
+    ICE: "",
+    CNSS: "",
+    RC: "",
+    IF: "",
+    RIB: "",
+    patente: "",
+    adresse: "",
+  });
+  const [entrepriseErrors, setEntrepriseErrors] = useState<string[]>([]);
+
   // UI state
   const [isLoading, setIsLoading] = useState(false);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
@@ -110,6 +129,7 @@ export default function Settings() {
   useEffect(() => {
     loadUserProfile();
     loadAppSettings();
+    loadEntrepriseData();
   }, []);
 
   const loadUserProfile = async () => {
@@ -151,6 +171,30 @@ export default function Settings() {
     }
   };
 
+  const loadEntrepriseData = async () => {
+    try {
+      const entrepriseData = await EntrepriseService.getEntreprise();
+      setEntreprise(entrepriseData);
+      if (entrepriseData) {
+        setEntrepriseFormData({
+          ICE: entrepriseData.ICE.toString(),
+          CNSS: entrepriseData.CNSS.toString(),
+          RC: entrepriseData.RC.toString(),
+          IF: entrepriseData.IF.toString(),
+          RIB: entrepriseData.RIB.toString(),
+          patente: entrepriseData.patente.toString(),
+          adresse: entrepriseData.adresse,
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: "Impossible de charger les informations de l'entreprise",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleUserFormChange = (field: keyof UserFormData, value: string) => {
     setUserFormData((prev) => ({ ...prev, [field]: value }));
     if (profileErrors.length > 0) {
@@ -184,6 +228,42 @@ export default function Settings() {
         description: "Impossible de sauvegarder le paramètre",
         variant: "destructive",
       });
+    }
+  };
+
+  const handleEntrepriseFormChange = (
+    field: keyof EntrepriseFormData,
+    value: string,
+  ) => {
+    setEntrepriseFormData((prev) => ({ ...prev, [field]: value }));
+    if (entrepriseErrors.length > 0) {
+      setEntrepriseErrors([]);
+    }
+  };
+
+  const handleSaveEntreprise = async () => {
+    const errors = EntrepriseService.validateEntrepriseData(entrepriseFormData);
+    if (errors.length > 0) {
+      setEntrepriseErrors(errors);
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const updatedEntreprise = await EntrepriseService.saveEntreprise(entrepriseFormData);
+      setEntreprise(updatedEntreprise);
+      toast({
+        title: "Informations de l'entreprise mises à jour",
+        description: "Les informations ont été sauvegardées avec succès",
+      });
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: "Impossible de sauvegarder les informations de l'entreprise",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -398,10 +478,14 @@ export default function Settings() {
           </div>
         ) : (
           <Tabs defaultValue="profile" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="profile" className="gap-2">
                 <User className="h-4 w-4" />
                 Profil
+              </TabsTrigger>
+              <TabsTrigger value="entreprise" className="gap-2">
+                <Building2 className="h-4 w-4" />
+                Entreprise
               </TabsTrigger>
               <TabsTrigger value="appearance" className="gap-2">
                 <Palette className="h-4 w-4" />
@@ -600,6 +684,178 @@ export default function Settings() {
                       <div>
                         <span className="font-medium">Nom d'affichage:</span>{" "}
                         {UserService.getDisplayName(user)}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </TabsContent>
+
+            {/* Entreprise Tab */}
+            <TabsContent value="entreprise" className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Building2 className="h-5 w-5" />
+                    Informations de l'entreprise
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {entrepriseErrors.length > 0 && (
+                    <Alert variant="destructive">
+                      <AlertDescription>
+                        <ul className="list-disc list-inside space-y-1">
+                          {entrepriseErrors.map((error, index) => (
+                            <li key={index}>{error}</li>
+                          ))}
+                        </ul>
+                      </AlertDescription>
+                    </Alert>
+                  )}
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="ICE">ICE</Label>
+                      <Input
+                        id="ICE"
+                        type="number"
+                        value={entrepriseFormData.ICE}
+                        onChange={(e) =>
+                          handleEntrepriseFormChange("ICE", e.target.value)
+                        }
+                        placeholder="Identifiant Commun de l'Entreprise"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="CNSS">CNSS</Label>
+                      <Input
+                        id="CNSS"
+                        type="number"
+                        value={entrepriseFormData.CNSS}
+                        onChange={(e) =>
+                          handleEntrepriseFormChange("CNSS", e.target.value)
+                        }
+                        placeholder="Caisse Nationale de Sécurité Sociale"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="RC">RC</Label>
+                      <Input
+                        id="RC"
+                        type="number"
+                        value={entrepriseFormData.RC}
+                        onChange={(e) =>
+                          handleEntrepriseFormChange("RC", e.target.value)
+                        }
+                        placeholder="Registre de Commerce"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="IF">IF</Label>
+                      <Input
+                        id="IF"
+                        type="number"
+                        value={entrepriseFormData.IF}
+                        onChange={(e) =>
+                          handleEntrepriseFormChange("IF", e.target.value)
+                        }
+                        placeholder="Identifiant Fiscal"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="RIB">RIB</Label>
+                      <Input
+                        id="RIB"
+                        type="number"
+                        value={entrepriseFormData.RIB}
+                        onChange={(e) =>
+                          handleEntrepriseFormChange("RIB", e.target.value)
+                        }
+                        placeholder="Relevé d'Identité Bancaire"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="patente">Patente</Label>
+                      <Input
+                        id="patente"
+                        type="number"
+                        value={entrepriseFormData.patente}
+                        onChange={(e) =>
+                          handleEntrepriseFormChange("patente", e.target.value)
+                        }
+                        placeholder="Numéro de patente"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="entreprise-adresse">Adresse</Label>
+                    <Textarea
+                      id="entreprise-adresse"
+                      value={entrepriseFormData.adresse}
+                      onChange={(e) =>
+                        handleEntrepriseFormChange("adresse", e.target.value)
+                      }
+                      placeholder="Adresse complète de l'entreprise"
+                      rows={3}
+                    />
+                  </div>
+
+                  <div className="flex gap-4">
+                    <Button
+                      onClick={handleSaveEntreprise}
+                      disabled={isLoading}
+                      className="gap-2"
+                    >
+                      <Save className="h-4 w-4" />
+                      {isLoading ? "Sauvegarde..." : "Sauvegarder les informations"}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {entreprise && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Récapitulatif de l'entreprise</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <span className="font-medium">ID:</span> {entreprise.id}
+                      </div>
+                      <div>
+                        <span className="font-medium">ICE:</span> {entreprise.ICE}
+                      </div>
+                      <div>
+                        <span className="font-medium">CNSS:</span> {entreprise.CNSS}
+                      </div>
+                      <div>
+                        <span className="font-medium">RC:</span> {entreprise.RC}
+                      </div>
+                      <div>
+                        <span className="font-medium">IF:</span> {entreprise.IF}
+                      </div>
+                      <div>
+                        <span className="font-medium">RIB:</span> {entreprise.RIB}
+                      </div>
+                      <div>
+                        <span className="font-medium">Patente:</span> {entreprise.patente}
+                      </div>
+                      <div>
+                        <span className="font-medium">Créé le:</span>{" "}
+                        {new Date(entreprise.created_at).toLocaleDateString("fr-FR")}
+                      </div>
+                    </div>
+                    <div className="mt-4">
+                      <span className="font-medium">Adresse:</span>
+                      <div className="mt-1 text-muted-foreground">
+                        {entreprise.adresse}
                       </div>
                     </div>
                   </CardContent>
