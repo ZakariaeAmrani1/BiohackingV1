@@ -1,5 +1,7 @@
 import { User } from "./userService";
 
+import api from "../api/axios";
+
 export interface LoginCredentials {
   email: string;
   password: string;
@@ -89,105 +91,66 @@ export class AuthService {
 
   // Login user
   static async login(credentials: LoginCredentials): Promise<AuthUser> {
-    await delay(800); // Simulate API call
+    try {
+      const result = await api.post("auth/login", credentials);
+      const data = result.data;
+      const authUser: AuthUser = {
+        id: data.user.id,
+        CIN: data.user.CIN,
+        nom: data.user.nom,
+        prenom: data.user.prenom,
+        date_naissance: data.user.date_naissance,
+        adresse: data.user.adresse,
+        numero_telephone: data.user.numero_telephone,
+        email: data.user.email,
+        role: data.user.role,
+        created_at: data.user.created_at,
+        token: data.token,
+      };
 
-    const user = mockUsers.find(
-      (u) => u.email.toLowerCase() === credentials.email.toLowerCase(),
-    );
+      // Store in localStorage
+      localStorage.setItem(TOKEN_KEY, data.token);
+      localStorage.setItem(USER_KEY, JSON.stringify(authUser));
 
-    if (!user) {
-      throw new Error("Email ou mot de passe incorrect");
+      return authUser;
+    } catch (error) {
+      throw new Error("Email ou mot de passe est incorrect");
     }
-
-    if (user.password !== credentials.password) {
-      throw new Error("Email ou mot de passe incorrect");
-    }
-
-    const token = this.generateToken(user);
-    const authUser: AuthUser = {
-      id: user.id,
-      CIN: user.CIN,
-      nom: user.nom,
-      prenom: user.prenom,
-      date_naissance: user.date_naissance,
-      adresse: user.adresse,
-      numero_telephone: user.numero_telephone,
-      email: user.email,
-      role: user.role,
-      created_at: user.created_at,
-      token,
-    };
-
-    // Store in localStorage
-    localStorage.setItem(TOKEN_KEY, token);
-    localStorage.setItem(USER_KEY, JSON.stringify(authUser));
-
-    return authUser;
   }
 
   // Register new user
-  static async register(data: RegisterData): Promise<AuthUser> {
-    await delay(1000); // Simulate API call
-
+  static async register(input: RegisterData): Promise<AuthUser> {
     // Validate registration data
-    const errors = this.validateRegistrationData(data);
+    const errors = this.validateRegistrationData(input);
     if (errors.length > 0) {
       throw new Error(errors[0]);
     }
 
-    // Check if user already exists
-    const existingUser = mockUsers.find(
-      (u) =>
-        u.email.toLowerCase() === data.email.toLowerCase() ||
-        u.CIN === data.CIN,
-    );
+    try {
+      const result = await api.post("auth/register", input);
+      const data = result.data;
+      const authUser: AuthUser = {
+        id: data.user.id,
+        CIN: data.user.CIN,
+        nom: data.user.nom,
+        prenom: data.user.prenom,
+        date_naissance: data.user.date_naissance,
+        adresse: data.user.adresse,
+        numero_telephone: data.user.numero_telephone,
+        email: data.user.email,
+        role: data.user.role,
+        created_at: data.user.created_at,
+        token: data.token,
+      };
 
-    if (existingUser) {
-      if (existingUser.email.toLowerCase() === data.email.toLowerCase()) {
-        throw new Error("Un utilisateur avec cet email existe déjà");
-      }
-      if (existingUser.CIN === data.CIN) {
-        throw new Error("Un utilisateur avec ce CIN existe déjà");
-      }
+      // Store in localStorage
+      localStorage.setItem(TOKEN_KEY, data.token);
+      localStorage.setItem(USER_KEY, JSON.stringify(authUser));
+
+      return authUser;
+    } catch (error) {
+      throw new Error(error.response.data.message);
     }
-
-    // Create new user
-    const newUser: User & { password: string } = {
-      id: Math.max(...mockUsers.map((u) => u.id)) + 1,
-      CIN: data.CIN,
-      nom: data.nom,
-      prenom: data.prenom,
-      date_naissance: data.date_naissance,
-      adresse: data.adresse,
-      numero_telephone: data.numero_telephone,
-      email: data.email,
-      password: data.password, // In real app, this would be hashed
-      role: data.role,
-      created_at: new Date().toISOString(),
-    };
-
-    mockUsers.push(newUser);
-
-    const token = this.generateToken(newUser);
-    const authUser: AuthUser = {
-      id: newUser.id,
-      CIN: newUser.CIN,
-      nom: newUser.nom,
-      prenom: newUser.prenom,
-      date_naissance: newUser.date_naissance,
-      adresse: newUser.adresse,
-      numero_telephone: newUser.numero_telephone,
-      email: newUser.email,
-      role: newUser.role,
-      created_at: newUser.created_at,
-      token,
-    };
-
-    // Store in localStorage
-    localStorage.setItem(TOKEN_KEY, token);
-    localStorage.setItem(USER_KEY, JSON.stringify(authUser));
-
-    return authUser;
   }
 
   // Logout user

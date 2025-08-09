@@ -1,3 +1,6 @@
+import { json } from "react-router-dom";
+import api from "../api/axios";
+
 export interface User {
   id: number;
   CIN: string;
@@ -29,18 +32,17 @@ export interface PasswordChangeData {
   confirmPassword: string;
 }
 
-// Mock current user data
 let currentUser: User = {
-  id: 1,
-  CIN: "BE123456789",
-  nom: "Smith",
-  prenom: "Dr. John",
-  date_naissance: "1980-05-15T00:00:00",
-  adresse: "123 Avenue de la Santé, Bruxelles, 1000",
-  numero_telephone: "+32 2 123 45 67",
-  email: "dr.smith@biohacking-clinic.be",
+  id: 0,
+  CIN: "",
+  nom: "",
+  prenom: "",
+  date_naissance: "",
+  adresse: "",
+  numero_telephone: "",
+  email: "",
   role: "admin",
-  created_at: "2023-01-01T10:00:00",
+  created_at: "",
 };
 
 // Simulate API delay
@@ -49,46 +51,73 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 export class UserService {
   // Get current user profile
   static async getCurrentUser(): Promise<User> {
-    await delay(300);
-    // Return user without password for security
-    const { password, ...userWithoutPassword } = currentUser;
-    return userWithoutPassword as User;
+    const user = JSON.parse(localStorage.getItem("biohacking-clinic-user"));
+    currentUser = {
+      id: user.id,
+      CIN: user.CIN,
+      nom: user.nom,
+      prenom: user.prenom,
+      date_naissance: user.date_naissance,
+      adresse: user.adresse,
+      numero_telephone: user.numero_telephone,
+      email: user.email,
+      role: user.role,
+      created_at: user.created_at,
+    };
+    return currentUser as User;
   }
 
   // Update user profile
   static async updateProfile(data: UserFormData): Promise<User> {
-    await delay(800);
-
-    const updatedUser: User = {
-      ...currentUser,
-      ...data,
-    };
-
-    currentUser = updatedUser;
-
-    // Return user without password
-    const { password, ...userWithoutPassword } = updatedUser;
-    return userWithoutPassword as User;
+    try {
+      const result = await api.patch(`utilisateur/${currentUser.id}`, data);
+      const updatedUser: User = {
+        ...currentUser,
+        ...data,
+      };
+      currentUser = updatedUser;
+      // Return user without password
+      const { password, ...userWithoutPassword } = updatedUser;
+      localStorage.setItem(
+        "biohacking-clinic-user",
+        JSON.stringify(updatedUser),
+      );
+      return userWithoutPassword as User;
+    } catch (error) {
+      throw new Error("Erreur: " + error.response.data.message);
+    }
   }
 
   // Change password
   static async changePassword(data: PasswordChangeData): Promise<boolean> {
-    await delay(800);
+    try {
+      if (data.newPassword !== data.confirmPassword) {
+        throw new Error("Les mots de passe ne correspondent pas");
+      }
+      if (data.newPassword.length < 8) {
+        throw new Error("Le mot de passe doit contenir au moins 8 caractères");
+      }
 
-    // In a real app, you'd verify the current password against the hash
-    // For demo purposes, we'll just validate the format
-    if (data.newPassword !== data.confirmPassword) {
-      throw new Error("Les mots de passe ne correspondent pas");
+      const result = await api.patch(`auth/update-password/${currentUser.id}`, {
+        oldPassword: data.currentPassword,
+        newPassword: data.newPassword,
+      });
+      const updatedUser: User = {
+        ...currentUser,
+        ...data,
+      };
+      currentUser = updatedUser;
+      console.log(updatedUser);
+      // Return user without password
+      const { password, ...userWithoutPassword } = updatedUser;
+      localStorage.setItem(
+        "biohacking-clinic-user",
+        JSON.stringify(updatedUser),
+      );
+      return true;
+    } catch (error) {
+      throw new Error("Erreur: " + error.response.data.message);
     }
-
-    if (data.newPassword.length < 8) {
-      throw new Error("Le mot de passe doit contenir au moins 8 caractères");
-    }
-
-    // In real app, you'd hash the password before storing
-    currentUser.password = data.newPassword;
-
-    return true;
   }
 
   // Validate user form data

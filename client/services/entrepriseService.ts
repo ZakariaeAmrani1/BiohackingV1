@@ -1,3 +1,4 @@
+import api from "../api/axios";
 export interface Entreprise {
   id: number;
   ICE: number;
@@ -21,17 +22,7 @@ export interface EntrepriseFormData {
 }
 
 // Mock company data
-let currentEntreprise: Entreprise | null = {
-  id: 1,
-  ICE: 123456789,
-  CNSS: 987654321,
-  RC: 456789123,
-  IF: 789123456,
-  RIB: 321654987,
-  patente: 654987321,
-  adresse: "123 Avenue Mohamed V, Casablanca, 20000",
-  created_at: "2023-01-01T10:00:00",
-};
+let currentEntreprise: Entreprise | null = null;
 
 // Simulate API delay
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -39,65 +30,93 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 export class EntrepriseService {
   // Get company information
   static async getEntreprise(): Promise<Entreprise | null> {
-    await delay(300);
-    return currentEntreprise;
+    try {
+      const result = await api.get(`entreprise`);
+      const data = result.data;
+      if (data !== "") {
+        currentEntreprise = {
+          id: data.id,
+          ICE: data.ICE,
+          CNSS: data.CNSS,
+          RC: data.RC,
+          IF: data.IF,
+          RIB: data.RIB,
+          patente: data.patente,
+          adresse: data.adresse,
+          created_at: data.created_at,
+        };
+        return currentEntreprise;
+      }
+    } catch (error) {
+      throw new Error("Erreur: " + error.response.data.message);
+    }
+    return null;
   }
 
   // Update company information
   static async updateEntreprise(data: EntrepriseFormData): Promise<Entreprise> {
-    await delay(800);
+    try {
+      const result = await api.patch(
+        `entreprise/${currentEntreprise.id}`,
+        data,
+      );
 
-    // Convert string numbers to integers for validation
-    const numericData = {
-      ICE: typeof data.ICE === "string" ? parseInt(data.ICE) : data.ICE,
-      CNSS: typeof data.CNSS === "string" ? parseInt(data.CNSS) : data.CNSS,
-      RC: typeof data.RC === "string" ? parseInt(data.RC) : data.RC,
-      IF: typeof data.IF === "string" ? parseInt(data.IF) : data.IF,
-      RIB: typeof data.RIB === "string" ? parseInt(data.RIB) : data.RIB,
-      patente:
-        typeof data.patente === "string"
-          ? parseInt(data.patente)
-          : data.patente,
-      adresse: data.adresse,
-    };
+      const numericData = {
+        ICE: typeof data.ICE === "string" ? parseInt(data.ICE) : data.ICE,
+        CNSS: typeof data.CNSS === "string" ? parseInt(data.CNSS) : data.CNSS,
+        RC: typeof data.RC === "string" ? parseInt(data.RC) : data.RC,
+        IF: typeof data.IF === "string" ? parseInt(data.IF) : data.IF,
+        RIB: typeof data.RIB === "string" ? parseInt(data.RIB) : data.RIB,
+        patente:
+          typeof data.patente === "string"
+            ? parseInt(data.patente)
+            : data.patente,
+        adresse: data.adresse,
+      };
+      const updatedEntreprise: Entreprise = {
+        ...currentEntreprise!,
+        ...numericData,
+      };
 
-    const updatedEntreprise: Entreprise = {
-      ...currentEntreprise!,
-      ...numericData,
-    };
+      currentEntreprise = updatedEntreprise;
 
-    currentEntreprise = updatedEntreprise;
-
-    return updatedEntreprise;
+      return updatedEntreprise;
+    } catch (error) {
+      throw new Error("Erreur: " + error.response.data.message);
+    }
   }
 
   // Create new company information
   static async createEntreprise(data: EntrepriseFormData): Promise<Entreprise> {
-    await delay(800);
-
     // Convert string numbers to integers
-    const numericData = {
-      ICE: typeof data.ICE === "string" ? parseInt(data.ICE) : data.ICE,
-      CNSS: typeof data.CNSS === "string" ? parseInt(data.CNSS) : data.CNSS,
-      RC: typeof data.RC === "string" ? parseInt(data.RC) : data.RC,
-      IF: typeof data.IF === "string" ? parseInt(data.IF) : data.IF,
-      RIB: typeof data.RIB === "string" ? parseInt(data.RIB) : data.RIB,
-      patente:
-        typeof data.patente === "string"
-          ? parseInt(data.patente)
-          : data.patente,
-      adresse: data.adresse,
-    };
 
-    const newEntreprise: Entreprise = {
-      id: 1,
-      ...numericData,
-      created_at: new Date().toISOString(),
-    };
+    try {
+      const result = await api.post(`entreprise/`, data);
 
-    currentEntreprise = newEntreprise;
+      const numericData = {
+        ICE: typeof data.ICE === "string" ? parseInt(data.ICE) : data.ICE,
+        CNSS: typeof data.CNSS === "string" ? parseInt(data.CNSS) : data.CNSS,
+        RC: typeof data.RC === "string" ? parseInt(data.RC) : data.RC,
+        IF: typeof data.IF === "string" ? parseInt(data.IF) : data.IF,
+        RIB: typeof data.RIB === "string" ? parseInt(data.RIB) : data.RIB,
+        patente:
+          typeof data.patente === "string"
+            ? parseInt(data.patente)
+            : data.patente,
+        adresse: data.adresse,
+      };
+      const newEntreprise: Entreprise = {
+        id: result.data.id,
+        ...numericData,
+        created_at: new Date().toISOString(),
+      };
 
-    return newEntreprise;
+      currentEntreprise = newEntreprise;
+
+      return newEntreprise;
+    } catch (error) {
+      throw new Error("Erreur: " + error.response.data.message);
+    }
   }
 
   // Validate company form data
@@ -147,7 +166,7 @@ export class EntrepriseService {
 
   // Save or update company information
   static async saveEntreprise(data: EntrepriseFormData): Promise<Entreprise> {
-    if (currentEntreprise) {
+    if (currentEntreprise !== null) {
       return this.updateEntreprise(data);
     } else {
       return this.createEntreprise(data);
