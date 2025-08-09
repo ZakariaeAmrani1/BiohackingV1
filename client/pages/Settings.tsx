@@ -102,15 +102,16 @@ export default function Settings() {
 
   // Entreprise state
   const [entreprise, setEntreprise] = useState<Entreprise | null>(null);
-  const [entrepriseFormData, setEntrepriseFormData] = useState<EntrepriseFormData>({
-    ICE: "",
-    CNSS: "",
-    RC: "",
-    IF: "",
-    RIB: "",
-    patente: "",
-    adresse: "",
-  });
+  const [entrepriseFormData, setEntrepriseFormData] =
+    useState<EntrepriseFormData>({
+      ICE: "",
+      CNSS: "",
+      RC: "",
+      IF: "",
+      RIB: "",
+      patente: "",
+      adresse: "",
+    });
   const [entrepriseErrors, setEntrepriseErrors] = useState<string[]>([]);
 
   // UI state
@@ -250,7 +251,8 @@ export default function Settings() {
 
     setIsLoading(true);
     try {
-      const updatedEntreprise = await EntrepriseService.saveEntreprise(entrepriseFormData);
+      const updatedEntreprise =
+        await EntrepriseService.saveEntreprise(entrepriseFormData);
       setEntreprise(updatedEntreprise);
       toast({
         title: "Informations de l'entreprise mises à jour",
@@ -259,7 +261,8 @@ export default function Settings() {
     } catch (error) {
       toast({
         title: "Erreur",
-        description: "Impossible de sauvegarder les informations de l'entreprise",
+        description:
+          "Impossible de sauvegarder les informations de l'entreprise",
         variant: "destructive",
       });
     } finally {
@@ -813,7 +816,9 @@ export default function Settings() {
                       className="gap-2"
                     >
                       <Save className="h-4 w-4" />
-                      {isLoading ? "Sauvegarde..." : "Sauvegarder les informations"}
+                      {isLoading
+                        ? "Sauvegarde..."
+                        : "Sauvegarder les informations"}
                     </Button>
                   </div>
                 </CardContent>
@@ -830,10 +835,12 @@ export default function Settings() {
                         <span className="font-medium">ID:</span> {entreprise.id}
                       </div>
                       <div>
-                        <span className="font-medium">ICE:</span> {entreprise.ICE}
+                        <span className="font-medium">ICE:</span>{" "}
+                        {entreprise.ICE}
                       </div>
                       <div>
-                        <span className="font-medium">CNSS:</span> {entreprise.CNSS}
+                        <span className="font-medium">CNSS:</span>{" "}
+                        {entreprise.CNSS}
                       </div>
                       <div>
                         <span className="font-medium">RC:</span> {entreprise.RC}
@@ -842,14 +849,18 @@ export default function Settings() {
                         <span className="font-medium">IF:</span> {entreprise.IF}
                       </div>
                       <div>
-                        <span className="font-medium">RIB:</span> {entreprise.RIB}
+                        <span className="font-medium">RIB:</span>{" "}
+                        {entreprise.RIB}
                       </div>
                       <div>
-                        <span className="font-medium">Patente:</span> {entreprise.patente}
+                        <span className="font-medium">Patente:</span>{" "}
+                        {entreprise.patente}
                       </div>
                       <div>
                         <span className="font-medium">Créé le:</span>{" "}
-                        {new Date(entreprise.created_at).toLocaleDateString("fr-FR")}
+                        {new Date(entreprise.created_at).toLocaleDateString(
+                          "fr-FR",
+                        )}
                       </div>
                     </div>
                     <div className="mt-4">

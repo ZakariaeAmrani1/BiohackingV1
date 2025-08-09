@@ -49,12 +49,15 @@ export class EntrepriseService {
 
     // Convert string numbers to integers for validation
     const numericData = {
-      ICE: typeof data.ICE === 'string' ? parseInt(data.ICE) : data.ICE,
-      CNSS: typeof data.CNSS === 'string' ? parseInt(data.CNSS) : data.CNSS,
-      RC: typeof data.RC === 'string' ? parseInt(data.RC) : data.RC,
-      IF: typeof data.IF === 'string' ? parseInt(data.IF) : data.IF,
-      RIB: typeof data.RIB === 'string' ? parseInt(data.RIB) : data.RIB,
-      patente: typeof data.patente === 'string' ? parseInt(data.patente) : data.patente,
+      ICE: typeof data.ICE === "string" ? parseInt(data.ICE) : data.ICE,
+      CNSS: typeof data.CNSS === "string" ? parseInt(data.CNSS) : data.CNSS,
+      RC: typeof data.RC === "string" ? parseInt(data.RC) : data.RC,
+      IF: typeof data.IF === "string" ? parseInt(data.IF) : data.IF,
+      RIB: typeof data.RIB === "string" ? parseInt(data.RIB) : data.RIB,
+      patente:
+        typeof data.patente === "string"
+          ? parseInt(data.patente)
+          : data.patente,
       adresse: data.adresse,
     };
 
@@ -74,12 +77,15 @@ export class EntrepriseService {
 
     // Convert string numbers to integers
     const numericData = {
-      ICE: typeof data.ICE === 'string' ? parseInt(data.ICE) : data.ICE,
-      CNSS: typeof data.CNSS === 'string' ? parseInt(data.CNSS) : data.CNSS,
-      RC: typeof data.RC === 'string' ? parseInt(data.RC) : data.RC,
-      IF: typeof data.IF === 'string' ? parseInt(data.IF) : data.IF,
-      RIB: typeof data.RIB === 'string' ? parseInt(data.RIB) : data.RIB,
-      patente: typeof data.patente === 'string' ? parseInt(data.patente) : data.patente,
+      ICE: typeof data.ICE === "string" ? parseInt(data.ICE) : data.ICE,
+      CNSS: typeof data.CNSS === "string" ? parseInt(data.CNSS) : data.CNSS,
+      RC: typeof data.RC === "string" ? parseInt(data.RC) : data.RC,
+      IF: typeof data.IF === "string" ? parseInt(data.IF) : data.IF,
+      RIB: typeof data.RIB === "string" ? parseInt(data.RIB) : data.RIB,
+      patente:
+        typeof data.patente === "string"
+          ? parseInt(data.patente)
+          : data.patente,
       adresse: data.adresse,
     };
 
@@ -99,12 +105,14 @@ export class EntrepriseService {
     const errors: string[] = [];
 
     // Convert to numbers for validation
-    const ice = typeof data.ICE === 'string' ? parseInt(data.ICE) : data.ICE;
-    const cnss = typeof data.CNSS === 'string' ? parseInt(data.CNSS) : data.CNSS;
-    const rc = typeof data.RC === 'string' ? parseInt(data.RC) : data.RC;
-    const ifNumber = typeof data.IF === 'string' ? parseInt(data.IF) : data.IF;
-    const rib = typeof data.RIB === 'string' ? parseInt(data.RIB) : data.RIB;
-    const patente = typeof data.patente === 'string' ? parseInt(data.patente) : data.patente;
+    const ice = typeof data.ICE === "string" ? parseInt(data.ICE) : data.ICE;
+    const cnss =
+      typeof data.CNSS === "string" ? parseInt(data.CNSS) : data.CNSS;
+    const rc = typeof data.RC === "string" ? parseInt(data.RC) : data.RC;
+    const ifNumber = typeof data.IF === "string" ? parseInt(data.IF) : data.IF;
+    const rib = typeof data.RIB === "string" ? parseInt(data.RIB) : data.RIB;
+    const patente =
+      typeof data.patente === "string" ? parseInt(data.patente) : data.patente;
 
     if (!data.ICE || isNaN(ice) || ice <= 0) {
       errors.push("L'ICE est obligatoire et doit être un nombre valide");
