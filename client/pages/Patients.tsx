@@ -11,11 +11,11 @@ import {
   LayoutGrid,
   Table as TableIcon,
   Clock,
-  User,
   Mail,
   Phone,
   Heart,
   FileText,
+  User,
 } from "lucide-react";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -54,7 +54,9 @@ import {
   ClientFormData,
   calculateAge,
   getBloodGroups,
+  Utilisateur,
 } from "@/services/clientsService";
+import { UserService } from "@/services/userService";
 
 export default function Patients() {
   const navigate = useNavigate();
@@ -66,6 +68,7 @@ export default function Patients() {
 
   // Data state
   const [clients, setClients] = useState<Client[]>([]);
+  const [users, setUsers] = useState<Utilisateur[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   // Modal states
@@ -86,6 +89,10 @@ export default function Patients() {
   // Load clients on component mount
   useEffect(() => {
     loadClients();
+  }, []);
+
+  useEffect(() => {
+    loadUsers();
   }, []);
 
   // Add escape key handler to force close modals if stuck
@@ -117,6 +124,28 @@ export default function Patients() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const loadUsers = async () => {
+    try {
+      setIsLoading(true);
+      const data = await UserService.getCurrentAllUsers();
+      setUsers(data);
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: "Impossible de charger les utilisateurs",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const getUserName = (CIN: string) => {
+    const user = users.find((user) => user.CIN === CIN);
+    if (user && user.nom) return user.nom;
+    return CIN;
   };
 
   // Filter and search logic
@@ -215,7 +244,7 @@ export default function Patients() {
       closeDeleteModal();
       toast({
         title: "Succès",
-        description: "Le patient a été supprim�� avec succès",
+        description: "Le patient a été supprimé avec succès",
       });
     } catch (error) {
       toast({
@@ -486,7 +515,9 @@ export default function Patients() {
                                 <div>{client.numero_telephone}</div>
                               </div>
                             </TableCell>
-                            <TableCell>{client.Cree_par}</TableCell>
+                            <TableCell>
+                              {getUserName(client.Cree_par)}
+                            </TableCell>
                             <TableCell>
                               {formatDate(client.created_at)}
                             </TableCell>
@@ -684,6 +715,7 @@ export default function Patients() {
           onSubmit={selectedClient ? handleUpdateClient : handleCreateClient}
           client={selectedClient}
           isLoading={isSubmitting}
+          users={users}
         />
 
         <ClientDetailsModal
@@ -692,6 +724,7 @@ export default function Patients() {
           client={selectedClient}
           onEdit={openEditModal}
           onDelete={openDeleteModal}
+          users={users}
         />
 
         <DeleteClientModal

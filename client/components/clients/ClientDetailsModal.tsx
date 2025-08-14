@@ -25,7 +25,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Client, calculateAge } from "@/services/clientsService";
+import { Client, Utilisateur, calculateAge } from "@/services/clientsService";
 
 interface ClientDetailsModalProps {
   isOpen: boolean;
@@ -33,6 +33,7 @@ interface ClientDetailsModalProps {
   client: Client | null;
   onEdit?: (client: Client) => void;
   onDelete?: (client: Client) => void;
+  users: Utilisateur[] | null;
 }
 
 export default function ClientDetailsModal({
@@ -41,6 +42,7 @@ export default function ClientDetailsModal({
   client,
   onEdit,
   onDelete,
+  users,
 }: ClientDetailsModalProps) {
   if (!client) return null;
 
@@ -76,6 +78,11 @@ export default function ClientDetailsModal({
       onDelete(client);
     }
     onClose();
+  };
+
+  const getUserName = (CIN: string) => {
+    const user = users.find((user) => user.CIN === CIN);
+    return user.nom || CIN;
   };
 
   const age = calculateAge(client.date_naissance);
@@ -237,7 +244,7 @@ export default function ClientDetailsModal({
                 <Label>Créé par</Label>
                 <Value className="flex items-center gap-2">
                   <UserCheck className="h-4 w-4" />
-                  {client.Cree_par}
+                  {getUserName(client.Cree_par)}
                 </Value>
               </div>
               <div>

@@ -17,6 +17,12 @@ export interface Client {
   Cree_par: string;
 }
 
+export interface Utilisateur {
+  id: number;
+  CIN: string;
+  nom: string;
+}
+
 // Create/Update form data interface
 export interface ClientFormData {
   CIN: string;
@@ -132,7 +138,21 @@ export class ClientsService {
     id: number,
     data: ClientFormData,
   ): Promise<Client | null> {
-    await delay(800);
+    const currentUser = AuthService.getCurrentUser();
+    const result = await api.patch(`client/${id}`, {
+      CIN: data.CIN,
+      nom: data.nom,
+      prenom: data.prenom,
+      date_naissance: data.date_naissance,
+      adresse: data.adresse,
+      numero_telephone: data.numero_telephone,
+      groupe_sanguin: data.groupe_sanguin,
+      email: data.email,
+      commentaire: data.commentaire,
+      allergies: data.allergies,
+      antecedents: data.antecedents,
+      Cree_par: currentUser.CIN,
+    });
 
     const index = mockClients.findIndex((client) => client.id === id);
     if (index === -1) return null;
@@ -161,7 +181,7 @@ export class ClientsService {
 
   // Delete client
   static async delete(id: number): Promise<boolean> {
-    await delay(500);
+    const result = await api.delete(`client/${id}`);
 
     const index = mockClients.findIndex((client) => client.id === id);
     if (index === -1) return false;
@@ -237,8 +257,8 @@ export const validateClientData = (data: ClientFormData): string[] => {
 
   if (!data.CIN.trim()) {
     errors.push("Le CIN est obligatoire");
-  } else if (!/^[A-Z]{2}\d{6}$/.test(data.CIN)) {
-    errors.push("Le CIN doit suivre le format BE123456");
+  } else if (!/^[A-Z]{1,2}\d{5,}$/.test(data.CIN)) {
+    errors.push("Le CIN doit suivre le format B1234567 ou BR54657");
   }
 
   if (!data.nom.trim()) {
@@ -267,7 +287,9 @@ export const validateClientData = (data: ClientFormData): string[] => {
   if (!data.numero_telephone.trim()) {
     errors.push("Le numéro de téléphone est obligatoire");
   } else if (
-    !/^(\+32|0)[1-9]\d{7,8}$/.test(data.numero_telephone.replace(/\s/g, ""))
+    !/^(\+212|0|\+33)[1-9]\d{7,8}$/.test(
+      data.numero_telephone.replace(/\s/g, ""),
+    )
   ) {
     errors.push("Le numéro de téléphone n'est pas au format belge valide");
   }

@@ -35,10 +35,12 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   ClientFormData,
   Client,
+  Utilisateur,
   validateClientData,
   getAvailableDoctors,
   getBloodGroups,
 } from "@/services/clientsService";
+import { AuthService } from "@/services/authService";
 
 interface ClientFormModalProps {
   isOpen: boolean;
@@ -46,6 +48,7 @@ interface ClientFormModalProps {
   onSubmit: (data: ClientFormData) => Promise<void>;
   client?: Client | null;
   isLoading?: boolean;
+  users: Utilisateur[] | null;
 }
 
 export default function ClientFormModal({
@@ -54,6 +57,7 @@ export default function ClientFormModal({
   onSubmit,
   client,
   isLoading = false,
+  users,
 }: ClientFormModalProps) {
   const [formData, setFormData] = useState<ClientFormData>({
     CIN: "",
@@ -80,8 +84,8 @@ export default function ClientFormModal({
 
   // Initialize form data when client changes
   useEffect(() => {
+    const user = AuthService.getCurrentUser();
     if (client) {
-      // Convert ISO string to date format
       const birthDate = client.date_naissance
         ? new Date(client.date_naissance).toISOString().slice(0, 10)
         : "";
@@ -98,7 +102,7 @@ export default function ClientFormModal({
         antecedents: client.antecedents || "",
         allergies: client.allergies || "",
         commentaire: client.commentaire || "",
-        Cree_par: client.Cree_par || "",
+        Cree_par: client.Cree_par || user.CIN,
       });
     } else {
       // Reset form for new client
@@ -114,7 +118,7 @@ export default function ClientFormModal({
         antecedents: "",
         allergies: "",
         commentaire: "",
-        Cree_par: "",
+        Cree_par: user.CIN,
       });
     }
     setErrors([]);
@@ -215,8 +219,7 @@ export default function ClientFormModal({
                     handleInputChange("CIN", e.target.value.toUpperCase())
                   }
                   placeholder="BE123456"
-                  pattern="[A-Z]{2}\d{6}"
-                  disabled={isSubmitting}
+                  disabled={isEditMode ? true : isSubmitting}
                 />
               </div>
 
@@ -422,17 +425,23 @@ export default function ClientFormModal({
               <Select
                 value={formData.Cree_par}
                 onValueChange={(value) => handleInputChange("Cree_par", value)}
-                disabled={isSubmitting}
+                disabled={true}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Sélectionnez le médecin" />
                 </SelectTrigger>
                 <SelectContent>
-                  {availableDoctors.map((doctor) => (
-                    <SelectItem key={doctor} value={doctor}>
-                      {doctor}
-                    </SelectItem>
-                  ))}
+                  {Array.isArray(users) && users.length > 0 ? (
+                    users.map((user) => (
+                      <SelectItem key={user.CIN} value={user.CIN}>
+                        {user.nom}
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <div className="p-2 text-sm text-gray-500">
+                      Aucun médecin trouvé
+                    </div>
+                  )}
                 </SelectContent>
               </Select>
             </div>

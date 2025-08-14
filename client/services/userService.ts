@@ -49,6 +49,20 @@ let currentUser: User = {
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export class UserService {
+  static async getCurrentAllUsers() {
+    const allUSers = [];
+    const result = await api.get(`utilisateur`);
+    const data = result.data;
+    data.map((user) => {
+      allUSers.push({
+        id: user.id,
+        nom: user.nom + " " + user.prenom,
+        CIN: user.CIN,
+      });
+    });
+    return allUSers;
+  }
+
   // Get current user profile
   static async getCurrentUser(): Promise<User> {
     const user = JSON.parse(localStorage.getItem("biohacking-clinic-user"));
