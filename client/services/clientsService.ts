@@ -1,4 +1,5 @@
-// Type matching your database structure
+import api from "../api/axios";
+
 export interface Client {
   id: number;
   CIN: string;
@@ -33,138 +34,10 @@ export interface ClientFormData {
 }
 
 import { ActivitiesService } from "./activitiesService";
+import { AuthService } from "./authService";
 
 // Mock data storage - in real app this would connect to your backend
-let mockClients: Client[] = [
-  {
-    id: 1,
-    CIN: "BE123456",
-    nom: "Dupont",
-    prenom: "Jean",
-    date_naissance: "1985-03-15T00:00:00",
-    adresse: "123 Rue de la Santé, Bruxelles",
-    numero_telephone: "+32 2 123 45 67",
-    email: "jean.dupont@email.com",
-    groupe_sanguin: "O+",
-    antecedents: "Hypertension, Diabète type 2",
-    allergies: "Pénicilline, Arachides",
-    commentaire: "Patient très coopératif, suit bien les traitements",
-    created_at: "2024-01-01T10:30:00",
-    Cree_par: "Dr. Smith",
-  },
-  {
-    id: 2,
-    CIN: "BE234567",
-    nom: "Laurent",
-    prenom: "Marie",
-    date_naissance: "1992-07-22T00:00:00",
-    adresse: "456 Avenue des Fleurs, Liège",
-    numero_telephone: "+32 4 234 56 78",
-    email: "marie.laurent@email.com",
-    groupe_sanguin: "A+",
-    antecedents: "Aucun antécédent majeur",
-    allergies: "Latex",
-    commentaire: "Patiente sportive, bonne condition physique générale",
-    created_at: "2024-01-02T14:20:00",
-    Cree_par: "Dr. Martin",
-  },
-  {
-    id: 3,
-    CIN: "BE345678",
-    nom: "Martin",
-    prenom: "Pierre",
-    date_naissance: "1978-11-08T00:00:00",
-    adresse: "789 Boulevard du Roi, Gand",
-    numero_telephone: "+32 9 345 67 89",
-    email: "pierre.martin@email.com",
-    groupe_sanguin: "B-",
-    antecedents: "Chirurgie du genou (2015), Asthme léger",
-    allergies: "Pollen, Poussière",
-    commentaire: "Recommandé éviter les exercices intensifs",
-    created_at: "2024-01-03T09:15:00",
-    Cree_par: "Dr. Smith",
-  },
-  {
-    id: 4,
-    CIN: "BE456789",
-    nom: "Wilson",
-    prenom: "Sophie",
-    date_naissance: "1990-05-14T00:00:00",
-    adresse: "321 Rue de l'Espoir, Anvers",
-    numero_telephone: "+32 3 456 78 90",
-    email: "sophie.wilson@email.com",
-    groupe_sanguin: "AB+",
-    antecedents: "Migraine chronique",
-    allergies: "Aucune allergie connue",
-    commentaire: "Suivi régulier pour migraines, répond bien au traitement",
-    created_at: "2024-01-04T16:45:00",
-    Cree_par: "Dr. Dubois",
-  },
-  {
-    id: 5,
-    CIN: "BE567890",
-    nom: "Chen",
-    prenom: "Luc",
-    date_naissance: "1988-12-03T00:00:00",
-    adresse: "654 Place du Marché, Charleroi",
-    numero_telephone: "+32 71 567 89 01",
-    email: "luc.chen@email.com",
-    groupe_sanguin: "O-",
-    antecedents: "Fracture du bras (2020)",
-    allergies: "Fruits de mer",
-    commentaire: "Donneur universel, très impliqué dans sa santé",
-    created_at: "2024-01-05T11:30:00",
-    Cree_par: "Dr. Martin",
-  },
-  {
-    id: 6,
-    CIN: "BE678901",
-    nom: "Brown",
-    prenom: "Alice",
-    date_naissance: "1995-09-18T00:00:00",
-    adresse: "987 Chemin des Roses, Namur",
-    numero_telephone: "+32 81 678 90 12",
-    email: "alice.brown@email.com",
-    groupe_sanguin: "A-",
-    antecedents: "Aucun",
-    allergies: "Iode",
-    commentaire: "Jeune patiente, première consultation",
-    created_at: "2024-01-06T13:20:00",
-    Cree_par: "Dr. Smith",
-  },
-  {
-    id: 7,
-    CIN: "BE789012",
-    nom: "Garcia",
-    prenom: "David",
-    date_naissance: "1982-04-25T00:00:00",
-    adresse: "147 Rue du Soleil, Mons",
-    numero_telephone: "+32 65 789 01 23",
-    email: "david.garcia@email.com",
-    groupe_sanguin: "B+",
-    antecedents: "Cholestérol élevé, Apnée du sommeil",
-    allergies: "Aspirine",
-    commentaire: "Suivi cardiologique recommandé",
-    created_at: "2024-01-07T08:10:00",
-    Cree_par: "Dr. Dubois",
-  },
-  {
-    id: 8,
-    CIN: "BE890123",
-    nom: "Rodriguez",
-    prenom: "Emma",
-    date_naissance: "1993-01-30T00:00:00",
-    adresse: "258 Avenue de la Paix, Louvain",
-    numero_telephone: "+32 16 890 12 34",
-    email: "emma.rodriguez@email.com",
-    groupe_sanguin: "AB-",
-    antecedents: "Thyroïde hyperactive",
-    allergies: "Colorants alimentaires",
-    commentaire: "Contrôle thyroïdien tous les 6 mois",
-    created_at: "2024-01-08T15:40:00",
-    Cree_par: "Dr. Martin",
-  },
-];
+let mockClients: Client[] = [];
 
 // Simulate API delay
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -172,8 +45,28 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 export class ClientsService {
   // Get all clients
   static async getAll(): Promise<Client[]> {
-    await delay(500); // Simulate API delay
-    return [...mockClients];
+    mockClients = [];
+    const result = await api.get(`client`);
+    const data = result.data;
+    data.map((client) => {
+      mockClients.push({
+        id: client.id,
+        CIN: client.CIN,
+        nom: client.nom,
+        prenom: client.prenom,
+        date_naissance: client.date_naissance,
+        adresse: client.adresse,
+        numero_telephone: client.numero_telephone,
+        email: client.email,
+        groupe_sanguin: client.groupe_sanguin,
+        antecedents: client.antecedents,
+        allergies: client.allergies,
+        commentaire: client.commentaire,
+        created_at: client.created_at,
+        Cree_par: client.Cree_par,
+      });
+    });
+    return mockClients;
   }
 
   // Get client by ID
@@ -185,17 +78,41 @@ export class ClientsService {
 
   // Create new client
   static async create(data: ClientFormData): Promise<Client> {
-    await delay(800);
+    const currentUser = AuthService.getCurrentUser();
+    const result = await api.post(`client`, {
+      CIN: data.CIN,
+      nom: data.nom,
+      prenom: data.prenom,
+      date_naissance: data.date_naissance,
+      adresse: data.adresse,
+      numero_telephone: data.numero_telephone,
+      groupe_sanguin: data.groupe_sanguin,
+      email: data.email,
+      commentaire: data.commentaire,
+      allergies: data.allergies,
+      antecedents: data.antecedents,
+      Cree_par: currentUser.CIN,
+    });
 
     const newClient: Client = {
-      id: Math.max(...mockClients.map((client) => client.id)) + 1,
-      ...data,
-      created_at: new Date().toISOString(),
+      id: result.id,
+      CIN: data.CIN,
+      nom: data.nom,
+      prenom: data.prenom,
+      date_naissance: data.date_naissance,
+      adresse: data.adresse,
+      numero_telephone: data.numero_telephone,
+      groupe_sanguin: data.groupe_sanguin,
+      email: data.email,
+      allergies: data.allergies,
+      antecedents: data.antecedents,
+      commentaire: data.commentaire,
+      created_at: result.created_at,
+      Cree_par: currentUser.CIN,
     };
 
     mockClients.push(newClient);
 
-    // Log activity
     ActivitiesService.logActivity(
       "patient",
       "created",

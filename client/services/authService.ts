@@ -164,13 +164,12 @@ export class AuthService {
     try {
       const token = localStorage.getItem(TOKEN_KEY);
       const userStr = localStorage.getItem(USER_KEY);
-
       if (!token || !userStr) return null;
 
-      if (!this.isTokenValid(token)) {
-        this.logout();
-        return null;
-      }
+      // if (!this.isTokenValid(token)) {
+      //   this.logout();
+      //   return null;
+      // }
 
       return JSON.parse(userStr);
     } catch {

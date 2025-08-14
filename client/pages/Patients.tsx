@@ -168,9 +168,11 @@ export default function Patients() {
         description: "Le patient a été créé avec succès",
       });
     } catch (error) {
+      console.log(error);
       toast({
         title: "Erreur",
-        description: "Impossible de créer le patient",
+        description:
+          error.response.data.message || "Impossible de créer le patient",
         variant: "destructive",
       });
       throw error;

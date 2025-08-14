@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useToast } from "@/components/ui/use-toast";
 import {
   Users,
   User,
@@ -68,6 +69,7 @@ export default function ClientFormModal({
     commentaire: "",
     Cree_par: "",
   });
+  const { toast } = useToast();
 
   const [errors, setErrors] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -133,6 +135,11 @@ export default function ClientFormModal({
     const validationErrors = validateClientData(formData);
     if (validationErrors.length > 0) {
       setErrors(validationErrors);
+      toast({
+        title: "Erreur",
+        description: "Impossible de créer le patient",
+        variant: "destructive",
+      });
       return;
     }
 
@@ -141,7 +148,10 @@ export default function ClientFormModal({
       await onSubmit(formData);
       // Don't call onClose here - let the parent handle it
     } catch (error) {
-      setErrors(["Une erreur s'est produite lors de l'enregistrement"]);
+      setErrors([
+        error.response.data.message ||
+          "Une erreur s'est produite lors de l'enregistrement",
+      ]);
     } finally {
       setIsSubmitting(false);
     }
