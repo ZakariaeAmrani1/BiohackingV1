@@ -78,21 +78,22 @@ export default function CalendarAppointmentModal({
   // Load full appointment and client data when appointment changes
   useEffect(() => {
     if (appointment && isOpen) {
+      // Set initial status from calendar appointment
+      setCurrentStatus(appointment.status);
+      // Load additional data in background
       loadAppointmentData();
     }
   }, [appointment, isOpen]);
 
   const loadAppointmentData = async () => {
     if (!appointment) return;
-    
+
     try {
-      setLoading(true);
       // Get full appointment data
       const aptData = await AppointmentsService.getById(appointment.id);
       if (aptData) {
         setFullAppointment(aptData);
-        setCurrentStatus(aptData.status || "programmé");
-        
+
         // Load client data if client_id exists
         if (aptData.client_id) {
           const clientData = await ClientsService.getById(aptData.client_id);
@@ -101,8 +102,6 @@ export default function CalendarAppointmentModal({
       }
     } catch (error) {
       console.error("Error loading appointment data:", error);
-    } finally {
-      setLoading(false);
     }
   };
 
