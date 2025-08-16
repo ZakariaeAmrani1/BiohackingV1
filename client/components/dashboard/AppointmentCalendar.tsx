@@ -198,7 +198,11 @@ export default function AppointmentCalendar() {
         </div>
       </CardHeader>
       <CardContent className="p-0">
-        {view === "week" ? (
+        {loading ? (
+          <div className="flex items-center justify-center py-8">
+            <div className="text-muted-foreground">Chargement des rendez-vous...</div>
+          </div>
+        ) : view === "week" ? (
           <div className="overflow-x-auto grid grid-cols-8 border-t border-border min-w-[700px]">
             {/* Time column */}
             <div className="border-r border-border">
