@@ -201,6 +201,7 @@ export default function AppointmentCalendar() {
             <Button
               size="sm"
               className="gap-2 bg-primary hover:bg-primary/90 text-primary-foreground"
+              onClick={() => setIsAppointmentModalOpen(true)}
             >
               <Plus className="h-4 w-4" />
               Nouveau Rendez-vous
