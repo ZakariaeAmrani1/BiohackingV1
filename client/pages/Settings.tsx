@@ -800,7 +800,9 @@ export default function Settings() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="entreprise-email">Email (optionnel)</Label>
+                      <Label htmlFor="entreprise-email">
+                        Email (optionnel)
+                      </Label>
                       <Input
                         id="entreprise-email"
                         type="email"
@@ -813,12 +815,17 @@ export default function Settings() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="entreprise-telephone">Téléphone (optionnel)</Label>
+                      <Label htmlFor="entreprise-telephone">
+                        Téléphone (optionnel)
+                      </Label>
                       <Input
                         id="entreprise-telephone"
                         value={entrepriseFormData.numero_telephone || ""}
                         onChange={(e) =>
-                          handleEntrepriseFormChange("numero_telephone", e.target.value)
+                          handleEntrepriseFormChange(
+                            "numero_telephone",
+                            e.target.value,
+                          )
                         }
                         placeholder="+32 2 123 45 67"
                       />
