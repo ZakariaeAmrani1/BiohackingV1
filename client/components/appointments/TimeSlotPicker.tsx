@@ -227,7 +227,7 @@ export default function TimeSlotPicker({
           <CardHeader className="pb-3">
             <CardTitle className="text-lg flex items-center gap-2">
               <Clock className="h-5 w-5" />
-              Créneaux disponibles -{" "}
+              Choisir l'heure -{" "}
               {selectedDate.toLocaleDateString("fr-FR", {
                 weekday: "long",
                 day: "2-digit",
