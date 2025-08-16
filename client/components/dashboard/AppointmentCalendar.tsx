@@ -83,6 +83,7 @@ export default function AppointmentCalendar() {
   // Listen for appointment updates
   useEffect(() => {
     const handleActivityLogged = () => {
+      console.log('Calendar received activityLogged event, reloading appointments...');
       loadAppointments();
     };
 
