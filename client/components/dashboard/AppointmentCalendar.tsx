@@ -308,7 +308,7 @@ export default function AppointmentCalendar() {
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
                 <div className="text-center">
-                  <h3 className="font-semibold text-lg">
+                  <h3 className={`font-semibold text-lg ${isToday(currentDate) ? 'text-primary' : ''}`}>
                     {currentDate.toLocaleDateString("fr-FR", {
                       weekday: "long",
                       year: "numeric",
@@ -317,7 +317,10 @@ export default function AppointmentCalendar() {
                     })}
                   </h3>
                   {isToday(currentDate) && (
-                    <span className="text-sm text-primary font-medium">Aujourd'hui</span>
+                    <div className="flex items-center justify-center gap-1 mt-1">
+                      <span className="inline-flex h-2 w-2 rounded-full bg-primary"></span>
+                      <span className="text-sm text-primary font-medium">Aujourd'hui</span>
+                    </div>
                   )}
                 </div>
                 <Button
