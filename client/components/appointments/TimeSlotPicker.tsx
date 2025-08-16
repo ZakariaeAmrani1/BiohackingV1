@@ -204,11 +204,11 @@ export default function TimeSlotPicker({
                     isPast && "opacity-50 cursor-not-allowed",
                     isWeekend && !isSelected && "bg-muted/50",
                     !isPast && "hover:bg-primary/10",
-                    isSelected && isWeekend && "bg-primary text-primary-foreground",
+                    isSelected &&
+                      isWeekend &&
+                      "bg-primary text-primary-foreground",
                   )}
-                  onClick={() =>
-                    !isPast && handleDateSelect(date)
-                  }
+                  onClick={() => !isPast && handleDateSelect(date)}
                   disabled={disabled || isPast}
                 >
                   <span className="text-sm font-medium">{date.getDate()}</span>
@@ -247,11 +247,7 @@ export default function TimeSlotPicker({
                   <Button
                     key={index}
                     type="button"
-                    variant={
-                      value === slot.datetime
-                        ? "default"
-                        : "outline"
-                    }
+                    variant={value === slot.datetime ? "default" : "outline"}
                     className={cn(
                       "h-10 text-sm hover:bg-primary/10",
                       value === slot.datetime &&

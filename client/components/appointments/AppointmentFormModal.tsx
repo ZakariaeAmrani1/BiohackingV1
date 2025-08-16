@@ -91,12 +91,14 @@ export default function AppointmentFormModal({
   const [isClientSelectorOpen, setIsClientSelectorOpen] = useState(false);
   const [clientSearchQuery, setClientSearchQuery] = useState("");
   const [isNewPatientMode, setIsNewPatientMode] = useState(false);
-  const [newPatientData, setNewPatientData] = useState<Partial<ClientFormData>>({
-    nom: "",
-    prenom: "",
-    CIN: "",
-    numero_telephone: "",
-  });
+  const [newPatientData, setNewPatientData] = useState<Partial<ClientFormData>>(
+    {
+      nom: "",
+      prenom: "",
+      CIN: "",
+      numero_telephone: "",
+    },
+  );
 
   const isEditMode = !!appointment;
   const availableDoctors = getAvailableDoctors();
@@ -259,7 +261,10 @@ export default function AppointmentFormModal({
     const updatedFormData = { ...formData, client_id: clientId };
 
     // Validate appointment form data
-    const validationErrors = validateAppointmentData(updatedFormData, appointment?.id);
+    const validationErrors = validateAppointmentData(
+      updatedFormData,
+      appointment?.id,
+    );
     if (validationErrors.length > 0) {
       setErrors(validationErrors);
       return;
@@ -295,7 +300,10 @@ export default function AppointmentFormModal({
     }
   };
 
-  const handleNewPatientChange = (field: keyof ClientFormData, value: string) => {
+  const handleNewPatientChange = (
+    field: keyof ClientFormData,
+    value: string,
+  ) => {
     setNewPatientData((prev) => ({ ...prev, [field]: value }));
     // Clear errors when user starts typing
     if (errors.length > 0) {
@@ -469,7 +477,9 @@ export default function AppointmentFormModal({
                   <div className="space-y-4">
                     <div className="flex items-center gap-2 mb-4">
                       <UserPlus className="h-4 w-4" />
-                      <span className="font-medium">Informations du nouveau patient</span>
+                      <span className="font-medium">
+                        Informations du nouveau patient
+                      </span>
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
@@ -479,7 +489,9 @@ export default function AppointmentFormModal({
                           id="new-patient-prenom"
                           type="text"
                           value={newPatientData.prenom || ""}
-                          onChange={(e) => handleNewPatientChange("prenom", e.target.value)}
+                          onChange={(e) =>
+                            handleNewPatientChange("prenom", e.target.value)
+                          }
                           placeholder="Entrez le prénom"
                           disabled={isSubmitting}
                         />
@@ -491,7 +503,9 @@ export default function AppointmentFormModal({
                           id="new-patient-nom"
                           type="text"
                           value={newPatientData.nom || ""}
-                          onChange={(e) => handleNewPatientChange("nom", e.target.value)}
+                          onChange={(e) =>
+                            handleNewPatientChange("nom", e.target.value)
+                          }
                           placeholder="Entrez le nom"
                           disabled={isSubmitting}
                         />
@@ -505,19 +519,31 @@ export default function AppointmentFormModal({
                           id="new-patient-cin"
                           type="text"
                           value={newPatientData.CIN || ""}
-                          onChange={(e) => handleNewPatientChange("CIN", e.target.value.toUpperCase())}
+                          onChange={(e) =>
+                            handleNewPatientChange(
+                              "CIN",
+                              e.target.value.toUpperCase(),
+                            )
+                          }
                           placeholder="Ex: B1234567"
                           disabled={isSubmitting}
                         />
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor="new-patient-phone">Numéro de téléphone *</Label>
+                        <Label htmlFor="new-patient-phone">
+                          Numéro de téléphone *
+                        </Label>
                         <Input
                           id="new-patient-phone"
                           type="tel"
                           value={newPatientData.numero_telephone || ""}
-                          onChange={(e) => handleNewPatientChange("numero_telephone", e.target.value)}
+                          onChange={(e) =>
+                            handleNewPatientChange(
+                              "numero_telephone",
+                              e.target.value,
+                            )
+                          }
                           placeholder="Ex: 0612345678"
                           disabled={isSubmitting}
                         />
@@ -525,7 +551,8 @@ export default function AppointmentFormModal({
                     </div>
 
                     <div className="text-xs text-muted-foreground">
-                      * Champs obligatoires. Le patient sera créé avec ces informations de base.
+                      * Champs obligatoires. Le patient sera créé avec ces
+                      informations de base.
                     </div>
                   </div>
                 </CardContent>

@@ -381,7 +381,11 @@ export const generateTimeSlotsForDate = (
   const endMinutes = WORKING_HOURS.end * 60; // 6 PM = 1080 minutes
 
   // Generate slots at 30-minute intervals
-  for (let minutes = startMinutes; minutes < endMinutes; minutes += WORKING_HOURS.slotInterval) {
+  for (
+    let minutes = startMinutes;
+    minutes < endMinutes;
+    minutes += WORKING_HOURS.slotInterval
+  ) {
     const slotDate = new Date(date);
     const hours = Math.floor(minutes / 60);
     const mins = minutes % 60;
@@ -440,7 +444,8 @@ export const isTimeSlotAvailable = (
   const minutes = slotDate.getMinutes();
 
   // Check if time is within working hours and on valid intervals
-  const isWithinWorkingHours = hours >= WORKING_HOURS.start && hours < WORKING_HOURS.end;
+  const isWithinWorkingHours =
+    hours >= WORKING_HOURS.start && hours < WORKING_HOURS.end;
   const isValidInterval = minutes % WORKING_HOURS.slotInterval === 0;
 
   // Also check for weekend (but still allow booking)
