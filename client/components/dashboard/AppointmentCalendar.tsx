@@ -36,7 +36,7 @@ export default function AppointmentCalendar() {
   const [view, setView] = useState<"week" | "day">("week");
   const [appointments, setAppointments] = useState<CalendarAppointment[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedAppointmentId, setSelectedAppointmentId] = useState<number | null>(null);
+  const [selectedAppointment, setSelectedAppointment] = useState<CalendarAppointment | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Convert RendezVous to CalendarAppointment format
@@ -135,16 +135,18 @@ export default function AppointmentCalendar() {
     );
   };
 
-  const handleAppointmentClick = (appointmentId: number) => {
-    setSelectedAppointmentId(appointmentId);
+  const handleAppointmentClick = (appointment: CalendarAppointment) => {
+    setSelectedAppointment(appointment);
     setIsModalOpen(true);
   };
 
-  const handleModalClose = () => {
+  const handleModalClose = (statusChanged: boolean = false) => {
     setIsModalOpen(false);
-    setSelectedAppointmentId(null);
-    // Reload appointments to get any status updates
-    loadAppointments();
+    setSelectedAppointment(null);
+    // Only reload if status was actually changed
+    if (statusChanged) {
+      loadAppointments();
+    }
   };
 
   const isToday = (date: Date) => {
@@ -288,7 +290,7 @@ export default function AppointmentCalendar() {
                             top: `${aptIndex * (76 / timeAppointments.length) + 2}px`,
                             height: `${76 / timeAppointments.length - 2}px`
                           } : undefined}
-                          onClick={() => handleAppointmentClick(appointment.id)}
+                          onClick={() => handleAppointmentClick(appointment)}
                           title={`Cliquer pour voir les détails de ${appointment.patient}`}
                         >
                           <div className="flex items-center gap-1 mb-1">
@@ -394,7 +396,7 @@ export default function AppointmentCalendar() {
                     <div
                       key={appointment.id}
                       className="flex items-center gap-4 p-4 border border-border rounded-lg hover:bg-accent/50 transition-colors cursor-pointer"
-                      onClick={() => handleAppointmentClick(appointment.id)}
+                      onClick={() => handleAppointmentClick(appointment)}
                       title={`Cliquer pour voir les détails de ${appointment.patient}`}
                     >
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -437,7 +439,7 @@ export default function AppointmentCalendar() {
       <CalendarAppointmentModal
         isOpen={isModalOpen}
         onClose={handleModalClose}
-        appointmentId={selectedAppointmentId}
+        appointment={selectedAppointment}
       />
     </Card>
   );
