@@ -1,9 +1,19 @@
 import { useState, useEffect } from "react";
-import { ChevronLeft, ChevronRight, Plus, Clock, User, Calendar } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Plus,
+  Clock,
+  User,
+  Calendar,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { AppointmentsService, RendezVous } from "@/services/appointmentsService";
+import {
+  AppointmentsService,
+  RendezVous,
+} from "@/services/appointmentsService";
 import CalendarAppointmentModal from "./CalendarAppointmentModal";
 
 // Interface for calendar display
@@ -36,27 +46,30 @@ export default function AppointmentCalendar() {
   const [view, setView] = useState<"week" | "day">("week");
   const [appointments, setAppointments] = useState<CalendarAppointment[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedAppointment, setSelectedAppointment] = useState<CalendarAppointment | null>(null);
+  const [selectedAppointment, setSelectedAppointment] =
+    useState<CalendarAppointment | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Convert RendezVous to CalendarAppointment format
-  const convertToCalendarFormat = (rendezVous: RendezVous[]): CalendarAppointment[] => {
-    return rendezVous.map(apt => {
+  const convertToCalendarFormat = (
+    rendezVous: RendezVous[],
+  ): CalendarAppointment[] => {
+    return rendezVous.map((apt) => {
       const appointmentDate = new Date(apt.date_rendez_vous);
-      const timeString = appointmentDate.toLocaleTimeString('fr-FR', {
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false
+      const timeString = appointmentDate.toLocaleTimeString("fr-FR", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
       });
 
       return {
         id: apt.id,
         time: timeString,
         duration: 60, // Default duration
-        patient: apt.patient_nom || 'Patient inconnu',
+        patient: apt.patient_nom || "Patient inconnu",
         treatment: apt.sujet,
-        status: apt.status || 'programmé',
-        date: appointmentDate
+        status: apt.status || "programmé",
+        date: appointmentDate,
       };
     });
   };
@@ -66,12 +79,12 @@ export default function AppointmentCalendar() {
     try {
       setLoading(true);
       const data = await AppointmentsService.getAll();
-      console.log('Calendar loaded appointments from service:', data);
+      console.log("Calendar loaded appointments from service:", data);
       const calendarAppointments = convertToCalendarFormat(data);
-      console.log('Calendar converted appointments:', calendarAppointments);
+      console.log("Calendar converted appointments:", calendarAppointments);
       setAppointments(calendarAppointments);
     } catch (error) {
-      console.error('Error loading appointments:', error);
+      console.error("Error loading appointments:", error);
     } finally {
       setLoading(false);
     }
@@ -85,13 +98,15 @@ export default function AppointmentCalendar() {
   // Listen for appointment updates
   useEffect(() => {
     const handleActivityLogged = () => {
-      console.log('Calendar received activityLogged event, reloading appointments...');
+      console.log(
+        "Calendar received activityLogged event, reloading appointments...",
+      );
       loadAppointments();
     };
 
-    window.addEventListener('activityLogged', handleActivityLogged);
+    window.addEventListener("activityLogged", handleActivityLogged);
     return () => {
-      window.removeEventListener('activityLogged', handleActivityLogged);
+      window.removeEventListener("activityLogged", handleActivityLogged);
     };
   }, []);
 
@@ -220,7 +235,9 @@ export default function AppointmentCalendar() {
       <CardContent className="p-0">
         {loading ? (
           <div className="flex items-center justify-center py-8">
-            <div className="text-muted-foreground">Chargement des rendez-vous...</div>
+            <div className="text-muted-foreground">
+              Chargement des rendez-vous...
+            </div>
           </div>
         ) : view === "week" ? (
           <div className="overflow-x-auto grid grid-cols-8 border-t border-border min-w-[700px]">
@@ -270,9 +287,9 @@ export default function AppointmentCalendar() {
                 </div>
                 {timeSlots.map((time, timeIndex) => {
                   const dayAppointments = getAppointmentsForDate(date);
-                  const slotHour = parseInt(time.split(':')[0]); // Extract hour from slot (e.g., 14 from "14:00")
+                  const slotHour = parseInt(time.split(":")[0]); // Extract hour from slot (e.g., 14 from "14:00")
                   const timeAppointments = dayAppointments.filter((apt) => {
-                    const aptHour = parseInt(apt.time.split(':')[0]); // Extract hour from appointment time
+                    const aptHour = parseInt(apt.time.split(":")[0]); // Extract hour from appointment time
                     return aptHour === slotHour; // Match appointments to the hour slot
                   });
 
@@ -287,18 +304,24 @@ export default function AppointmentCalendar() {
                           className={`absolute inset-x-1 rounded-md bg-primary/10 border border-primary/20 p-2 text-xs overflow-hidden cursor-pointer hover:bg-primary/20 hover:border-primary/30 transition-colors ${
                             timeAppointments.length > 1
                               ? `top-${aptIndex * 10 + 1} h-${Math.max(18, 78 / timeAppointments.length)}`
-                              : 'top-1 bottom-1'
+                              : "top-1 bottom-1"
                           }`}
-                          style={timeAppointments.length > 1 ? {
-                            top: `${aptIndex * (76 / timeAppointments.length) + 2}px`,
-                            height: `${76 / timeAppointments.length - 2}px`
-                          } : undefined}
+                          style={
+                            timeAppointments.length > 1
+                              ? {
+                                  top: `${aptIndex * (76 / timeAppointments.length) + 2}px`,
+                                  height: `${76 / timeAppointments.length - 2}px`,
+                                }
+                              : undefined
+                          }
                           onClick={() => handleAppointmentClick(appointment)}
                           title={`Cliquer pour voir les détails de ${appointment.patient}`}
                         >
                           <div className="flex items-center gap-1 mb-1">
                             <Clock className="h-3 w-3 text-primary" />
-                            <span className="text-primary font-medium">{appointment.time}</span>
+                            <span className="text-primary font-medium">
+                              {appointment.time}
+                            </span>
                           </div>
                           <div className="font-medium text-primary truncate">
                             {appointment.patient}
@@ -342,7 +365,9 @@ export default function AppointmentCalendar() {
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
                 <div className="text-center">
-                  <h3 className={`font-semibold text-lg ${isToday(currentDate) ? 'text-primary' : ''}`}>
+                  <h3
+                    className={`font-semibold text-lg ${isToday(currentDate) ? "text-primary" : ""}`}
+                  >
                     {currentDate.toLocaleDateString("fr-FR", {
                       weekday: "long",
                       year: "numeric",
@@ -353,7 +378,9 @@ export default function AppointmentCalendar() {
                   {isToday(currentDate) && (
                     <div className="flex items-center justify-center gap-1 mt-1">
                       <span className="inline-flex h-2 w-2 rounded-full bg-primary"></span>
-                      <span className="text-sm text-primary font-medium">Aujourd'hui</span>
+                      <span className="text-sm text-primary font-medium">
+                        Aujourd'hui
+                      </span>
                     </div>
                   )}
                 </div>
@@ -377,60 +404,65 @@ export default function AppointmentCalendar() {
 
             {loading ? (
               <div className="flex items-center justify-center py-8">
-                <div className="text-muted-foreground">Chargement des rendez-vous...</div>
+                <div className="text-muted-foreground">
+                  Chargement des rendez-vous...
+                </div>
               </div>
             ) : (
               <div className="space-y-4">
                 {getAppointmentsForDate(currentDate).length === 0 ? (
                   <div className="text-center py-8 text-muted-foreground">
                     <Calendar className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                    <p className="text-lg font-medium mb-2">Aucun rendez-vous</p>
+                    <p className="text-lg font-medium mb-2">
+                      Aucun rendez-vous
+                    </p>
                     <p className="text-sm">
                       {isToday(currentDate)
                         ? "Vous n'avez aucun rendez-vous aujourd'hui"
-                        : `Aucun rendez-vous prévu pour le ${currentDate.toLocaleDateString("fr-FR")}`
-                      }
+                        : `Aucun rendez-vous prévu pour le ${currentDate.toLocaleDateString("fr-FR")}`}
                     </p>
                   </div>
                 ) : (
                   getAppointmentsForDate(currentDate)
                     .sort((a, b) => a.time.localeCompare(b.time))
                     .map((appointment) => (
-                    <div
-                      key={appointment.id}
-                      className="flex items-center gap-4 p-4 border border-border rounded-lg hover:bg-accent/50 transition-colors cursor-pointer"
-                      onClick={() => handleAppointmentClick(appointment)}
-                      title={`Cliquer pour voir les détails de ${appointment.patient}`}
-                    >
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Clock className="h-4 w-4" />
-                        {appointment.time}
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <User className="h-4 w-4 text-muted-foreground" />
-                          <span className="font-medium">{appointment.patient}</span>
-                        </div>
-                        <p className="text-sm text-muted-foreground">
-                          {appointment.treatment}
-                        </p>
-                      </div>
-                      <Badge
-                        variant="secondary"
-                        className={
-                          statusColors[
-                            appointment.status as keyof typeof statusColors
-                          ]
-                        }
+                      <div
+                        key={appointment.id}
+                        className="flex items-center gap-4 p-4 border border-border rounded-lg hover:bg-accent/50 transition-colors cursor-pointer"
+                        onClick={() => handleAppointmentClick(appointment)}
+                        title={`Cliquer pour voir les détails de ${appointment.patient}`}
                       >
-                        {
-                          statusTranslations[
-                            appointment.status as keyof typeof statusTranslations
-                          ]
-                        }
-                      </Badge>
-                    </div>
-                  ))
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <Clock className="h-4 w-4" />
+                          {appointment.time}
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <User className="h-4 w-4 text-muted-foreground" />
+                            <span className="font-medium">
+                              {appointment.patient}
+                            </span>
+                          </div>
+                          <p className="text-sm text-muted-foreground">
+                            {appointment.treatment}
+                          </p>
+                        </div>
+                        <Badge
+                          variant="secondary"
+                          className={
+                            statusColors[
+                              appointment.status as keyof typeof statusColors
+                            ]
+                          }
+                        >
+                          {
+                            statusTranslations[
+                              appointment.status as keyof typeof statusTranslations
+                            ]
+                          }
+                        </Badge>
+                      </div>
+                    ))
                 )}
               </div>
             )}

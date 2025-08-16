@@ -30,7 +30,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { RendezVous, AppointmentsService } from "@/services/appointmentsService";
+import {
+  RendezVous,
+  AppointmentsService,
+} from "@/services/appointmentsService";
 import { ClientsService, Client } from "@/services/clientsService";
 
 // Calendar appointment interface
@@ -69,7 +72,9 @@ export default function CalendarAppointmentModal({
   onClose,
   appointment,
 }: CalendarAppointmentModalProps) {
-  const [fullAppointment, setFullAppointment] = useState<RendezVous | null>(null);
+  const [fullAppointment, setFullAppointment] = useState<RendezVous | null>(
+    null,
+  );
   const [client, setClient] = useState<Client | null>(null);
   const [currentStatus, setCurrentStatus] = useState<string>("");
   const [updating, setUpdating] = useState(false);
@@ -89,13 +94,13 @@ export default function CalendarAppointmentModal({
 
   const loadAppointmentData = async () => {
     if (!appointment) return;
-    
+
     try {
       // Get full appointment data
       const aptData = await AppointmentsService.getById(appointment.id);
       if (aptData) {
         setFullAppointment(aptData);
-        
+
         // Load client data if client_id exists
         if (aptData.client_id) {
           const clientData = await ClientsService.getById(aptData.client_id);
@@ -109,10 +114,10 @@ export default function CalendarAppointmentModal({
 
   const handleStatusUpdate = async (newStatus: string) => {
     if (!fullAppointment) return;
-    
+
     try {
       setUpdating(true);
-      
+
       // Create update data with new status
       const updateData = {
         client_id: fullAppointment.client_id || 0,
@@ -121,8 +126,11 @@ export default function CalendarAppointmentModal({
         Cree_par: fullAppointment.Cree_par,
         status: newStatus as "programmé" | "confirmé" | "terminé" | "annulé",
       };
-      
-      const updatedAppointment = await AppointmentsService.update(fullAppointment.id, updateData);
+
+      const updatedAppointment = await AppointmentsService.update(
+        fullAppointment.id,
+        updateData,
+      );
       if (updatedAppointment) {
         setFullAppointment(updatedAppointment);
         setCurrentStatus(newStatus);
@@ -164,8 +172,8 @@ export default function CalendarAppointmentModal({
           {/* Status Update Section */}
           <div className="space-y-3">
             <Label htmlFor="status">Statut du rendez-vous</Label>
-            <Select 
-              value={currentStatus} 
+            <Select
+              value={currentStatus}
               onValueChange={handleStatusUpdate}
               disabled={updating || !fullAppointment}
             >
@@ -200,7 +208,9 @@ export default function CalendarAppointmentModal({
               </SelectContent>
             </Select>
             {updating && (
-              <div className="text-sm text-muted-foreground">Mise à jour en cours...</div>
+              <div className="text-sm text-muted-foreground">
+                Mise à jour en cours...
+              </div>
             )}
           </div>
 
@@ -264,7 +274,9 @@ export default function CalendarAppointmentModal({
             <div className="space-y-3 pl-7">
               <div>
                 <FieldLabel>Type de consultation</FieldLabel>
-                <FieldValue className="font-medium">{appointment.treatment}</FieldValue>
+                <FieldValue className="font-medium">
+                  {appointment.treatment}
+                </FieldValue>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -315,46 +327,51 @@ export default function CalendarAppointmentModal({
               <div>
                 <FieldLabel>Date de création</FieldLabel>
                 <FieldValue>
-                  {fullAppointment ? formatDate(fullAppointment.created_at) : "Chargement..."}
+                  {fullAppointment
+                    ? formatDate(fullAppointment.created_at)
+                    : "Chargement..."}
                 </FieldValue>
               </div>
             </div>
           </div>
 
           {/* Additional client info if available */}
-          {client && (client.groupe_sanguin || client.allergies || client.antecedents) && (
-            <>
-              <Separator />
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold flex items-center gap-2">
-                  <FileText className="h-5 w-5" />
-                  Informations Médicales
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pl-7">
-                  {client.groupe_sanguin && (
-                    <div>
-                      <FieldLabel>Groupe sanguin</FieldLabel>
-                      <FieldValue className="font-medium text-red-600">
-                        {client.groupe_sanguin}
-                      </FieldValue>
-                    </div>
-                  )}
-                  {client.allergies && (
-                    <div className="md:col-span-2">
-                      <FieldLabel>Allergies</FieldLabel>
-                      <FieldValue>{client.allergies}</FieldValue>
-                    </div>
-                  )}
-                  {client.antecedents && (
-                    <div className="md:col-span-3">
-                      <FieldLabel>Antécédents</FieldLabel>
-                      <FieldValue>{client.antecedents}</FieldValue>
-                    </div>
-                  )}
+          {client &&
+            (client.groupe_sanguin ||
+              client.allergies ||
+              client.antecedents) && (
+              <>
+                <Separator />
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold flex items-center gap-2">
+                    <FileText className="h-5 w-5" />
+                    Informations Médicales
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pl-7">
+                    {client.groupe_sanguin && (
+                      <div>
+                        <FieldLabel>Groupe sanguin</FieldLabel>
+                        <FieldValue className="font-medium text-red-600">
+                          {client.groupe_sanguin}
+                        </FieldValue>
+                      </div>
+                    )}
+                    {client.allergies && (
+                      <div className="md:col-span-2">
+                        <FieldLabel>Allergies</FieldLabel>
+                        <FieldValue>{client.allergies}</FieldValue>
+                      </div>
+                    )}
+                    {client.antecedents && (
+                      <div className="md:col-span-3">
+                        <FieldLabel>Antécédents</FieldLabel>
+                        <FieldValue>{client.antecedents}</FieldValue>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-            </>
-          )}
+              </>
+            )}
 
           {/* Footer Info */}
           <div className="bg-muted/50 rounded-lg p-4">
@@ -362,7 +379,9 @@ export default function CalendarAppointmentModal({
               <span>ID du rendez-vous: #{appointment.id}</span>
               <Badge
                 variant="secondary"
-                className={statusColors[currentStatus as keyof typeof statusColors]}
+                className={
+                  statusColors[currentStatus as keyof typeof statusColors]
+                }
               >
                 {statusLabels[currentStatus as keyof typeof statusLabels]}
               </Badge>
