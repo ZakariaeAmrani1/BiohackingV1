@@ -344,9 +344,16 @@ export default function AppointmentCalendar() {
               </div>
             ) : (
               <div className="space-y-4">
-                {appointments.length === 0 ? (
+                {getAppointmentsForDate(currentDate).length === 0 ? (
                   <div className="text-center py-8 text-muted-foreground">
-                    Aucun rendez-vous trouvé
+                    <Calendar className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p className="text-lg font-medium mb-2">Aucun rendez-vous</p>
+                    <p className="text-sm">
+                      {isToday(currentDate)
+                        ? "Vous n'avez aucun rendez-vous aujourd'hui"
+                        : `Aucun rendez-vous prévu pour le ${currentDate.toLocaleDateString("fr-FR")}`
+                      }
+                    </p>
                   </div>
                 ) : (
                   getAppointmentsForDate(currentDate)
