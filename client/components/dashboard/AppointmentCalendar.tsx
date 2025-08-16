@@ -1,74 +1,30 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight, Plus, Clock, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/use-toast";
 import AppointmentFormModal from "@/components/appointments/AppointmentFormModal";
+import AppointmentDetailsModal from "@/components/appointments/AppointmentDetailsModal";
+import DeleteConfirmationModal from "@/components/appointments/DeleteConfirmationModal";
 import {
   AppointmentFormData,
   AppointmentsService,
+  RendezVous,
 } from "@/services/appointmentsService";
 
-// Mock appointment data
-const mockAppointments = [
-  {
-    id: 1,
-    time: "9:00",
-    duration: 60,
-    patient: "John Smith",
-    treatment: "Consultation Biohacking",
-    status: "confirmed",
-    date: new Date(), // Today
-  },
-  {
-    id: 2,
-    time: "10:00",
-    duration: 45,
-    patient: "Sarah Johnson",
-    treatment: "Thérapie IV",
-    status: "pending",
-    date: new Date(), // Today
-  },
-  {
-    id: 3,
-    time: "14:00",
-    duration: 90,
-    patient: "Mike Davis",
-    treatment: "Séance de Cryothérapie",
-    status: "confirmed",
-    date: new Date(Date.now() + 86400000), // Tomorrow
-  },
-  {
-    id: 4,
-    time: "11:00",
-    duration: 30,
-    patient: "Emma Wilson",
-    treatment: "Analyse du Bilan Sanguin",
-    status: "confirmed",
-    date: new Date(Date.now() - 86400000), // Yesterday
-  },
-  {
-    id: 5,
-    time: "15:00",
-    duration: 60,
-    patient: "Alex Chen",
-    treatment: "Consultation Bien-être",
-    status: "pending",
-    date: new Date(Date.now() + 2 * 86400000), // Day after tomorrow
-  },
-];
-
 const statusColors = {
-  confirmed: "bg-green-100 text-green-700 border-green-200",
-  pending: "bg-yellow-100 text-yellow-700 border-yellow-200",
-  cancelled: "bg-red-100 text-red-700 border-red-200",
+  "programmé": "bg-blue-100 text-blue-700 border-blue-200",
+  "confirmé": "bg-green-100 text-green-700 border-green-200",
+  "terminé": "bg-gray-100 text-gray-700 border-gray-200",
+  "annulé": "bg-red-100 text-red-700 border-red-200",
 };
 
 const statusTranslations = {
-  confirmed: "confirmé",
-  pending: "en attente",
-  cancelled: "annulé",
+  "programmé": "programmé",
+  "confirmé": "confirmé", 
+  "terminé": "terminé",
+  "annulé": "annulé",
 };
 
 export default function AppointmentCalendar() {
@@ -76,8 +32,28 @@ export default function AppointmentCalendar() {
   const [view, setView] = useState<"week" | "day">("week");
   const [isAppointmentModalOpen, setIsAppointmentModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [appointments, setAppointments] = useState<RendezVous[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  
+  // Details modal state
+  const [selectedAppointment, setSelectedAppointment] = useState<RendezVous | null>(null);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+  
+  // Edit modal state
+  const [appointmentToEdit, setAppointmentToEdit] = useState<RendezVous | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  
+  // Delete modal state
+  const [appointmentToDelete, setAppointmentToDelete] = useState<RendezVous | null>(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const { toast } = useToast();
+
+  // Load appointments on component mount and when currentDate changes
+  useEffect(() => {
+    loadAppointments();
+  }, [currentDate]);
 
   const weekDays = [
     "Lundi",
@@ -89,6 +65,22 @@ export default function AppointmentCalendar() {
     "Dimanche",
   ];
   const timeSlots = Array.from({ length: 12 }, (_, i) => `${8 + i}:00`);
+
+  const loadAppointments = async () => {
+    try {
+      setIsLoading(true);
+      const appointmentsData = await AppointmentsService.getAll();
+      setAppointments(appointmentsData);
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: "Impossible de charger les rendez-vous",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const navigateWeek = (direction: "prev" | "next") => {
     const newDate = new Date(currentDate);
@@ -117,9 +109,36 @@ export default function AppointmentCalendar() {
   };
 
   const getAppointmentsForDate = (date: Date) => {
-    return mockAppointments.filter(
-      (apt) => apt.date.toDateString() === date.toDateString(),
-    );
+    return appointments.filter((apt) => {
+      const appointmentDate = new Date(apt.date_rendez_vous);
+      return appointmentDate.toDateString() === date.toDateString();
+    });
+  };
+
+  const getTimeFromDateTime = (dateTimeString: string) => {
+    const date = new Date(dateTimeString);
+    return date.toLocaleTimeString("fr-FR", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    });
+  };
+
+  const handleAppointmentClick = (appointment: RendezVous) => {
+    setSelectedAppointment(appointment);
+    setIsDetailsModalOpen(true);
+  };
+
+  const handleEditAppointment = (appointment: RendezVous) => {
+    setAppointmentToEdit(appointment);
+    setIsEditModalOpen(true);
+    setIsDetailsModalOpen(false);
+  };
+
+  const handleDeleteAppointment = (appointment: RendezVous) => {
+    setAppointmentToDelete(appointment);
+    setIsDeleteModalOpen(true);
+    setIsDetailsModalOpen(false);
   };
 
   const isToday = (date: Date) => {
@@ -132,6 +151,7 @@ export default function AppointmentCalendar() {
       setIsSubmitting(true);
       await AppointmentsService.create(data);
       setIsAppointmentModalOpen(false);
+      await loadAppointments(); // Reload appointments
       toast({
         title: "Succès",
         description: "Le rendez-vous a été créé avec succès",
@@ -145,6 +165,56 @@ export default function AppointmentCalendar() {
       throw error;
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleUpdateAppointment = async (data: AppointmentFormData) => {
+    if (!appointmentToEdit) return;
+    
+    try {
+      setIsSubmitting(true);
+      await AppointmentsService.update(appointmentToEdit.id, data);
+      setIsEditModalOpen(false);
+      setAppointmentToEdit(null);
+      await loadAppointments(); // Reload appointments
+      toast({
+        title: "Succès",
+        description: "Le rendez-vous a été modifié avec succès",
+      });
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: "Impossible de modifier le rendez-vous",
+        variant: "destructive",
+      });
+      throw error;
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!appointmentToDelete) return;
+    
+    try {
+      setIsDeleting(true);
+      await AppointmentsService.delete(appointmentToDelete.id);
+      setIsDeleteModalOpen(false);
+      setAppointmentToDelete(null);
+      await loadAppointments(); // Reload appointments
+      toast({
+        title: "Succès",
+        description: "Le rendez-vous a été supprimé avec succès",
+      });
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: "Impossible de supprimer le rendez-vous",
+        variant: "destructive",
+      });
+      throw error;
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -258,9 +328,10 @@ export default function AppointmentCalendar() {
                 </div>
                 {timeSlots.map((time, timeIndex) => {
                   const dayAppointments = getAppointmentsForDate(date);
-                  const timeAppointments = dayAppointments.filter(
-                    (apt) => apt.time === time,
-                  );
+                  const timeAppointments = dayAppointments.filter((apt) => {
+                    const appointmentTime = getTimeFromDateTime(apt.date_rendez_vous);
+                    return appointmentTime === time;
+                  });
 
                   return (
                     <div
@@ -270,13 +341,14 @@ export default function AppointmentCalendar() {
                       {timeAppointments.map((appointment) => (
                         <div
                           key={appointment.id}
-                          className="absolute inset-x-1 top-1 bottom-1 rounded-md bg-primary/10 border border-primary/20 p-2 text-xs overflow-hidden"
+                          onClick={() => handleAppointmentClick(appointment)}
+                          className="absolute inset-x-1 top-1 bottom-1 rounded-md bg-primary/10 border border-primary/20 p-2 text-xs overflow-hidden cursor-pointer hover:bg-primary/20 transition-colors"
                         >
                           <div className="font-medium text-primary truncate">
-                            {appointment.patient}
+                            {appointment.patient_nom}
                           </div>
                           <div className="text-muted-foreground truncate">
-                            {appointment.treatment}
+                            {appointment.sujet}
                           </div>
                           <Badge
                             variant="secondary"
@@ -299,22 +371,23 @@ export default function AppointmentCalendar() {
         ) : (
           <div className="p-4">
             <div className="space-y-4">
-              {mockAppointments.map((appointment) => (
+              {appointments.map((appointment) => (
                 <div
                   key={appointment.id}
-                  className="flex items-center gap-4 p-4 border border-border rounded-lg hover:bg-accent/50 transition-colors"
+                  onClick={() => handleAppointmentClick(appointment)}
+                  className="flex items-center gap-4 p-4 border border-border rounded-lg hover:bg-accent/50 transition-colors cursor-pointer"
                 >
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <Clock className="h-4 w-4" />
-                    {appointment.time}
+                    {getTimeFromDateTime(appointment.date_rendez_vous)}
                   </div>
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
                       <User className="h-4 w-4 text-muted-foreground" />
-                      <span className="font-medium">{appointment.patient}</span>
+                      <span className="font-medium">{appointment.patient_nom}</span>
                     </div>
                     <p className="text-sm text-muted-foreground">
-                      {appointment.treatment}
+                      {appointment.sujet}
                     </p>
                   </div>
                   <Badge
@@ -344,6 +417,42 @@ export default function AppointmentCalendar() {
         onClose={() => setIsAppointmentModalOpen(false)}
         onSubmit={handleCreateAppointment}
         isLoading={isSubmitting}
+      />
+
+      {/* Appointment Details Modal */}
+      <AppointmentDetailsModal
+        isOpen={isDetailsModalOpen}
+        onClose={() => {
+          setIsDetailsModalOpen(false);
+          setSelectedAppointment(null);
+        }}
+        appointment={selectedAppointment}
+        onEdit={handleEditAppointment}
+        onDelete={handleDeleteAppointment}
+      />
+
+      {/* Appointment Edit Modal */}
+      <AppointmentFormModal
+        isOpen={isEditModalOpen}
+        onClose={() => {
+          setIsEditModalOpen(false);
+          setAppointmentToEdit(null);
+        }}
+        onSubmit={handleUpdateAppointment}
+        appointment={appointmentToEdit}
+        isLoading={isSubmitting}
+      />
+
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmationModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => {
+          setIsDeleteModalOpen(false);
+          setAppointmentToDelete(null);
+        }}
+        onConfirm={handleConfirmDelete}
+        appointment={appointmentToDelete}
+        isLoading={isDeleting}
       />
     </Card>
   );
