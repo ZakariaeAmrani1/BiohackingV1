@@ -50,10 +50,23 @@ export default function AppointmentCalendar() {
 
   const { toast } = useToast();
 
-  // Load appointments on component mount and when currentDate changes
+  // Load appointments on component mount and listen for activity updates
   useEffect(() => {
     loadAppointments();
-  }, [currentDate]);
+
+    const handleActivityLogged = () => {
+      // Only reload if no modal is open to prevent interference
+      if (!isDetailsModalOpen && !isEditModalOpen && !isDeleteModalOpen && !isAppointmentModalOpen) {
+        loadAppointments();
+      }
+    };
+
+    window.addEventListener('activityLogged', handleActivityLogged);
+
+    return () => {
+      window.removeEventListener('activityLogged', handleActivityLogged);
+    };
+  }, [isDetailsModalOpen, isEditModalOpen, isDeleteModalOpen, isAppointmentModalOpen]);
 
   const weekDays = [
     "Lundi",
@@ -127,6 +140,11 @@ export default function AppointmentCalendar() {
   const handleAppointmentClick = (appointment: RendezVous) => {
     setSelectedAppointment(appointment);
     setIsDetailsModalOpen(true);
+  };
+
+  const handleStatusUpdateSuccess = () => {
+    // Reload appointments after status update
+    loadAppointments();
   };
 
   const handleEditAppointment = (appointment: RendezVous) => {
