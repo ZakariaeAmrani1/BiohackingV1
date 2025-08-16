@@ -127,6 +127,27 @@ export default function AppointmentCalendar() {
     return date.toDateString() === today.toDateString();
   };
 
+  const handleCreateAppointment = async (data: AppointmentFormData) => {
+    try {
+      setIsSubmitting(true);
+      await AppointmentsService.create(data);
+      setIsAppointmentModalOpen(false);
+      toast({
+        title: "Succès",
+        description: "Le rendez-vous a été créé avec succès",
+      });
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: "Impossible de créer le rendez-vous",
+        variant: "destructive",
+      });
+      throw error;
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <Card className="h-full">
       <CardHeader className="pb-4">
