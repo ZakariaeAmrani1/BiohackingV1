@@ -371,6 +371,7 @@ const WORKING_HOURS = {
   start: 8, // 8 AM
   end: 18, // 6 PM
   appointmentDuration: 60, // 1 hour in minutes
+  slotInterval: 15, // 15 minutes intervals
 };
 
 // Generate time slots for a specific date
@@ -379,47 +380,24 @@ export const generateTimeSlotsForDate = (
   excludeAppointmentId?: number,
 ): TimeSlot[] => {
   const slots: TimeSlot[] = [];
-  const dateStr = date.toISOString().split("T")[0]; // YYYY-MM-DD format
 
-  // Get existing appointments for this date (excluding the one being edited if applicable)
-  const existingAppointments = mockAppointments.filter((apt) => {
-    const aptDate = new Date(apt.date_rendez_vous).toISOString().split("T")[0];
-    const isOnSameDate = aptDate === dateStr;
-    const isNotExcluded =
-      !excludeAppointmentId || apt.id !== excludeAppointmentId;
-    return isOnSameDate && isNotExcluded;
-  });
-
-  // Generate slots from working hours
+  // Generate slots from working hours with 15-minute intervals
   for (let hour = WORKING_HOURS.start; hour < WORKING_HOURS.end; hour++) {
-    const slotDate = new Date(date);
-    slotDate.setHours(hour, 0, 0, 0);
+    for (let minute = 0; minute < 60; minute += WORKING_HOURS.slotInterval) {
+      const slotDate = new Date(date);
+      slotDate.setHours(hour, minute, 0, 0);
 
-    // Check if this slot conflicts with existing appointments
-    const slotEnd = new Date(
-      slotDate.getTime() + WORKING_HOURS.appointmentDuration * 60000,
-    );
-
-    const isAvailable = !existingAppointments.some((apt) => {
-      const aptStart = new Date(apt.date_rendez_vous);
-      const aptEnd = new Date(
-        aptStart.getTime() + WORKING_HOURS.appointmentDuration * 60000,
-      );
-
-      // Check for overlap: slot overlaps with appointment if:
-      // slot starts before appointment ends AND slot ends after appointment starts
-      return slotDate < aptEnd && slotEnd > aptStart;
-    });
-
-    slots.push({
-      datetime: slotDate.toISOString().slice(0, 16), // YYYY-MM-DDTHH:MM format
-      time: slotDate.toLocaleTimeString("fr-FR", {
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: false,
-      }),
-      available: isAvailable,
-    });
+      // All slots are available (removed conflict checking logic)
+      slots.push({
+        datetime: slotDate.toISOString().slice(0, 16), // YYYY-MM-DDTHH:MM format
+        time: slotDate.toLocaleTimeString("fr-FR", {
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false,
+        }),
+        available: true, // Always available - no conflict checking
+      });
+    }
   }
 
   return slots;
