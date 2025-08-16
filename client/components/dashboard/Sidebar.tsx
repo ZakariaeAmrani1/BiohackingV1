@@ -34,7 +34,6 @@ const navigation = [
   { name: "Tableau de Bord", href: "/", icon: Home },
   { name: "Rendez-vous", href: "/appointments", icon: Calendar },
   { name: "Patients", href: "/patients", icon: Users },
-  { name: "Documents", href: "/documents", icon: FileText },
   { name: "Types de Documents", href: "/document-types", icon: FolderOpen },
   {
     name: "Biens",
