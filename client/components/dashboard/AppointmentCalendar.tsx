@@ -337,6 +337,14 @@ export default function AppointmentCalendar() {
           </div>
         )}
       </CardContent>
+
+      {/* Appointment Creation Modal */}
+      <AppointmentFormModal
+        isOpen={isAppointmentModalOpen}
+        onClose={() => setIsAppointmentModalOpen(false)}
+        onSubmit={handleCreateAppointment}
+        isLoading={isSubmitting}
+      />
     </Card>
   );
 }
