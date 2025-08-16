@@ -371,6 +371,7 @@ const WORKING_HOURS = {
   start: 8, // 8 AM
   end: 18, // 6 PM
   appointmentDuration: 60, // 1 hour in minutes
+  slotInterval: 30, // 30 minutes between slots
 };
 
 // Generate time slots for a specific date
@@ -379,38 +380,19 @@ export const generateTimeSlotsForDate = (
   excludeAppointmentId?: number,
 ): TimeSlot[] => {
   const slots: TimeSlot[] = [];
-  const dateStr = date.toISOString().split("T")[0]; // YYYY-MM-DD format
 
-  // Get existing appointments for this date (excluding the one being edited if applicable)
-  const existingAppointments = mockAppointments.filter((apt) => {
-    const aptDate = new Date(apt.date_rendez_vous).toISOString().split("T")[0];
-    const isOnSameDate = aptDate === dateStr;
-    const isNotExcluded =
-      !excludeAppointmentId || apt.id !== excludeAppointmentId;
-    return isOnSameDate && isNotExcluded;
-  });
+  // Calculate total minutes in working day
+  const startMinutes = WORKING_HOURS.start * 60; // 8 AM = 480 minutes
+  const endMinutes = WORKING_HOURS.end * 60; // 6 PM = 1080 minutes
 
-  // Generate slots from working hours
-  for (let hour = WORKING_HOURS.start; hour < WORKING_HOURS.end; hour++) {
+  // Generate slots at 30-minute intervals
+  for (let minutes = startMinutes; minutes < endMinutes; minutes += WORKING_HOURS.slotInterval) {
     const slotDate = new Date(date);
-    slotDate.setHours(hour, 0, 0, 0);
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    slotDate.setHours(hours, mins, 0, 0);
 
-    // Check if this slot conflicts with existing appointments
-    const slotEnd = new Date(
-      slotDate.getTime() + WORKING_HOURS.appointmentDuration * 60000,
-    );
-
-    const isAvailable = !existingAppointments.some((apt) => {
-      const aptStart = new Date(apt.date_rendez_vous);
-      const aptEnd = new Date(
-        aptStart.getTime() + WORKING_HOURS.appointmentDuration * 60000,
-      );
-
-      // Check for overlap: slot overlaps with appointment if:
-      // slot starts before appointment ends AND slot ends after appointment starts
-      return slotDate < aptEnd && slotEnd > aptStart;
-    });
-
+    // All slots are available - no conflict checking
     slots.push({
       datetime: slotDate.toISOString().slice(0, 16), // YYYY-MM-DDTHH:MM format
       time: slotDate.toLocaleTimeString("fr-FR", {
@@ -418,7 +400,7 @@ export const generateTimeSlotsForDate = (
         minute: "2-digit",
         hour12: false,
       }),
-      available: isAvailable,
+      available: true, // Always available
     });
   }
 
@@ -443,12 +425,10 @@ export const getAvailableDates = (
       continue; // Skip Sunday (0) and Saturday (6)
     }
 
-    const slots = generateTimeSlotsForDate(date, excludeAppointmentId);
-    const hasAvailableSlots = slots.some((slot) => slot.available);
-
+    // All dates have available slots since we removed conflict checking
     dates.push({
       date,
-      hasAvailableSlots,
+      hasAvailableSlots: true, // Always true
     });
   }
 
@@ -461,7 +441,12 @@ export const isTimeSlotAvailable = (
   excludeAppointmentId?: number,
 ): boolean => {
   const slotDate = new Date(datetime);
-  const slots = generateTimeSlotsForDate(slotDate, excludeAppointmentId);
-  const slot = slots.find((s) => s.datetime === datetime);
-  return slot?.available ?? false;
+  const hours = slotDate.getHours();
+  const minutes = slotDate.getMinutes();
+
+  // Check if time is within working hours and on valid intervals
+  const isWithinWorkingHours = hours >= WORKING_HOURS.start && hours < WORKING_HOURS.end;
+  const isValidInterval = minutes % WORKING_HOURS.slotInterval === 0;
+
+  return isWithinWorkingHours && isValidInterval;
 };
