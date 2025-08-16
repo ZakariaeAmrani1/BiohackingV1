@@ -891,6 +891,18 @@ export default function Settings() {
                           "fr-FR",
                         )}
                       </div>
+                      {entreprise.email && (
+                        <div>
+                          <span className="font-medium">Email:</span>{" "}
+                          {entreprise.email}
+                        </div>
+                      )}
+                      {entreprise.numero_telephone && (
+                        <div>
+                          <span className="font-medium">Téléphone:</span>{" "}
+                          {entreprise.numero_telephone}
+                        </div>
+                      )}
                     </div>
                     <div className="mt-4">
                       <span className="font-medium">Adresse:</span>
