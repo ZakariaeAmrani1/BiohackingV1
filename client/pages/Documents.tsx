@@ -55,10 +55,7 @@ import {
   DocumentTemplatesService,
   DocumentTemplate,
 } from "@/services/documentTemplatesService";
-import {
-  ClientsService,
-  Client,
-} from "@/services/clientsService";
+import { ClientsService, Client } from "@/services/clientsService";
 
 export default function Documents() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -77,7 +74,9 @@ export default function Documents() {
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
+  const [selectedDocument, setSelectedDocument] = useState<Document | null>(
+    null,
+  );
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -96,7 +95,7 @@ export default function Documents() {
   }, [documents, clients]);
 
   const uniqueCreators = Array.from(
-    new Set(documents.map((doc) => doc.Cree_par))
+    new Set(documents.map((doc) => doc.Cree_par)),
   );
 
   // Load data on component mount
@@ -126,7 +125,7 @@ export default function Documents() {
         DocumentTemplatesService.getAll(),
         ClientsService.getAll(),
       ]);
-      
+
       setDocuments(documentsData);
       setTemplates(templatesData);
       setClients(clientsData);
@@ -146,29 +145,43 @@ export default function Documents() {
     return documents.filter((doc) => {
       const client = clients.find((c) => c.CIN === doc.CIN);
       const template = templates.find((t) => t.id === doc.template_id);
-      
+
       const matchesSearch =
         doc.Cree_par.toLowerCase().includes(searchTerm.toLowerCase()) ||
         doc.CIN.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (client && 
-          (`${client.prenom} ${client.nom}`.toLowerCase().includes(searchTerm.toLowerCase()))) ||
-        (template && 
+        (client &&
+          `${client.prenom} ${client.nom}`
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase())) ||
+        (template &&
           template.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        JSON.stringify(doc.data_json).toLowerCase().includes(searchTerm.toLowerCase());
+        JSON.stringify(doc.data_json)
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase());
 
       const matchesPatient =
         patientFilter === "tous" || doc.CIN === patientFilter;
 
       const matchesTemplate =
-        templateFilter === "tous" || 
+        templateFilter === "tous" ||
         doc.template_id.toString() === templateFilter;
 
       const matchesCreator =
         creatorFilter === "tous" || doc.Cree_par === creatorFilter;
 
-      return matchesSearch && matchesPatient && matchesTemplate && matchesCreator;
+      return (
+        matchesSearch && matchesPatient && matchesTemplate && matchesCreator
+      );
     });
-  }, [searchTerm, patientFilter, templateFilter, creatorFilter, documents, clients, templates]);
+  }, [
+    searchTerm,
+    patientFilter,
+    templateFilter,
+    creatorFilter,
+    documents,
+    clients,
+    templates,
+  ]);
 
   // Helper functions
   const getClientName = (cin: string) => {
@@ -533,9 +546,7 @@ export default function Documents() {
         {/* Header */}
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">
-              Documents
-            </h1>
+            <h1 className="text-3xl font-bold tracking-tight">Documents</h1>
             <p className="text-muted-foreground">
               Gestion des documents de tous les patients
             </p>
@@ -590,7 +601,10 @@ export default function Documents() {
                 <SelectContent>
                   <SelectItem value="tous">Tous les types</SelectItem>
                   {templates.map((template) => (
-                    <SelectItem key={template.id} value={template.id.toString()}>
+                    <SelectItem
+                      key={template.id}
+                      value={template.id.toString()}
+                    >
                       {template.name}
                     </SelectItem>
                   ))}
@@ -716,15 +730,15 @@ export default function Documents() {
                               {formatDate(document.created_at)}
                             </TableCell>
                             <TableCell>
-                              <Badge 
+                              <Badge
                                 variant={
-                                  Object.keys(document.data_json).length > 0 
-                                    ? "default" 
+                                  Object.keys(document.data_json).length > 0
+                                    ? "default"
                                     : "secondary"
                                 }
                               >
-                                {Object.keys(document.data_json).length > 0 
-                                  ? "Complet" 
+                                {Object.keys(document.data_json).length > 0
+                                  ? "Complet"
                                   : "Vide"}
                               </Badge>
                             </TableCell>
@@ -778,7 +792,8 @@ export default function Documents() {
                             <div className="flex flex-col items-center gap-2">
                               <FileText className="h-8 w-8 text-muted-foreground" />
                               <p className="text-muted-foreground">
-                                Aucun document trouvé avec les critères sélectionnés
+                                Aucun document trouvé avec les critères
+                                sélectionnés
                               </p>
                             </div>
                           </TableCell>
@@ -813,15 +828,15 @@ export default function Documents() {
                             Document #{document.id}
                           </div>
                         </div>
-                        <Badge 
+                        <Badge
                           variant={
-                            Object.keys(document.data_json).length > 0 
-                              ? "default" 
+                            Object.keys(document.data_json).length > 0
+                              ? "default"
                               : "secondary"
                           }
                         >
-                          {Object.keys(document.data_json).length > 0 
-                            ? "Complet" 
+                          {Object.keys(document.data_json).length > 0
+                            ? "Complet"
                             : "Vide"}
                         </Badge>
                       </div>
@@ -936,7 +951,9 @@ export default function Documents() {
           isOpen={isDetailsModalOpen}
           onClose={closeDetailsModal}
           document={selectedDocument}
-          template={selectedDocument ? getSelectedTemplate(selectedDocument) : null}
+          template={
+            selectedDocument ? getSelectedTemplate(selectedDocument) : null
+          }
           onEdit={openEditModal}
           onDelete={openDeleteModal}
         />
@@ -946,7 +963,9 @@ export default function Documents() {
           onClose={closeDeleteModal}
           onConfirm={handleDeleteDocument}
           document={selectedDocument}
-          template={selectedDocument ? getSelectedTemplate(selectedDocument) : null}
+          template={
+            selectedDocument ? getSelectedTemplate(selectedDocument) : null
+          }
           isLoading={isSubmitting}
         />
       </div>

@@ -406,7 +406,9 @@ export default function DocumentFormModal({
               ) : (
                 <Select
                   value={formData.CIN}
-                  onValueChange={(value) => handleBasicFieldChange("CIN", value)}
+                  onValueChange={(value) =>
+                    handleBasicFieldChange("CIN", value)
+                  }
                   disabled={isSubmitting || isEditMode}
                 >
                   <SelectTrigger>

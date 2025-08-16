@@ -243,9 +243,7 @@ export default function TimeSlotPicker({
                   <Button
                     key={index}
                     type="button"
-                    variant={
-                      value === slot.datetime ? "default" : "outline"
-                    }
+                    variant={value === slot.datetime ? "default" : "outline"}
                     className={cn(
                       "h-10 text-sm hover:bg-primary/10",
                       value === slot.datetime &&
