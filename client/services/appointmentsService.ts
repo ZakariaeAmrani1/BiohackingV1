@@ -196,16 +196,31 @@ export class AppointmentsService {
     const index = mockAppointments.findIndex((apt) => apt.id === id);
     if (index === -1) return null;
 
-    // Get client information from client_id
-    const client = await ClientsService.getById(data.client_id);
-    if (!client) {
-      throw new Error("Client non trouvé");
+    const existingAppointment = mockAppointments[index];
+
+    // For status-only updates, preserve existing client data
+    // Only fetch client data if client_id has changed
+    let clientData = {
+      CIN: existingAppointment.CIN,
+      patient_nom: existingAppointment.patient_nom,
+    };
+
+    // Only fetch client if client_id has changed
+    if (data.client_id !== existingAppointment.client_id) {
+      const client = await ClientsService.getById(data.client_id);
+      if (!client) {
+        throw new Error("Client non trouvé");
+      }
+      clientData = {
+        CIN: client.CIN,
+        patient_nom: `${client.prenom} ${client.nom}`,
+      };
     }
 
     const updatedAppointment: RendezVous = {
-      ...mockAppointments[index],
-      CIN: client.CIN,
-      patient_nom: `${client.prenom} ${client.nom}`,
+      ...existingAppointment,
+      CIN: clientData.CIN,
+      patient_nom: clientData.patient_nom,
       sujet: data.sujet,
       date_rendez_vous: data.date_rendez_vous,
       Cree_par: data.Cree_par,
