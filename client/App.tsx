@@ -11,6 +11,7 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
 import Appointments from "./pages/Appointments";
 import Patients from "./pages/Patients";
+import Documents from "./pages/Documents";
 import PatientDocuments from "./pages/PatientDocuments";
 import Treatments from "./pages/Treatments";
 import Products from "./pages/Products";
@@ -79,6 +80,14 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <Patients />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/documents"
+        element={
+          <ProtectedRoute>
+            <Documents />
           </ProtectedRoute>
         }
       />

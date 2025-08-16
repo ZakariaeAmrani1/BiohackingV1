@@ -102,16 +102,14 @@ export default function TimeSlotPicker({
   };
 
   const handleTimeSlotSelect = (slot: TimeSlot) => {
-    if (slot.available && !disabled) {
+    if (!disabled) {
       onChange(slot.datetime);
     }
   };
 
   const isDateAvailable = (date: Date): boolean => {
-    return availableDates.some(
-      (d) =>
-        d.date.toDateString() === date.toDateString() && d.hasAvailableSlots,
-    );
+    // All dates are now available (except past dates and weekends)
+    return true;
   };
 
   const isDateSelected = (date: Date): boolean => {
@@ -190,7 +188,6 @@ export default function TimeSlotPicker({
             ))}
             {weekDates.map((date, index) => {
               const isPast = date < today;
-              const isAvailable = isDateAvailable(date);
               const isSelected = isDateSelected(date);
               const isWeekend = date.getDay() === 0 || date.getDay() === 6;
 
@@ -202,20 +199,19 @@ export default function TimeSlotPicker({
                   className={cn(
                     "h-12 p-1 flex flex-col items-center justify-center",
                     isPast && "opacity-50 cursor-not-allowed",
-                    isWeekend && "bg-muted/50",
-                    !isAvailable && !isPast && "opacity-60",
-                    isAvailable && !isPast && "hover:bg-primary/10",
+                    isWeekend && "bg-muted/50 opacity-60 cursor-not-allowed",
+                    !isPast && !isWeekend && "hover:bg-primary/10",
                   )}
                   onClick={() =>
-                    !isPast && isAvailable && handleDateSelect(date)
+                    !isPast && !isWeekend && handleDateSelect(date)
                   }
-                  disabled={disabled || isPast || !isAvailable}
+                  disabled={disabled || isPast || isWeekend}
                 >
                   <span className="text-sm font-medium">{date.getDate()}</span>
                   <span className="text-xs">
                     {formatDate(date).split(" ")[1]}
                   </span>
-                  {isAvailable && !isPast && (
+                  {!isPast && !isWeekend && (
                     <div className="w-1 h-1 bg-green-500 rounded-full mt-1" />
                   )}
                 </Button>
@@ -231,7 +227,7 @@ export default function TimeSlotPicker({
           <CardHeader className="pb-3">
             <CardTitle className="text-lg flex items-center gap-2">
               <Clock className="h-5 w-5" />
-              Créneaux disponibles -{" "}
+              Choisir l'heure -{" "}
               {selectedDate.toLocaleDateString("fr-FR", {
                 weekday: "long",
                 day: "2-digit",
@@ -242,28 +238,19 @@ export default function TimeSlotPicker({
           </CardHeader>
           <CardContent>
             {timeSlots.length > 0 ? (
-              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
+              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
                 {timeSlots.map((slot, index) => (
                   <Button
                     key={index}
                     type="button"
-                    variant={
-                      value === slot.datetime
-                        ? "default"
-                        : slot.available
-                          ? "outline"
-                          : "ghost"
-                    }
+                    variant={value === slot.datetime ? "default" : "outline"}
                     className={cn(
-                      "h-10 text-sm",
-                      !slot.available &&
-                        "opacity-50 cursor-not-allowed bg-muted",
-                      slot.available && "hover:bg-primary/10",
+                      "h-10 text-sm hover:bg-primary/10",
                       value === slot.datetime &&
                         "bg-primary text-primary-foreground",
                     )}
                     onClick={() => handleTimeSlotSelect(slot)}
-                    disabled={disabled || !slot.available}
+                    disabled={disabled}
                   >
                     {slot.time}
                   </Button>

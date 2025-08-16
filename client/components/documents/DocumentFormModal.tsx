@@ -55,6 +55,7 @@ interface DocumentFormModalProps {
   document?: Document | null;
   patient: Client | null;
   templates: DocumentTemplate[];
+  clients?: Client[];
   isLoading?: boolean;
 }
 
@@ -65,6 +66,7 @@ export default function DocumentFormModal({
   document,
   patient,
   templates,
+  clients = [],
   isLoading = false,
 }: DocumentFormModalProps) {
   const [formData, setFormData] = useState<DocumentFormData>(
@@ -388,20 +390,39 @@ export default function DocumentFormModal({
             </div>
 
             <div className="space-y-2">
-              <Label>Patient</Label>
-              <div className="p-3 bg-muted rounded-lg">
-                <div className="flex items-center gap-2">
-                  <User className="h-4 w-4" />
-                  <span className="font-medium">
-                    {patient
-                      ? `${patient.prenom} ${patient.nom}`
-                      : "Patient non sélectionné"}
-                  </span>
-                  <span className="text-muted-foreground">
-                    ({formData.CIN})
-                  </span>
+              <Label htmlFor="patient">Patient</Label>
+              {patient ? (
+                <div className="p-3 bg-muted rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <User className="h-4 w-4" />
+                    <span className="font-medium">
+                      {`${patient.prenom} ${patient.nom}`}
+                    </span>
+                    <span className="text-muted-foreground">
+                      ({formData.CIN})
+                    </span>
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <Select
+                  value={formData.CIN}
+                  onValueChange={(value) =>
+                    handleBasicFieldChange("CIN", value)
+                  }
+                  disabled={isSubmitting || isEditMode}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Sélectionnez un patient" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {clients.map((client) => (
+                      <SelectItem key={client.CIN} value={client.CIN}>
+                        {`${client.prenom} ${client.nom} (${client.CIN})`}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
             </div>
           </div>
 

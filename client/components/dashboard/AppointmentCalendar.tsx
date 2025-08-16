@@ -3,6 +3,12 @@ import { ChevronLeft, ChevronRight, Plus, Clock, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/components/ui/use-toast";
+import AppointmentFormModal from "@/components/appointments/AppointmentFormModal";
+import {
+  AppointmentFormData,
+  AppointmentsService,
+} from "@/services/appointmentsService";
 
 // Mock appointment data
 const mockAppointments = [
@@ -68,6 +74,10 @@ const statusTranslations = {
 export default function AppointmentCalendar() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [view, setView] = useState<"week" | "day">("week");
+  const [isAppointmentModalOpen, setIsAppointmentModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const { toast } = useToast();
 
   const weekDays = [
     "Lundi",
@@ -115,6 +125,27 @@ export default function AppointmentCalendar() {
   const isToday = (date: Date) => {
     const today = new Date();
     return date.toDateString() === today.toDateString();
+  };
+
+  const handleCreateAppointment = async (data: AppointmentFormData) => {
+    try {
+      setIsSubmitting(true);
+      await AppointmentsService.create(data);
+      setIsAppointmentModalOpen(false);
+      toast({
+        title: "Succès",
+        description: "Le rendez-vous a été créé avec succès",
+      });
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: "Impossible de créer le rendez-vous",
+        variant: "destructive",
+      });
+      throw error;
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -170,6 +201,7 @@ export default function AppointmentCalendar() {
             <Button
               size="sm"
               className="gap-2 bg-primary hover:bg-primary/90 text-primary-foreground"
+              onClick={() => setIsAppointmentModalOpen(true)}
             >
               <Plus className="h-4 w-4" />
               Nouveau Rendez-vous
@@ -305,6 +337,14 @@ export default function AppointmentCalendar() {
           </div>
         )}
       </CardContent>
+
+      {/* Appointment Creation Modal */}
+      <AppointmentFormModal
+        isOpen={isAppointmentModalOpen}
+        onClose={() => setIsAppointmentModalOpen(false)}
+        onSubmit={handleCreateAppointment}
+        isLoading={isSubmitting}
+      />
     </Card>
   );
 }
