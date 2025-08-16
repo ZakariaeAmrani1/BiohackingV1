@@ -63,9 +63,7 @@ export default function AppointmentCalendar() {
     try {
       setLoading(true);
       const data = await AppointmentsService.getAll();
-      console.log('Raw appointments data:', data);
       const calendarAppointments = convertToCalendarFormat(data);
-      console.log('Converted calendar appointments:', calendarAppointments);
       setAppointments(calendarAppointments);
     } catch (error) {
       console.error('Error loading appointments:', error);
