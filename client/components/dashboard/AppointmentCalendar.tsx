@@ -545,6 +545,68 @@ export default function AppointmentCalendar() {
         appointment={appointmentToDelete}
         isLoading={isDeleting}
       />
+
+      {/* Time Slot Appointments Modal */}
+      <Dialog open={isTimeSlotModalOpen} onOpenChange={setIsTimeSlotModalOpen}>
+        <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Clock className="h-5 w-5" />
+              Rendez-vous - {selectedTimeSlot}
+            </DialogTitle>
+            <DialogDescription>
+              {timeSlotAppointments.length} rendez-vous programmés à cette heure
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-3">
+            {timeSlotAppointments.map((appointment, index) => (
+              <div
+                key={appointment.id}
+                onClick={() => {
+                  setIsTimeSlotModalOpen(false);
+                  handleAppointmentClick(appointment);
+                }}
+                className="flex items-center gap-4 p-3 border border-border rounded-lg hover:bg-accent/50 transition-colors cursor-pointer"
+              >
+                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                  <span className="text-sm font-medium text-primary">{index + 1}</span>
+                </div>
+
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <User className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                    <span className="font-medium truncate">{appointment.patient_nom}</span>
+                  </div>
+                  <div className="flex items-center gap-2 mt-1">
+                    <Stethoscope className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                    <span className="text-sm text-muted-foreground truncate">{appointment.sujet}</span>
+                  </div>
+                  <div className="flex items-center gap-2 mt-1">
+                    <User className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                    <span className="text-sm text-muted-foreground">{appointment.Cree_par}</span>
+                  </div>
+                </div>
+
+                <div className="flex-shrink-0">
+                  <Badge
+                    variant="secondary"
+                    className={statusColors[appointment.status as keyof typeof statusColors]}
+                  >
+                    {statusTranslations[appointment.status as keyof typeof statusTranslations]}
+                  </Badge>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsTimeSlotModalOpen(false)}>
+              Fermer
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }
