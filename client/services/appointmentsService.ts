@@ -24,24 +24,13 @@ export interface AppointmentFormData {
 }
 
 // Mock data storage - in real app this would connect to your backend
-// Generate current dates for appointments
-const today = new Date();
-const tomorrow = new Date(today);
-tomorrow.setDate(today.getDate() + 1);
-const dayAfterTomorrow = new Date(today);
-dayAfterTomorrow.setDate(today.getDate() + 2);
-const yesterday = new Date(today);
-yesterday.setDate(today.getDate() - 1);
-const threeDaysAgo = new Date(today);
-threeDaysAgo.setDate(today.getDate() - 3);
-
 let mockAppointments: RendezVous[] = [
   {
     id: 1,
     CIN: "BE123456",
     sujet: "Consultation Biohacking",
-    date_rendez_vous: `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}T09:00:00`,
-    created_at: `${threeDaysAgo.getFullYear()}-${String(threeDaysAgo.getMonth() + 1).padStart(2, '0')}-${String(threeDaysAgo.getDate()).padStart(2, '0')}T14:30:00`,
+    date_rendez_vous: "2024-01-15T09:00:00",
+    created_at: "2024-01-10T14:30:00",
     Cree_par: "Dr. Smith",
     status: "confirmé",
     patient_nom: "Jean Dupont",
@@ -51,8 +40,8 @@ let mockAppointments: RendezVous[] = [
     id: 2,
     CIN: "BE234567",
     sujet: "Thérapie IV",
-    date_rendez_vous: `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}T10:30:00`,
-    created_at: `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, '0')}-${String(yesterday.getDate()).padStart(2, '0')}T09:15:00`,
+    date_rendez_vous: "2024-01-15T10:30:00",
+    created_at: "2024-01-12T09:15:00",
     Cree_par: "Dr. Martin",
     status: "programmé",
     patient_nom: "Marie Laurent",
@@ -62,8 +51,8 @@ let mockAppointments: RendezVous[] = [
     id: 3,
     CIN: "BE345678",
     sujet: "Séance de Cryothérapie",
-    date_rendez_vous: `${tomorrow.getFullYear()}-${String(tomorrow.getMonth() + 1).padStart(2, '0')}-${String(tomorrow.getDate()).padStart(2, '0')}T14:00:00`,
-    created_at: `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, '0')}-${String(yesterday.getDate()).padStart(2, '0')}T16:45:00`,
+    date_rendez_vous: "2024-01-16T14:00:00",
+    created_at: "2024-01-11T16:45:00",
     Cree_par: "Dr. Smith",
     status: "confirmé",
     patient_nom: "Pierre Martin",
@@ -73,8 +62,8 @@ let mockAppointments: RendezVous[] = [
     id: 4,
     CIN: "BE456789",
     sujet: "Analyse du Bilan Sanguin",
-    date_rendez_vous: `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, '0')}-${String(yesterday.getDate()).padStart(2, '0')}T11:00:00`,
-    created_at: `${threeDaysAgo.getFullYear()}-${String(threeDaysAgo.getMonth() + 1).padStart(2, '0')}-${String(threeDaysAgo.getDate()).padStart(2, '0')}T10:20:00`,
+    date_rendez_vous: "2024-01-14T11:00:00",
+    created_at: "2024-01-08T10:20:00",
     Cree_par: "Dr. Dubois",
     status: "terminé",
     patient_nom: "Sophie Wilson",
@@ -84,8 +73,8 @@ let mockAppointments: RendezVous[] = [
     id: 5,
     CIN: "BE567890",
     sujet: "Consultation Bien-être",
-    date_rendez_vous: `${dayAfterTomorrow.getFullYear()}-${String(dayAfterTomorrow.getMonth() + 1).padStart(2, '0')}-${String(dayAfterTomorrow.getDate()).padStart(2, '0')}T15:00:00`,
-    created_at: `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}T11:30:00`,
+    date_rendez_vous: "2024-01-17T15:00:00",
+    created_at: "2024-01-13T11:30:00",
     Cree_par: "Dr. Martin",
     status: "programmé",
     patient_nom: "Luc Chen",
@@ -95,8 +84,8 @@ let mockAppointments: RendezVous[] = [
     id: 6,
     CIN: "BE678901",
     sujet: "Suivi Post-Traitement",
-    date_rendez_vous: `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}T13:30:00`,
-    created_at: `${threeDaysAgo.getFullYear()}-${String(threeDaysAgo.getMonth() + 1).padStart(2, '0')}-${String(threeDaysAgo.getDate()).padStart(2, '0')}T15:10:00`,
+    date_rendez_vous: "2024-01-12T13:30:00",
+    created_at: "2024-01-05T15:10:00",
     Cree_par: "Dr. Smith",
     status: "annulé",
     patient_nom: "Alice Brown",
@@ -106,8 +95,8 @@ let mockAppointments: RendezVous[] = [
     id: 7,
     CIN: "BE789012",
     sujet: "Thérapie par Ondes de Choc",
-    date_rendez_vous: `${tomorrow.getFullYear()}-${String(tomorrow.getMonth() + 1).padStart(2, '0')}-${String(tomorrow.getDate()).padStart(2, '0')}T16:30:00`,
-    created_at: `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}T08:45:00`,
+    date_rendez_vous: "2024-01-18T16:30:00",
+    created_at: "2024-01-14T08:45:00",
     Cree_par: "Dr. Dubois",
     status: "confirmé",
     patient_nom: "David Garcia",
@@ -117,34 +106,12 @@ let mockAppointments: RendezVous[] = [
     id: 8,
     CIN: "BE890123",
     sujet: "Consultation Nutritionnelle",
-    date_rendez_vous: `${dayAfterTomorrow.getFullYear()}-${String(dayAfterTomorrow.getMonth() + 1).padStart(2, '0')}-${String(dayAfterTomorrow.getDate()).padStart(2, '0')}T10:00:00`,
-    created_at: `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}T12:20:00`,
+    date_rendez_vous: "2024-01-19T10:00:00",
+    created_at: "2024-01-15T12:20:00",
     Cree_par: "Dr. Martin",
     status: "programmé",
     patient_nom: "Emma Rodriguez",
     client_id: 8,
-  },
-  {
-    id: 9,
-    CIN: "BE901234",
-    sujet: "Consultation Urgente",
-    date_rendez_vous: `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}T09:00:00`,
-    created_at: `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}T08:00:00`,
-    Cree_par: "Dr. Laurent",
-    status: "confirmé",
-    patient_nom: "Marc Dubois",
-    client_id: 9,
-  },
-  {
-    id: 10,
-    CIN: "BE012345",
-    sujet: "Suivi Thérapeutique",
-    date_rendez_vous: `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}T09:00:00`,
-    created_at: `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}T08:15:00`,
-    Cree_par: "Dr. Martin",
-    status: "programmé",
-    patient_nom: "Lisa Moreau",
-    client_id: 10,
   },
 ];
 
@@ -218,31 +185,16 @@ export class AppointmentsService {
     const index = mockAppointments.findIndex((apt) => apt.id === id);
     if (index === -1) return null;
 
-    const existingAppointment = mockAppointments[index];
-
-    // For status-only updates, preserve existing client data
-    // Only fetch client data if client_id has changed
-    let clientData = {
-      CIN: existingAppointment.CIN,
-      patient_nom: existingAppointment.patient_nom,
-    };
-
-    // Only fetch client if client_id has changed
-    if (data.client_id !== existingAppointment.client_id) {
-      const client = await ClientsService.getById(data.client_id);
-      if (!client) {
-        throw new Error("Client non trouvé");
-      }
-      clientData = {
-        CIN: client.CIN,
-        patient_nom: `${client.prenom} ${client.nom}`,
-      };
+    // Get client information from client_id
+    const client = await ClientsService.getById(data.client_id);
+    if (!client) {
+      throw new Error("Client non trouvé");
     }
 
     const updatedAppointment: RendezVous = {
-      ...existingAppointment,
-      CIN: clientData.CIN,
-      patient_nom: clientData.patient_nom,
+      ...mockAppointments[index],
+      CIN: client.CIN,
+      patient_nom: `${client.prenom} ${client.nom}`,
       sujet: data.sujet,
       date_rendez_vous: data.date_rendez_vous,
       Cree_par: data.Cree_par,
