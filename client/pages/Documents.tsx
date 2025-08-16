@@ -740,6 +740,13 @@ ${JSON.stringify(pdfContent.data, null, 2)}`;
                               </DropdownMenuItem>
                               <DropdownMenuItem
                                 className="gap-2"
+                                onClick={() => handleDownloadPDF(document)}
+                              >
+                                <Download className="h-4 w-4" />
+                                Télécharger PDF
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                className="gap-2"
                                 onClick={() => openEditModal(document)}
                               >
                                 <Edit className="h-4 w-4" />
@@ -770,7 +777,7 @@ ${JSON.stringify(pdfContent.data, null, 2)}`;
                         Aucun document trouvé
                       </h3>
                       <p className="text-muted-foreground">
-                        Aucun document ne correspond aux crit��res sélectionnés
+                        Aucun document ne correspond aux critères sélectionnés
                       </p>
                     </div>
                   </div>
