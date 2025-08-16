@@ -448,5 +448,11 @@ export const isTimeSlotAvailable = (
   const isWithinWorkingHours = hours >= WORKING_HOURS.start && hours < WORKING_HOURS.end;
   const isValidInterval = minutes % WORKING_HOURS.slotInterval === 0;
 
+  // Also check for weekend (but still allow booking)
+  const dayOfWeek = slotDate.getDay();
+  const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+
+  // For now, allow all slots within working hours with correct intervals
+  // We can add more restrictions later if needed
   return isWithinWorkingHours && isValidInterval;
 };
