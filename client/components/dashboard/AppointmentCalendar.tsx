@@ -388,42 +388,58 @@ export default function AppointmentCalendar() {
           </div>
         ) : (
           <div className="p-4">
+            <div className="mb-4 text-center">
+              <h3 className="text-lg font-semibold">
+                {currentDate.toLocaleDateString("fr-FR", {
+                  weekday: "long",
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                })}
+              </h3>
+            </div>
             <div className="space-y-4">
-              {getAppointmentsForDate(currentDate).map((appointment) => (
-                <div
-                  key={appointment.id}
-                  onClick={() => handleAppointmentClick(appointment)}
-                  className="flex items-center gap-4 p-4 border border-border rounded-lg hover:bg-accent/50 transition-colors cursor-pointer"
-                >
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Clock className="h-4 w-4" />
-                    {getTimeFromDateTime(appointment.date_rendez_vous)}
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <User className="h-4 w-4 text-muted-foreground" />
-                      <span className="font-medium">{appointment.patient_nom}</span>
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      {appointment.sujet}
-                    </p>
-                  </div>
-                  <Badge
-                    variant="secondary"
-                    className={
-                      statusColors[
-                        appointment.status as keyof typeof statusColors
-                      ]
-                    }
-                  >
-                    {
-                      statusTranslations[
-                        appointment.status as keyof typeof statusTranslations
-                      ]
-                    }
-                  </Badge>
+              {getAppointmentsForDate(currentDate).length === 0 ? (
+                <div className="text-center text-muted-foreground py-8">
+                  Aucun rendez-vous pour cette date
                 </div>
-              ))}
+              ) : (
+                getAppointmentsForDate(currentDate).map((appointment) => (
+                  <div
+                    key={appointment.id}
+                    onClick={() => handleAppointmentClick(appointment)}
+                    className="flex items-center gap-4 p-4 border border-border rounded-lg hover:bg-accent/50 transition-colors cursor-pointer"
+                  >
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Clock className="h-4 w-4" />
+                      {getTimeFromDateTime(appointment.date_rendez_vous)}
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <User className="h-4 w-4 text-muted-foreground" />
+                        <span className="font-medium">{appointment.patient_nom}</span>
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        {appointment.sujet}
+                      </p>
+                    </div>
+                    <Badge
+                      variant="secondary"
+                      className={
+                        statusColors[
+                          appointment.status as keyof typeof statusColors
+                        ]
+                      }
+                    >
+                      {
+                        statusTranslations[
+                          appointment.status as keyof typeof statusTranslations
+                        ]
+                      }
+                    </Badge>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         )}
