@@ -55,6 +55,7 @@ interface DocumentFormModalProps {
   document?: Document | null;
   patient: Client | null;
   templates: DocumentTemplate[];
+  clients?: Client[];
   isLoading?: boolean;
 }
 
