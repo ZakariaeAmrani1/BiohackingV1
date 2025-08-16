@@ -798,6 +798,31 @@ export default function Settings() {
                         placeholder="Numéro de patente"
                       />
                     </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="entreprise-email">Email (optionnel)</Label>
+                      <Input
+                        id="entreprise-email"
+                        type="email"
+                        value={entrepriseFormData.email || ""}
+                        onChange={(e) =>
+                          handleEntrepriseFormChange("email", e.target.value)
+                        }
+                        placeholder="email@entreprise.com"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="entreprise-telephone">Téléphone (optionnel)</Label>
+                      <Input
+                        id="entreprise-telephone"
+                        value={entrepriseFormData.numero_telephone || ""}
+                        onChange={(e) =>
+                          handleEntrepriseFormChange("numero_telephone", e.target.value)
+                        }
+                        placeholder="+32 2 123 45 67"
+                      />
+                    </div>
                   </div>
 
                   <div className="space-y-2">
