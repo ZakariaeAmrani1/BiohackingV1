@@ -187,6 +187,8 @@ export default function Settings() {
           RIB: entrepriseData.RIB.toString(),
           patente: entrepriseData.patente.toString(),
           adresse: entrepriseData.adresse,
+          email: entrepriseData.email || "",
+          numero_telephone: entrepriseData.numero_telephone || "",
         });
       }
     } catch (error) {
