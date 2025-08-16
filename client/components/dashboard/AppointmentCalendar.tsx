@@ -1,73 +1,93 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight, Plus, Clock, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { AppointmentsService, RendezVous } from "@/services/appointmentsService";
 
-// Mock appointment data
-const mockAppointments = [
-  {
-    id: 1,
-    time: "9:00",
-    duration: 60,
-    patient: "John Smith",
-    treatment: "Consultation Biohacking",
-    status: "confirmed",
-    date: new Date(), // Today
-  },
-  {
-    id: 2,
-    time: "10:00",
-    duration: 45,
-    patient: "Sarah Johnson",
-    treatment: "Thérapie IV",
-    status: "pending",
-    date: new Date(), // Today
-  },
-  {
-    id: 3,
-    time: "14:00",
-    duration: 90,
-    patient: "Mike Davis",
-    treatment: "Séance de Cryothérapie",
-    status: "confirmed",
-    date: new Date(Date.now() + 86400000), // Tomorrow
-  },
-  {
-    id: 4,
-    time: "11:00",
-    duration: 30,
-    patient: "Emma Wilson",
-    treatment: "Analyse du Bilan Sanguin",
-    status: "confirmed",
-    date: new Date(Date.now() - 86400000), // Yesterday
-  },
-  {
-    id: 5,
-    time: "15:00",
-    duration: 60,
-    patient: "Alex Chen",
-    treatment: "Consultation Bien-être",
-    status: "pending",
-    date: new Date(Date.now() + 2 * 86400000), // Day after tomorrow
-  },
-];
+// Interface for calendar display
+interface CalendarAppointment {
+  id: number;
+  time: string;
+  duration: number;
+  patient: string;
+  treatment: string;
+  status: string;
+  date: Date;
+}
 
 const statusColors = {
-  confirmed: "bg-green-100 text-green-700 border-green-200",
-  pending: "bg-yellow-100 text-yellow-700 border-yellow-200",
-  cancelled: "bg-red-100 text-red-700 border-red-200",
+  confirmé: "bg-green-100 text-green-700 border-green-200",
+  programmé: "bg-blue-100 text-blue-700 border-blue-200",
+  terminé: "bg-gray-100 text-gray-700 border-gray-200",
+  annulé: "bg-red-100 text-red-700 border-red-200",
 };
 
 const statusTranslations = {
-  confirmed: "confirmé",
-  pending: "en attente",
-  cancelled: "annulé",
+  confirmé: "confirmé",
+  programmé: "programmé",
+  terminé: "terminé",
+  annulé: "annulé",
 };
 
 export default function AppointmentCalendar() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [view, setView] = useState<"week" | "day">("week");
+  const [appointments, setAppointments] = useState<CalendarAppointment[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Convert RendezVous to CalendarAppointment format
+  const convertToCalendarFormat = (rendezVous: RendezVous[]): CalendarAppointment[] => {
+    return rendezVous.map(apt => {
+      const appointmentDate = new Date(apt.date_rendez_vous);
+      const timeString = appointmentDate.toLocaleTimeString('fr-FR', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+      });
+
+      return {
+        id: apt.id,
+        time: timeString,
+        duration: 60, // Default duration
+        patient: apt.patient_nom || 'Patient inconnu',
+        treatment: apt.sujet,
+        status: apt.status || 'programmé',
+        date: appointmentDate
+      };
+    });
+  };
+
+  // Load appointments
+  const loadAppointments = async () => {
+    try {
+      setLoading(true);
+      const data = await AppointmentsService.getAll();
+      const calendarAppointments = convertToCalendarFormat(data);
+      setAppointments(calendarAppointments);
+    } catch (error) {
+      console.error('Error loading appointments:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Load appointments on component mount
+  useEffect(() => {
+    loadAppointments();
+  }, []);
+
+  // Listen for appointment updates
+  useEffect(() => {
+    const handleActivityLogged = () => {
+      loadAppointments();
+    };
+
+    window.addEventListener('activityLogged', handleActivityLogged);
+    return () => {
+      window.removeEventListener('activityLogged', handleActivityLogged);
+    };
+  }, []);
 
   const weekDays = [
     "Lundi",
@@ -107,7 +127,7 @@ export default function AppointmentCalendar() {
   };
 
   const getAppointmentsForDate = (date: Date) => {
-    return mockAppointments.filter(
+    return appointments.filter(
       (apt) => apt.date.toDateString() === date.toDateString(),
     );
   };
@@ -266,42 +286,54 @@ export default function AppointmentCalendar() {
           </div>
         ) : (
           <div className="p-4">
-            <div className="space-y-4">
-              {mockAppointments.map((appointment) => (
-                <div
-                  key={appointment.id}
-                  className="flex items-center gap-4 p-4 border border-border rounded-lg hover:bg-accent/50 transition-colors"
-                >
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Clock className="h-4 w-4" />
-                    {appointment.time}
+            {loading ? (
+              <div className="flex items-center justify-center py-8">
+                <div className="text-muted-foreground">Chargement des rendez-vous...</div>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {appointments.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    Aucun rendez-vous trouvé
                   </div>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <User className="h-4 w-4 text-muted-foreground" />
-                      <span className="font-medium">{appointment.patient}</span>
+                ) : (
+                  appointments.map((appointment) => (
+                    <div
+                      key={appointment.id}
+                      className="flex items-center gap-4 p-4 border border-border rounded-lg hover:bg-accent/50 transition-colors"
+                    >
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Clock className="h-4 w-4" />
+                        {appointment.time}
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <User className="h-4 w-4 text-muted-foreground" />
+                          <span className="font-medium">{appointment.patient}</span>
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          {appointment.treatment}
+                        </p>
+                      </div>
+                      <Badge
+                        variant="secondary"
+                        className={
+                          statusColors[
+                            appointment.status as keyof typeof statusColors
+                          ]
+                        }
+                      >
+                        {
+                          statusTranslations[
+                            appointment.status as keyof typeof statusTranslations
+                          ]
+                        }
+                      </Badge>
                     </div>
-                    <p className="text-sm text-muted-foreground">
-                      {appointment.treatment}
-                    </p>
-                  </div>
-                  <Badge
-                    variant="secondary"
-                    className={
-                      statusColors[
-                        appointment.status as keyof typeof statusColors
-                      ]
-                    }
-                  >
-                    {
-                      statusTranslations[
-                        appointment.status as keyof typeof statusTranslations
-                      ]
-                    }
-                  </Badge>
-                </div>
-              ))}
-            </div>
+                  ))
+                )}
+              </div>
+            )}
           </div>
         )}
       </CardContent>
