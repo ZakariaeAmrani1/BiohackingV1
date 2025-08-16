@@ -66,6 +66,7 @@ export default function DocumentFormModal({
   document,
   patient,
   templates,
+  clients = [],
   isLoading = false,
 }: DocumentFormModalProps) {
   const [formData, setFormData] = useState<DocumentFormData>(
