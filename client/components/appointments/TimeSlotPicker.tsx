@@ -238,28 +238,21 @@ export default function TimeSlotPicker({
           </CardHeader>
           <CardContent>
             {timeSlots.length > 0 ? (
-              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
+              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
                 {timeSlots.map((slot, index) => (
                   <Button
                     key={index}
                     type="button"
                     variant={
-                      value === slot.datetime
-                        ? "default"
-                        : slot.available
-                          ? "outline"
-                          : "ghost"
+                      value === slot.datetime ? "default" : "outline"
                     }
                     className={cn(
-                      "h-10 text-sm",
-                      !slot.available &&
-                        "opacity-50 cursor-not-allowed bg-muted",
-                      slot.available && "hover:bg-primary/10",
+                      "h-10 text-sm hover:bg-primary/10",
                       value === slot.datetime &&
                         "bg-primary text-primary-foreground",
                     )}
                     onClick={() => handleTimeSlotSelect(slot)}
-                    disabled={disabled || !slot.available}
+                    disabled={disabled}
                   >
                     {slot.time}
                   </Button>
