@@ -389,7 +389,7 @@ export default function AppointmentCalendar() {
         ) : (
           <div className="p-4">
             <div className="space-y-4">
-              {appointments.map((appointment) => (
+              {getAppointmentsForDate(currentDate).map((appointment) => (
                 <div
                   key={appointment.id}
                   onClick={() => handleAppointmentClick(appointment)}
