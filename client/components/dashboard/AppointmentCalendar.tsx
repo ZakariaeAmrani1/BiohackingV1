@@ -268,6 +268,10 @@ export default function AppointmentCalendar() {
                           key={appointment.id}
                           className="absolute inset-x-1 top-1 bottom-1 rounded-md bg-primary/10 border border-primary/20 p-2 text-xs overflow-hidden"
                         >
+                          <div className="flex items-center gap-1 mb-1">
+                            <Clock className="h-3 w-3 text-primary" />
+                            <span className="text-primary font-medium">{appointment.time}</span>
+                          </div>
                           <div className="font-medium text-primary truncate">
                             {appointment.patient}
                           </div>
