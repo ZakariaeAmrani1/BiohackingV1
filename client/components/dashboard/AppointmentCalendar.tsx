@@ -263,10 +263,18 @@ export default function AppointmentCalendar() {
                       key={timeIndex}
                       className="h-20 border-b border-border p-1 relative"
                     >
-                      {timeAppointments.map((appointment) => (
+                      {timeAppointments.map((appointment, aptIndex) => (
                         <div
                           key={appointment.id}
-                          className="absolute inset-x-1 top-1 bottom-1 rounded-md bg-primary/10 border border-primary/20 p-2 text-xs overflow-hidden"
+                          className={`absolute inset-x-1 rounded-md bg-primary/10 border border-primary/20 p-2 text-xs overflow-hidden ${
+                            timeAppointments.length > 1
+                              ? `top-${aptIndex * 10 + 1} h-${Math.max(18, 78 / timeAppointments.length)}`
+                              : 'top-1 bottom-1'
+                          }`}
+                          style={timeAppointments.length > 1 ? {
+                            top: `${aptIndex * (76 / timeAppointments.length) + 2}px`,
+                            height: `${76 / timeAppointments.length - 2}px`
+                          } : undefined}
                         >
                           <div className="flex items-center gap-1 mb-1">
                             <Clock className="h-3 w-3 text-primary" />
