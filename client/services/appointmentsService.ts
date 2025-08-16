@@ -23,14 +23,22 @@ export interface AppointmentFormData {
   status: "programmé" | "confirmé" | "terminé" | "annulé";
 }
 
+// Helper function to get dates relative to today
+const getRelativeDate = (daysFromToday: number, hour: number = 10, minute: number = 0): string => {
+  const date = new Date();
+  date.setDate(date.getDate() + daysFromToday);
+  date.setHours(hour, minute, 0, 0);
+  return date.toISOString();
+};
+
 // Mock data storage - in real app this would connect to your backend
 let mockAppointments: RendezVous[] = [
   {
     id: 1,
     CIN: "BE123456",
     sujet: "Consultation Biohacking",
-    date_rendez_vous: "2024-01-15T09:00:00",
-    created_at: "2024-01-10T14:30:00",
+    date_rendez_vous: getRelativeDate(0, 11, 0), // Today at 11:00
+    created_at: getRelativeDate(-2, 14, 30),
     Cree_par: "Dr. Smith",
     status: "confirmé",
     patient_nom: "Jean Dupont",
@@ -40,8 +48,8 @@ let mockAppointments: RendezVous[] = [
     id: 2,
     CIN: "BE234567",
     sujet: "Thérapie IV",
-    date_rendez_vous: "2024-01-15T10:30:00",
-    created_at: "2024-01-12T09:15:00",
+    date_rendez_vous: getRelativeDate(0, 14, 30), // Today at 14:30
+    created_at: getRelativeDate(-1, 9, 15),
     Cree_par: "Dr. Martin",
     status: "programmé",
     patient_nom: "Marie Laurent",
@@ -51,8 +59,8 @@ let mockAppointments: RendezVous[] = [
     id: 3,
     CIN: "BE345678",
     sujet: "Séance de Cryothérapie",
-    date_rendez_vous: "2024-01-16T14:00:00",
-    created_at: "2024-01-11T16:45:00",
+    date_rendez_vous: getRelativeDate(1, 15, 0), // Tomorrow at 15:00
+    created_at: getRelativeDate(-3, 16, 45),
     Cree_par: "Dr. Smith",
     status: "confirmé",
     patient_nom: "Pierre Martin",
@@ -62,8 +70,8 @@ let mockAppointments: RendezVous[] = [
     id: 4,
     CIN: "BE456789",
     sujet: "Analyse du Bilan Sanguin",
-    date_rendez_vous: "2024-01-14T11:00:00",
-    created_at: "2024-01-08T10:20:00",
+    date_rendez_vous: getRelativeDate(-1, 12, 0), // Yesterday at 12:00
+    created_at: getRelativeDate(-5, 10, 20),
     Cree_par: "Dr. Dubois",
     status: "terminé",
     patient_nom: "Sophie Wilson",
@@ -73,8 +81,8 @@ let mockAppointments: RendezVous[] = [
     id: 5,
     CIN: "BE567890",
     sujet: "Consultation Bien-être",
-    date_rendez_vous: "2024-01-17T15:00:00",
-    created_at: "2024-01-13T11:30:00",
+    date_rendez_vous: getRelativeDate(2, 16, 0), // Day after tomorrow at 16:00
+    created_at: getRelativeDate(0, 11, 30),
     Cree_par: "Dr. Martin",
     status: "programmé",
     patient_nom: "Luc Chen",
@@ -84,8 +92,8 @@ let mockAppointments: RendezVous[] = [
     id: 6,
     CIN: "BE678901",
     sujet: "Suivi Post-Traitement",
-    date_rendez_vous: "2024-01-12T13:30:00",
-    created_at: "2024-01-05T15:10:00",
+    date_rendez_vous: getRelativeDate(-2, 13, 30), // 2 days ago at 13:30
+    created_at: getRelativeDate(-7, 15, 10),
     Cree_par: "Dr. Smith",
     status: "annulé",
     patient_nom: "Alice Brown",
@@ -95,8 +103,8 @@ let mockAppointments: RendezVous[] = [
     id: 7,
     CIN: "BE789012",
     sujet: "Thérapie par Ondes de Choc",
-    date_rendez_vous: "2024-01-18T16:30:00",
-    created_at: "2024-01-14T08:45:00",
+    date_rendez_vous: getRelativeDate(3, 17, 30), // 3 days from now at 17:30
+    created_at: getRelativeDate(1, 8, 45),
     Cree_par: "Dr. Dubois",
     status: "confirmé",
     patient_nom: "David Garcia",
@@ -106,8 +114,8 @@ let mockAppointments: RendezVous[] = [
     id: 8,
     CIN: "BE890123",
     sujet: "Consultation Nutritionnelle",
-    date_rendez_vous: "2024-01-19T10:00:00",
-    created_at: "2024-01-15T12:20:00",
+    date_rendez_vous: getRelativeDate(4, 10, 0), // 4 days from now at 10:00
+    created_at: getRelativeDate(2, 12, 20),
     Cree_par: "Dr. Martin",
     status: "programmé",
     patient_nom: "Emma Rodriguez",
@@ -366,7 +374,7 @@ const WORKING_HOURS = {
   start: 10, // 10 AM
   end: 19, // 7 PM
   appointmentDuration: 60, // 1 hour in minutes
-  slotInterval: 15, // 15 minutes between slots
+  slotInterval: 30, // 30 minutes between slots
 };
 
 // Generate time slots for a specific date

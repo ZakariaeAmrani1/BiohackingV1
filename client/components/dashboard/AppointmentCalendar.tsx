@@ -1,73 +1,114 @@
-import { useState } from "react";
-import { ChevronLeft, ChevronRight, Plus, Clock, User } from "lucide-react";
+import { useState, useEffect } from "react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Plus,
+  Clock,
+  User,
+  Calendar,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import {
+  AppointmentsService,
+  RendezVous,
+} from "@/services/appointmentsService";
+import CalendarAppointmentModal from "./CalendarAppointmentModal";
 
-// Mock appointment data
-const mockAppointments = [
-  {
-    id: 1,
-    time: "9:00",
-    duration: 60,
-    patient: "John Smith",
-    treatment: "Consultation Biohacking",
-    status: "confirmed",
-    date: new Date(), // Today
-  },
-  {
-    id: 2,
-    time: "10:00",
-    duration: 45,
-    patient: "Sarah Johnson",
-    treatment: "Thérapie IV",
-    status: "pending",
-    date: new Date(), // Today
-  },
-  {
-    id: 3,
-    time: "14:00",
-    duration: 90,
-    patient: "Mike Davis",
-    treatment: "Séance de Cryothérapie",
-    status: "confirmed",
-    date: new Date(Date.now() + 86400000), // Tomorrow
-  },
-  {
-    id: 4,
-    time: "11:00",
-    duration: 30,
-    patient: "Emma Wilson",
-    treatment: "Analyse du Bilan Sanguin",
-    status: "confirmed",
-    date: new Date(Date.now() - 86400000), // Yesterday
-  },
-  {
-    id: 5,
-    time: "15:00",
-    duration: 60,
-    patient: "Alex Chen",
-    treatment: "Consultation Bien-être",
-    status: "pending",
-    date: new Date(Date.now() + 2 * 86400000), // Day after tomorrow
-  },
-];
+// Interface for calendar display
+interface CalendarAppointment {
+  id: number;
+  time: string;
+  duration: number;
+  patient: string;
+  treatment: string;
+  status: string;
+  date: Date;
+}
 
 const statusColors = {
-  confirmed: "bg-green-100 text-green-700 border-green-200",
-  pending: "bg-yellow-100 text-yellow-700 border-yellow-200",
-  cancelled: "bg-red-100 text-red-700 border-red-200",
+  confirmé: "bg-green-100 text-green-700 border-green-200",
+  programmé: "bg-blue-100 text-blue-700 border-blue-200",
+  terminé: "bg-gray-100 text-gray-700 border-gray-200",
+  annulé: "bg-red-100 text-red-700 border-red-200",
 };
 
 const statusTranslations = {
-  confirmed: "confirmé",
-  pending: "en attente",
-  cancelled: "annulé",
+  confirmé: "confirmé",
+  programmé: "programmé",
+  terminé: "terminé",
+  annulé: "annulé",
 };
 
 export default function AppointmentCalendar() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [view, setView] = useState<"week" | "day">("week");
+  const [appointments, setAppointments] = useState<CalendarAppointment[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedAppointment, setSelectedAppointment] =
+    useState<CalendarAppointment | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Convert RendezVous to CalendarAppointment format
+  const convertToCalendarFormat = (
+    rendezVous: RendezVous[],
+  ): CalendarAppointment[] => {
+    return rendezVous.map((apt) => {
+      const appointmentDate = new Date(apt.date_rendez_vous);
+      const timeString = appointmentDate.toLocaleTimeString("fr-FR", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      });
+
+      return {
+        id: apt.id,
+        time: timeString,
+        duration: 60, // Default duration
+        patient: apt.patient_nom || "Patient inconnu",
+        treatment: apt.sujet,
+        status: apt.status || "programmé",
+        date: appointmentDate,
+      };
+    });
+  };
+
+  // Load appointments
+  const loadAppointments = async () => {
+    try {
+      setLoading(true);
+      const data = await AppointmentsService.getAll();
+      console.log("Calendar loaded appointments from service:", data);
+      const calendarAppointments = convertToCalendarFormat(data);
+      console.log("Calendar converted appointments:", calendarAppointments);
+      setAppointments(calendarAppointments);
+    } catch (error) {
+      console.error("Error loading appointments:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Load appointments on component mount
+  useEffect(() => {
+    loadAppointments();
+  }, []);
+
+  // Listen for appointment updates
+  useEffect(() => {
+    const handleActivityLogged = () => {
+      console.log(
+        "Calendar received activityLogged event, reloading appointments...",
+      );
+      loadAppointments();
+    };
+
+    window.addEventListener("activityLogged", handleActivityLogged);
+    return () => {
+      window.removeEventListener("activityLogged", handleActivityLogged);
+    };
+  }, []);
 
   const weekDays = [
     "Lundi",
@@ -78,7 +119,7 @@ export default function AppointmentCalendar() {
     "Samedi",
     "Dimanche",
   ];
-  const timeSlots = Array.from({ length: 12 }, (_, i) => `${8 + i}:00`);
+  const timeSlots = Array.from({ length: 10 }, (_, i) => `${10 + i}:00`);
 
   const navigateWeek = (direction: "prev" | "next") => {
     const newDate = new Date(currentDate);
@@ -107,9 +148,23 @@ export default function AppointmentCalendar() {
   };
 
   const getAppointmentsForDate = (date: Date) => {
-    return mockAppointments.filter(
+    return appointments.filter(
       (apt) => apt.date.toDateString() === date.toDateString(),
     );
+  };
+
+  const handleAppointmentClick = (appointment: CalendarAppointment) => {
+    setSelectedAppointment(appointment);
+    setIsModalOpen(true);
+  };
+
+  const handleModalClose = (statusChanged: boolean = false) => {
+    setIsModalOpen(false);
+    setSelectedAppointment(null);
+    // Only reload if status was actually changed
+    if (statusChanged) {
+      loadAppointments();
+    }
   };
 
   const isToday = (date: Date) => {
@@ -178,7 +233,13 @@ export default function AppointmentCalendar() {
         </div>
       </CardHeader>
       <CardContent className="p-0">
-        {view === "week" ? (
+        {loading ? (
+          <div className="flex items-center justify-center py-8">
+            <div className="text-muted-foreground">
+              Chargement des rendez-vous...
+            </div>
+          </div>
+        ) : view === "week" ? (
           <div className="overflow-x-auto grid grid-cols-8 border-t border-border min-w-[700px]">
             {/* Time column */}
             <div className="border-r border-border">
@@ -226,20 +287,42 @@ export default function AppointmentCalendar() {
                 </div>
                 {timeSlots.map((time, timeIndex) => {
                   const dayAppointments = getAppointmentsForDate(date);
-                  const timeAppointments = dayAppointments.filter(
-                    (apt) => apt.time === time,
-                  );
+                  const slotHour = parseInt(time.split(":")[0]); // Extract hour from slot (e.g., 14 from "14:00")
+                  const timeAppointments = dayAppointments.filter((apt) => {
+                    const aptHour = parseInt(apt.time.split(":")[0]); // Extract hour from appointment time
+                    return aptHour === slotHour; // Match appointments to the hour slot
+                  });
 
                   return (
                     <div
                       key={timeIndex}
                       className="h-20 border-b border-border p-1 relative"
                     >
-                      {timeAppointments.map((appointment) => (
+                      {timeAppointments.map((appointment, aptIndex) => (
                         <div
                           key={appointment.id}
-                          className="absolute inset-x-1 top-1 bottom-1 rounded-md bg-primary/10 border border-primary/20 p-2 text-xs overflow-hidden"
+                          className={`absolute inset-x-1 rounded-md bg-primary/10 border border-primary/20 p-2 text-xs overflow-hidden cursor-pointer hover:bg-primary/20 hover:border-primary/30 transition-colors ${
+                            timeAppointments.length > 1
+                              ? `top-${aptIndex * 10 + 1} h-${Math.max(18, 78 / timeAppointments.length)}`
+                              : "top-1 bottom-1"
+                          }`}
+                          style={
+                            timeAppointments.length > 1
+                              ? {
+                                  top: `${aptIndex * (76 / timeAppointments.length) + 2}px`,
+                                  height: `${76 / timeAppointments.length - 2}px`,
+                                }
+                              : undefined
+                          }
+                          onClick={() => handleAppointmentClick(appointment)}
+                          title={`Cliquer pour voir les détails de ${appointment.patient}`}
                         >
+                          <div className="flex items-center gap-1 mb-1">
+                            <Clock className="h-3 w-3 text-primary" />
+                            <span className="text-primary font-medium">
+                              {appointment.time}
+                            </span>
+                          </div>
                           <div className="font-medium text-primary truncate">
                             {appointment.patient}
                           </div>
@@ -266,45 +349,133 @@ export default function AppointmentCalendar() {
           </div>
         ) : (
           <div className="p-4">
-            <div className="space-y-4">
-              {mockAppointments.map((appointment) => (
-                <div
-                  key={appointment.id}
-                  className="flex items-center gap-4 p-4 border border-border rounded-lg hover:bg-accent/50 transition-colors"
+            {/* Day view header with date navigation */}
+            <div className="flex items-center justify-between mb-6 pb-4 border-b border-border">
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => {
+                    const newDate = new Date(currentDate);
+                    newDate.setDate(newDate.getDate() - 1);
+                    setCurrentDate(newDate);
+                  }}
+                  className="h-8 w-8"
                 >
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Clock className="h-4 w-4" />
-                    {appointment.time}
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <User className="h-4 w-4 text-muted-foreground" />
-                      <span className="font-medium">{appointment.patient}</span>
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <div className="text-center">
+                  <h3
+                    className={`font-semibold text-lg ${isToday(currentDate) ? "text-primary" : ""}`}
+                  >
+                    {currentDate.toLocaleDateString("fr-FR", {
+                      weekday: "long",
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })}
+                  </h3>
+                  {isToday(currentDate) && (
+                    <div className="flex items-center justify-center gap-1 mt-1">
+                      <span className="inline-flex h-2 w-2 rounded-full bg-primary"></span>
+                      <span className="text-sm text-primary font-medium">
+                        Aujourd'hui
+                      </span>
                     </div>
-                    <p className="text-sm text-muted-foreground">
-                      {appointment.treatment}
+                  )}
+                </div>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => {
+                    const newDate = new Date(currentDate);
+                    newDate.setDate(newDate.getDate() + 1);
+                    setCurrentDate(newDate);
+                  }}
+                  className="h-8 w-8"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+              <div className="text-sm text-muted-foreground">
+                {getAppointmentsForDate(currentDate).length} rendez-vous
+              </div>
+            </div>
+
+            {loading ? (
+              <div className="flex items-center justify-center py-8">
+                <div className="text-muted-foreground">
+                  Chargement des rendez-vous...
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {getAppointmentsForDate(currentDate).length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <Calendar className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p className="text-lg font-medium mb-2">
+                      Aucun rendez-vous
+                    </p>
+                    <p className="text-sm">
+                      {isToday(currentDate)
+                        ? "Vous n'avez aucun rendez-vous aujourd'hui"
+                        : `Aucun rendez-vous prévu pour le ${currentDate.toLocaleDateString("fr-FR")}`}
                     </p>
                   </div>
-                  <Badge
-                    variant="secondary"
-                    className={
-                      statusColors[
-                        appointment.status as keyof typeof statusColors
-                      ]
-                    }
-                  >
-                    {
-                      statusTranslations[
-                        appointment.status as keyof typeof statusTranslations
-                      ]
-                    }
-                  </Badge>
-                </div>
-              ))}
-            </div>
+                ) : (
+                  getAppointmentsForDate(currentDate)
+                    .sort((a, b) => a.time.localeCompare(b.time))
+                    .map((appointment) => (
+                      <div
+                        key={appointment.id}
+                        className="flex items-center gap-4 p-4 border border-border rounded-lg hover:bg-accent/50 transition-colors cursor-pointer"
+                        onClick={() => handleAppointmentClick(appointment)}
+                        title={`Cliquer pour voir les détails de ${appointment.patient}`}
+                      >
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <Clock className="h-4 w-4" />
+                          {appointment.time}
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <User className="h-4 w-4 text-muted-foreground" />
+                            <span className="font-medium">
+                              {appointment.patient}
+                            </span>
+                          </div>
+                          <p className="text-sm text-muted-foreground">
+                            {appointment.treatment}
+                          </p>
+                        </div>
+                        <Badge
+                          variant="secondary"
+                          className={
+                            statusColors[
+                              appointment.status as keyof typeof statusColors
+                            ]
+                          }
+                        >
+                          {
+                            statusTranslations[
+                              appointment.status as keyof typeof statusTranslations
+                            ]
+                          }
+                        </Badge>
+                      </div>
+                    ))
+                )}
+              </div>
+            )}
           </div>
         )}
       </CardContent>
+
+      {/* Appointment Details Modal */}
+      <CalendarAppointmentModal
+        isOpen={isModalOpen}
+        onClose={handleModalClose}
+        appointment={selectedAppointment}
+      />
     </Card>
   );
 }
