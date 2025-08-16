@@ -252,9 +252,11 @@ export default function AppointmentCalendar() {
                 </div>
                 {timeSlots.map((time, timeIndex) => {
                   const dayAppointments = getAppointmentsForDate(date);
-                  const timeAppointments = dayAppointments.filter(
-                    (apt) => apt.time === time,
-                  );
+                  const slotHour = parseInt(time.split(':')[0]); // Extract hour from slot (e.g., 14 from "14:00")
+                  const timeAppointments = dayAppointments.filter((apt) => {
+                    const aptHour = parseInt(apt.time.split(':')[0]); // Extract hour from appointment time
+                    return aptHour === slotHour; // Match appointments to the hour slot
+                  });
 
                   return (
                     <div
