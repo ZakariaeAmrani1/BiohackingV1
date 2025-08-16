@@ -1,17 +1,17 @@
 import {
   CalendarDays,
   User,
-  FileText,
   Clock,
   Stethoscope,
-  UserCheck,
-  Calendar,
   Edit,
   Trash2,
   CheckCircle,
   PlayCircle,
   XCircle,
   CircleDot,
+  Phone,
+  Mail,
+  IdCard,
 } from "lucide-react";
 import {
   Dialog,
@@ -76,14 +76,20 @@ export default function AppointmentDetailsModal({
     });
   };
 
+  const formatTime = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleTimeString("fr-FR", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString("fr-FR", {
       day: "2-digit",
       month: "long",
       year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
     });
   };
 
@@ -91,22 +97,20 @@ export default function AppointmentDetailsModal({
     if (onEdit) {
       onEdit(appointment);
     }
-    onClose();
   };
 
   const handleDelete = () => {
     if (onDelete) {
       onDelete(appointment);
     }
-    onClose();
   };
 
   const handleStatusUpdate = async (newStatus: "programmé" | "confirmé" | "terminé" | "annulé") => {
     if (!appointment) return;
-
+    
     try {
       setIsUpdatingStatus(true);
-
+      
       // Create updated appointment data
       const updateData = {
         client_id: appointment.client_id!,
@@ -115,19 +119,19 @@ export default function AppointmentDetailsModal({
         Cree_par: appointment.Cree_par,
         status: newStatus,
       };
-
+      
       await AppointmentsService.update(appointment.id, updateData);
-
+      
       toast({
         title: "Succès",
         description: `Le statut du rendez-vous a été mis à jour: ${statusLabels[newStatus]}`,
       });
-
+      
       // Call parent callback to refresh data
       if (onStatusUpdate) {
         onStatusUpdate();
       }
-
+      
       onClose();
     } catch (error) {
       toast({
@@ -163,14 +167,14 @@ export default function AppointmentDetailsModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <CalendarDays className="h-5 w-5" />
             Détails du rendez-vous
           </DialogTitle>
           <DialogDescription>
-            Informations complètes du rendez-vous #{appointment.id}
+            {formatDate(appointment.date_rendez_vous)} à {formatTime(appointment.date_rendez_vous)}
           </DialogDescription>
         </DialogHeader>
 
@@ -189,14 +193,80 @@ export default function AppointmentDetailsModal({
 
           <Separator />
 
+          {/* Patient Information */}
+          <div className="space-y-3">
+            <h3 className="text-lg font-semibold flex items-center gap-2">
+              <User className="h-5 w-5" />
+              Informations Patient
+            </h3>
+
+            <div className="space-y-3 pl-7">
+              <div className="flex items-center gap-3">
+                <User className="h-4 w-4 text-muted-foreground" />
+                <div>
+                  <div className="font-medium">{appointment.patient_nom}</div>
+                  <div className="text-sm text-muted-foreground">Patient</div>
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-3">
+                <IdCard className="h-4 w-4 text-muted-foreground" />
+                <div>
+                  <div className="font-medium font-mono">{appointment.CIN}</div>
+                  <div className="text-sm text-muted-foreground">Numéro CIN</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <Separator />
+
+          {/* Appointment Information */}
+          <div className="space-y-3">
+            <h3 className="text-lg font-semibold flex items-center gap-2">
+              <Stethoscope className="h-5 w-5" />
+              Détails du Rendez-vous
+            </h3>
+
+            <div className="space-y-3 pl-7">
+              <div className="flex items-center gap-3">
+                <CalendarDays className="h-4 w-4 text-muted-foreground" />
+                <div>
+                  <div className="font-medium text-primary">
+                    {formatDateTime(appointment.date_rendez_vous)}
+                  </div>
+                  <div className="text-sm text-muted-foreground">Date et heure</div>
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-3">
+                <Stethoscope className="h-4 w-4 text-muted-foreground" />
+                <div>
+                  <div className="font-medium">{appointment.sujet}</div>
+                  <div className="text-sm text-muted-foreground">Type de consultation</div>
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-3">
+                <User className="h-4 w-4 text-muted-foreground" />
+                <div>
+                  <div className="font-medium">{appointment.Cree_par}</div>
+                  <div className="text-sm text-muted-foreground">Médecin responsable</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <Separator />
+
           {/* Quick Status Update */}
           <div className="space-y-4">
             <h3 className="text-lg font-semibold flex items-center gap-2">
               <PlayCircle className="h-5 w-5" />
-              Mise à jour rapide du statut
+              Mise à jour du statut
             </h3>
-
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pl-7">
+            
+            <div className="grid grid-cols-2 gap-2 pl-7">
               {getAvailableStatusUpdates().map((status) => (
                 <Button
                   key={status}
@@ -211,99 +281,13 @@ export default function AppointmentDetailsModal({
                 </Button>
               ))}
             </div>
-
+            
             {isUpdatingStatus && (
               <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground pl-7">
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
                 Mise à jour en cours...
               </div>
             )}
-          </div>
-
-          <Separator />
-
-          {/* Patient Information */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold flex items-center gap-2">
-              <User className="h-5 w-5" />
-              Informations Patient
-            </h3>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pl-7">
-              <div>
-                <Label>Nom du patient</Label>
-                <Value>{appointment.patient_nom}</Value>
-              </div>
-              <div>
-                <Label>Numéro CIN</Label>
-                <Value className="font-mono">{appointment.CIN}</Value>
-              </div>
-            </div>
-          </div>
-
-          <Separator />
-
-          {/* Appointment Information */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold flex items-center gap-2">
-              <Stethoscope className="h-5 w-5" />
-              Détails du Rendez-vous
-            </h3>
-
-            <div className="space-y-3 pl-7">
-              <div>
-                <Label>Type de consultation</Label>
-                <Value>{appointment.sujet}</Value>
-              </div>
-
-              <div>
-                <Label className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4" />
-                  Date et heure du rendez-vous
-                </Label>
-                <Value className="text-lg font-medium text-primary">
-                  {formatDateTime(appointment.date_rendez_vous)}
-                </Value>
-              </div>
-            </div>
-          </div>
-
-          <Separator />
-
-          {/* Administrative Information */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold flex items-center gap-2">
-              <FileText className="h-5 w-5" />
-              Informations Administratives
-            </h3>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pl-7">
-              <div>
-                <Label>Créé par</Label>
-                <Value className="flex items-center gap-2">
-                  <UserCheck className="h-4 w-4" />
-                  {appointment.Cree_par}
-                </Value>
-              </div>
-              <div>
-                <Label>Date de création</Label>
-                <Value className="flex items-center gap-2">
-                  <Clock className="h-4 w-4" />
-                  {formatDate(appointment.created_at)}
-                </Value>
-              </div>
-            </div>
-          </div>
-
-          {/* Time Information */}
-          <div className="bg-muted/50 rounded-lg p-4">
-            <div className="flex items-center justify-between text-sm text-muted-foreground">
-              <span>ID du rendez-vous: #{appointment.id}</span>
-              <span>
-                Créé le{" "}
-                {new Date(appointment.created_at).toLocaleDateString("fr-FR")}
-              </span>
-            </div>
           </div>
         </div>
 
@@ -313,9 +297,9 @@ export default function AppointmentDetailsModal({
           </Button>
 
           {onEdit && (
-            <Button
-              variant="outline"
-              onClick={handleEdit}
+            <Button 
+              variant="outline" 
+              onClick={handleEdit} 
               className="gap-2"
               disabled={isUpdatingStatus}
             >
@@ -338,34 +322,5 @@ export default function AppointmentDetailsModal({
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  );
-}
-
-// Helper components for consistent styling
-function Label({
-  children,
-  className = "",
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) {
-  return (
-    <div className={`text-sm font-medium text-muted-foreground ${className}`}>
-      {children}
-    </div>
-  );
-}
-
-function Value({
-  children,
-  className = "",
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) {
-  return (
-    <div className={`text-sm text-foreground mt-1 ${className}`}>
-      {children}
-    </div>
   );
 }
