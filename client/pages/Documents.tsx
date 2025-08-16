@@ -185,6 +185,57 @@ export default function Documents() {
     return templates.find((t) => t.id === document.template_id) || null;
   };
 
+  // Download PDF handler
+  const handleDownloadPDF = async (document: Document) => {
+    try {
+      const client = clients.find((c) => c.CIN === document.CIN);
+      const template = templates.find((t) => t.id === document.template_id);
+
+      // Create a simple PDF content structure
+      const pdfContent = {
+        documentId: document.id,
+        templateName: template?.name || "Document",
+        patientName: client ? `${client.prenom} ${client.nom}` : document.CIN,
+        patientCIN: document.CIN,
+        createdBy: document.Cree_par,
+        createdAt: formatDateTime(document.created_at),
+        data: document.data_json
+      };
+
+      // For now, we'll create a simple text-based download
+      // In a real implementation, you would use a PDF library like jsPDF or call a backend endpoint
+      const content = `Document: ${pdfContent.templateName}
+Patient: ${pdfContent.patientName} (${pdfContent.patientCIN})
+Créé par: ${pdfContent.createdBy}
+Date: ${pdfContent.createdAt}
+
+Données du document:
+${JSON.stringify(pdfContent.data, null, 2)}`;
+
+      // Create a blob and download
+      const blob = new Blob([content], { type: 'text/plain' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `document-${document.id}-${pdfContent.patientName.replace(/\s+/g, '_')}.txt`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      toast({
+        title: "Succès",
+        description: "Le document a été téléchargé avec succès",
+      });
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: "Impossible de télécharger le document",
+        variant: "destructive",
+      });
+    }
+  };
+
   // CRUD Operations
   const handleCreateDocument = async (data: DocumentFormData) => {
     try {
