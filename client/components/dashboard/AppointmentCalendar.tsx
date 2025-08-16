@@ -137,6 +137,11 @@ export default function AppointmentCalendar() {
     });
   };
 
+  const getHourFromDateTime = (dateTimeString: string) => {
+    const date = new Date(dateTimeString);
+    return `${date.getHours()}:00`;
+  };
+
   const handleAppointmentClick = (appointment: RendezVous) => {
     setSelectedAppointment(appointment);
     setIsDetailsModalOpen(true);
@@ -347,8 +352,8 @@ export default function AppointmentCalendar() {
                 {timeSlots.map((time, timeIndex) => {
                   const dayAppointments = getAppointmentsForDate(date);
                   const timeAppointments = dayAppointments.filter((apt) => {
-                    const appointmentTime = getTimeFromDateTime(apt.date_rendez_vous);
-                    return appointmentTime === time;
+                    const appointmentHour = getHourFromDateTime(apt.date_rendez_vous);
+                    return appointmentHour === time;
                   });
 
                   return (
