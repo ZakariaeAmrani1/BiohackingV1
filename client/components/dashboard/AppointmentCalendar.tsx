@@ -187,7 +187,7 @@ export default function AppointmentCalendar() {
       await loadAppointments(); // Reload appointments
       toast({
         title: "Succès",
-        description: "Le rendez-vous a été créé avec succès",
+        description: "Le rendez-vous a été cr��é avec succès",
       });
     } catch (error) {
       toast({
@@ -366,35 +366,64 @@ export default function AppointmentCalendar() {
                     return appointmentHour === time;
                   });
 
+                  const maxVisibleAppointments = 2;
+                  const visibleAppointments = timeAppointments.slice(0, maxVisibleAppointments);
+                  const hiddenCount = timeAppointments.length - maxVisibleAppointments;
+
                   return (
                     <div
                       key={timeIndex}
                       className="h-20 border-b border-border p-1 relative"
                     >
-                      {timeAppointments.map((appointment) => (
-                        <div
-                          key={appointment.id}
-                          onClick={() => handleAppointmentClick(appointment)}
-                          className="absolute inset-x-1 top-1 bottom-1 rounded-md bg-primary/10 border border-primary/20 p-2 text-xs overflow-hidden cursor-pointer hover:bg-primary/20 transition-colors"
-                        >
-                          <div className="font-medium text-primary truncate">
-                            {appointment.patient_nom}
-                          </div>
-                          <div className="text-muted-foreground truncate">
-                            {appointment.sujet}
-                          </div>
-                          <Badge
-                            variant="secondary"
-                            className={`text-xs mt-1 ${statusColors[appointment.status as keyof typeof statusColors]}`}
+                      {visibleAppointments.map((appointment, appointmentIndex) => {
+                        const appointmentHeight = timeAppointments.length === 1 ? 'bottom-1' :
+                          timeAppointments.length === 2 ? (appointmentIndex === 0 ? 'h-8' : 'bottom-1') :
+                          appointmentIndex === 0 ? 'h-7' : 'h-6';
+
+                        const topPosition = timeAppointments.length === 1 ? 'top-1' :
+                          timeAppointments.length === 2 ? (appointmentIndex === 0 ? 'top-1' : 'bottom-1') :
+                          appointmentIndex === 0 ? 'top-1' : 'top-8';
+
+                        return (
+                          <div
+                            key={appointment.id}
+                            onClick={() => handleAppointmentClick(appointment)}
+                            className={`absolute inset-x-1 ${topPosition} ${appointmentHeight} rounded-md bg-primary/10 border border-primary/20 p-1 text-xs overflow-hidden cursor-pointer hover:bg-primary/20 transition-colors`}
                           >
-                            {
-                              statusTranslations[
-                                appointment.status as keyof typeof statusTranslations
-                              ]
-                            }
-                          </Badge>
+                            <div className="font-medium text-primary truncate text-[10px]">
+                              {appointment.patient_nom}
+                            </div>
+                            <div className="text-muted-foreground truncate text-[9px] leading-tight">
+                              {appointment.sujet}
+                            </div>
+                            <Badge
+                              variant="secondary"
+                              className={`text-[8px] px-1 py-0 h-3 mt-0.5 ${statusColors[appointment.status as keyof typeof statusColors]}`}
+                            >
+                              {
+                                statusTranslations[
+                                  appointment.status as keyof typeof statusTranslations
+                                ]
+                              }
+                            </Badge>
+                          </div>
+                        );
+                      })}
+
+                      {/* Show overflow indicator if there are more appointments */}
+                      {hiddenCount > 0 && (
+                        <div
+                          onClick={() => {
+                            // Show all appointments for this time slot in a popover or modal
+                            console.log('Show all appointments:', timeAppointments);
+                          }}
+                          className="absolute inset-x-1 bottom-1 h-4 rounded-md bg-muted/80 border border-border flex items-center justify-center cursor-pointer hover:bg-muted transition-colors"
+                        >
+                          <span className="text-[9px] font-medium text-muted-foreground">
+                            +{hiddenCount} de plus
+                          </span>
                         </div>
-                      ))}
+                      )}
                     </div>
                   );
                 })}
