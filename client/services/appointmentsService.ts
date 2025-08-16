@@ -421,12 +421,10 @@ export const getAvailableDates = (
       continue; // Skip Sunday (0) and Saturday (6)
     }
 
-    const slots = generateTimeSlotsForDate(date, excludeAppointmentId);
-    const hasAvailableSlots = slots.some((slot) => slot.available);
-
+    // All dates are now available since we removed conflict checking
     dates.push({
       date,
-      hasAvailableSlots,
+      hasAvailableSlots: true, // Always true - no conflict checking
     });
   }
 
