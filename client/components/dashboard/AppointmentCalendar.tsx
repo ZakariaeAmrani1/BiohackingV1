@@ -432,6 +432,13 @@ export default function AppointmentCalendar() {
           </div>
         )}
       </CardContent>
+
+      {/* Appointment Details Modal */}
+      <CalendarAppointmentModal
+        isOpen={isModalOpen}
+        onClose={handleModalClose}
+        appointmentId={selectedAppointmentId}
+      />
     </Card>
   );
 }
