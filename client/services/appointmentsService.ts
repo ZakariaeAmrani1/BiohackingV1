@@ -124,6 +124,28 @@ let mockAppointments: RendezVous[] = [
     patient_nom: "Emma Rodriguez",
     client_id: 8,
   },
+  {
+    id: 9,
+    CIN: "BE901234",
+    sujet: "Consultation Urgente",
+    date_rendez_vous: `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}T09:00:00`,
+    created_at: `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}T08:00:00`,
+    Cree_par: "Dr. Laurent",
+    status: "confirmé",
+    patient_nom: "Marc Dubois",
+    client_id: 9,
+  },
+  {
+    id: 10,
+    CIN: "BE012345",
+    sujet: "Suivi Thérapeutique",
+    date_rendez_vous: `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}T09:00:00`,
+    created_at: `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}T08:15:00`,
+    Cree_par: "Dr. Martin",
+    status: "programmé",
+    patient_nom: "Lisa Moreau",
+    client_id: 10,
+  },
 ];
 
 // Simulate API delay
