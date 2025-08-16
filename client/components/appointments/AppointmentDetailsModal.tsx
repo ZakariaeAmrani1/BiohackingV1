@@ -25,8 +25,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { RendezVous, AppointmentsService } from "@/services/appointmentsService";
+import { ClientsService, Client } from "@/services/clientsService";
 import { useToast } from "@/components/ui/use-toast";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface AppointmentDetailsModalProps {
   isOpen: boolean;
@@ -60,7 +61,28 @@ export default function AppointmentDetailsModal({
   onStatusUpdate,
 }: AppointmentDetailsModalProps) {
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+  const [clientData, setClientData] = useState<Client | null>(null);
+  const [isLoadingClient, setIsLoadingClient] = useState(false);
   const { toast } = useToast();
+
+  // Load client data when appointment changes
+  useEffect(() => {
+    if (appointment && appointment.client_id) {
+      loadClientData(appointment.client_id);
+    }
+  }, [appointment]);
+
+  const loadClientData = async (clientId: number) => {
+    try {
+      setIsLoadingClient(true);
+      const client = await ClientsService.getById(clientId);
+      setClientData(client);
+    } catch (error) {
+      console.error('Error loading client data:', error);
+    } finally {
+      setIsLoadingClient(false);
+    }
+  };
 
   if (!appointment) return null;
 
@@ -106,34 +128,44 @@ export default function AppointmentDetailsModal({
   };
 
   const handleStatusUpdate = async (newStatus: "programmé" | "confirmé" | "terminé" | "annulé") => {
-    if (!appointment) return;
-    
+    if (!appointment || !appointment.client_id) {
+      toast({
+        title: "Erreur",
+        description: "Informations manquantes pour mettre à jour le statut",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       setIsUpdatingStatus(true);
-      
-      // Create updated appointment data
+
+      // Create updated appointment data with all required fields
       const updateData = {
-        client_id: appointment.client_id!,
+        client_id: appointment.client_id,
         sujet: appointment.sujet,
         date_rendez_vous: appointment.date_rendez_vous,
         Cree_par: appointment.Cree_par,
         status: newStatus,
       };
-      
+
+      console.log('Updating appointment with data:', updateData);
+
       await AppointmentsService.update(appointment.id, updateData);
-      
+
       toast({
         title: "Succès",
         description: `Le statut du rendez-vous a été mis à jour: ${statusLabels[newStatus]}`,
       });
-      
+
       // Call parent callback to refresh data
       if (onStatusUpdate) {
         onStatusUpdate();
       }
-      
+
       onClose();
     } catch (error) {
+      console.error('Status update error:', error);
       toast({
         title: "Erreur",
         description: "Impossible de mettre à jour le statut du rendez-vous",
@@ -216,6 +248,33 @@ export default function AppointmentDetailsModal({
                   <div className="text-sm text-muted-foreground">Numéro CIN</div>
                 </div>
               </div>
+
+              {clientData && clientData.numero_telephone && (
+                <div className="flex items-center gap-3">
+                  <Phone className="h-4 w-4 text-muted-foreground" />
+                  <div>
+                    <div className="font-medium">{clientData.numero_telephone}</div>
+                    <div className="text-sm text-muted-foreground">Téléphone</div>
+                  </div>
+                </div>
+              )}
+
+              {clientData && clientData.email && (
+                <div className="flex items-center gap-3">
+                  <Mail className="h-4 w-4 text-muted-foreground" />
+                  <div>
+                    <div className="font-medium">{clientData.email}</div>
+                    <div className="text-sm text-muted-foreground">Email</div>
+                  </div>
+                </div>
+              )}
+
+              {isLoadingClient && (
+                <div className="flex items-center gap-3">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+                  <div className="text-sm text-muted-foreground">Chargement des informations...</div>
+                </div>
+              )}
             </div>
           </div>
 
