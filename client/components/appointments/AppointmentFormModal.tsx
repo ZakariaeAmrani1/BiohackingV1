@@ -7,6 +7,7 @@ import {
   Stethoscope,
   User,
   Users,
+  UserPlus,
 } from "lucide-react";
 import TimeSlotPicker from "./TimeSlotPicker";
 import {
@@ -42,6 +43,9 @@ import {
 } from "@/components/ui/popover";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { Card, CardContent } from "@/components/ui/card";
+import { Switch } from "@/components/ui/switch";
 import {
   AppointmentFormData,
   RendezVous,
@@ -52,7 +56,9 @@ import {
 import {
   ClientsService,
   Client,
+  ClientFormData,
   calculateAge,
+  validateClientData,
 } from "@/services/clientsService";
 
 interface AppointmentFormModalProps {
@@ -84,6 +90,13 @@ export default function AppointmentFormModal({
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [isClientSelectorOpen, setIsClientSelectorOpen] = useState(false);
   const [clientSearchQuery, setClientSearchQuery] = useState("");
+  const [isNewPatientMode, setIsNewPatientMode] = useState(false);
+  const [newPatientData, setNewPatientData] = useState<Partial<ClientFormData>>({
+    nom: "",
+    prenom: "",
+    CIN: "",
+    numero_telephone: "",
+  });
 
   const isEditMode = !!appointment;
   const availableDoctors = getAvailableDoctors();
@@ -126,6 +139,13 @@ export default function AppointmentFormModal({
         status: "programmé",
       });
       setSelectedClient(null);
+      setIsNewPatientMode(false);
+      setNewPatientData({
+        nom: "",
+        prenom: "",
+        CIN: "",
+        numero_telephone: "",
+      });
     }
     setErrors([]);
   }, [appointment, isOpen]);
@@ -183,8 +203,63 @@ export default function AppointmentFormModal({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validate form data
-    const validationErrors = validateAppointmentData(formData, appointment?.id);
+    let clientId = formData.client_id;
+    const allErrors: string[] = [];
+
+    // If in new patient mode, create the patient first
+    if (isNewPatientMode) {
+      // Validate new patient data (only required fields)
+      const requiredPatientData: ClientFormData = {
+        nom: newPatientData.nom || "",
+        prenom: newPatientData.prenom || "",
+        CIN: newPatientData.CIN || "",
+        numero_telephone: newPatientData.numero_telephone || "",
+        date_naissance: "",
+        adresse: "",
+        email: "",
+        groupe_sanguin: "",
+        antecedents: "",
+        allergies: "",
+        commentaire: "",
+        Cree_par: "",
+      };
+
+      // Validate required fields for new patient
+      if (!newPatientData.nom?.trim()) {
+        allErrors.push("Le nom du patient est obligatoire");
+      }
+      if (!newPatientData.prenom?.trim()) {
+        allErrors.push("Le prénom du patient est obligatoire");
+      }
+      if (!newPatientData.CIN?.trim()) {
+        allErrors.push("Le CIN du patient est obligatoire");
+      } else if (!/^[A-Z]{1,2}\d{5,}$/.test(newPatientData.CIN)) {
+        allErrors.push("Le CIN doit suivre le format B1234567 ou BR54657");
+      }
+      if (!newPatientData.numero_telephone?.trim()) {
+        allErrors.push("Le numéro de téléphone du patient est obligatoire");
+      }
+
+      if (allErrors.length > 0) {
+        setErrors(allErrors);
+        return;
+      }
+
+      try {
+        // Create the new patient
+        const newClient = await ClientsService.create(requiredPatientData);
+        clientId = newClient.id;
+      } catch (error) {
+        setErrors(["Erreur lors de la création du patient"]);
+        return;
+      }
+    }
+
+    // Update form data with the client ID (either selected or newly created)
+    const updatedFormData = { ...formData, client_id: clientId };
+
+    // Validate appointment form data
+    const validationErrors = validateAppointmentData(updatedFormData, appointment?.id);
     if (validationErrors.length > 0) {
       setErrors(validationErrors);
       return;
@@ -192,12 +267,39 @@ export default function AppointmentFormModal({
 
     setIsSubmitting(true);
     try {
-      await onSubmit(formData);
+      await onSubmit(updatedFormData);
       // Don't call onClose here - let the parent handle it
     } catch (error) {
       setErrors(["Une erreur s'est produite lors de l'enregistrement"]);
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleNewPatientToggle = (checked: boolean) => {
+    setIsNewPatientMode(checked);
+    if (checked) {
+      setSelectedClient(null);
+      setFormData((prev) => ({ ...prev, client_id: 0 }));
+    } else {
+      setNewPatientData({
+        nom: "",
+        prenom: "",
+        CIN: "",
+        numero_telephone: "",
+      });
+    }
+    // Clear errors when switching modes
+    if (errors.length > 0) {
+      setErrors([]);
+    }
+  };
+
+  const handleNewPatientChange = (field: keyof ClientFormData, value: string) => {
+    setNewPatientData((prev) => ({ ...prev, [field]: value }));
+    // Clear errors when user starts typing
+    if (errors.length > 0) {
+      setErrors([]);
     }
   };
 
@@ -207,6 +309,13 @@ export default function AppointmentFormModal({
       setErrors([]);
       setSelectedClient(null);
       setClientSearchQuery("");
+      setIsNewPatientMode(false);
+      setNewPatientData({
+        nom: "",
+        prenom: "",
+        CIN: "",
+        numero_telephone: "",
+      });
       onClose();
     }
   };
@@ -240,103 +349,187 @@ export default function AppointmentFormModal({
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Patient Selection */}
-          <div className="space-y-2">
-            <Label className="flex items-center gap-2">
-              <Users className="h-4 w-4" />
-              Sélectionner un patient
-            </Label>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <Label className="flex items-center gap-2">
+                <Users className="h-4 w-4" />
+                Patient
+              </Label>
+              <div className="flex items-center space-x-2">
+                <Label htmlFor="new-patient-mode" className="text-sm">
+                  Nouveau patient
+                </Label>
+                <Switch
+                  id="new-patient-mode"
+                  checked={isNewPatientMode}
+                  onCheckedChange={handleNewPatientToggle}
+                  disabled={isSubmitting || isEditMode}
+                />
+              </div>
+            </div>
 
-            <Popover
-              open={isClientSelectorOpen}
-              onOpenChange={setIsClientSelectorOpen}
-              modal={true}
-            >
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  role="combobox"
-                  aria-expanded={isClientSelectorOpen}
-                  className="w-full justify-between"
-                  disabled={isSubmitting}
+            {!isNewPatientMode ? (
+              <>
+                <Popover
+                  open={isClientSelectorOpen}
+                  onOpenChange={setIsClientSelectorOpen}
+                  modal={true}
                 >
-                  {selectedClient ? (
-                    <div className="flex items-center gap-2">
-                      <span>
-                        {selectedClient.prenom} {selectedClient.nom}
-                      </span>
-                      <Badge variant="outline" className="text-xs">
-                        {selectedClient.CIN}
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      aria-expanded={isClientSelectorOpen}
+                      className="w-full justify-between"
+                      disabled={isSubmitting}
+                    >
+                      {selectedClient ? (
+                        <div className="flex items-center gap-2">
+                          <span>
+                            {selectedClient.prenom} {selectedClient.nom}
+                          </span>
+                          <Badge variant="outline" className="text-xs">
+                            {selectedClient.CIN}
+                          </Badge>
+                        </div>
+                      ) : (
+                        "Rechercher et sélectionner un patient..."
+                      )}
+                      <Search className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent
+                    className="w-[500px] p-0 z-[60] shadow-lg border-2"
+                    sideOffset={5}
+                    align="start"
+                  >
+                    <Command>
+                      <CommandInput
+                        placeholder="Rechercher par nom, prénom, CIN, email..."
+                        value={clientSearchQuery}
+                        onValueChange={setClientSearchQuery}
+                      />
+                      <CommandList>
+                        <CommandEmpty>Aucun patient trouvé.</CommandEmpty>
+                        <CommandGroup>
+                          {filteredClients.map((client) => (
+                            <CommandItem
+                              key={client.id}
+                              value={`${client.prenom} ${client.nom} ${client.CIN} ${client.email}`}
+                              onSelect={() => handleClientSelect(client)}
+                              className="flex items-center justify-between p-3"
+                            >
+                              <div className="flex flex-col">
+                                <div className="font-medium">
+                                  {client.prenom} {client.nom}
+                                </div>
+                                <div className="text-sm text-muted-foreground">
+                                  {client.CIN} •{" "}
+                                  {calculateAge(client.date_naissance)} ans •{" "}
+                                  {client.email}
+                                </div>
+                              </div>
+                              <Badge variant="outline">
+                                {client.groupe_sanguin}
+                              </Badge>
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
+
+                {selectedClient && (
+                  <div className="p-3 bg-muted/50 rounded-lg">
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-1">
+                        <div className="font-medium">
+                          {selectedClient.prenom} {selectedClient.nom}
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          CIN: {selectedClient.CIN} • Âge:{" "}
+                          {calculateAge(selectedClient.date_naissance)} ans
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          Email: {selectedClient.email} • Tél:{" "}
+                          {selectedClient.numero_telephone}
+                        </div>
+                      </div>
+                      <Badge variant="outline" className="gap-1">
+                        {selectedClient.groupe_sanguin}
                       </Badge>
                     </div>
-                  ) : (
-                    "Rechercher et sélectionner un patient..."
-                  )}
-                  <Search className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent
-                className="w-[500px] p-0 z-[60] shadow-lg border-2"
-                sideOffset={5}
-                align="start"
-              >
-                <Command>
-                  <CommandInput
-                    placeholder="Rechercher par nom, prénom, CIN, email..."
-                    value={clientSearchQuery}
-                    onValueChange={setClientSearchQuery}
-                  />
-                  <CommandList>
-                    <CommandEmpty>Aucun patient trouvé.</CommandEmpty>
-                    <CommandGroup>
-                      {filteredClients.map((client) => (
-                        <CommandItem
-                          key={client.id}
-                          value={`${client.prenom} ${client.nom} ${client.CIN} ${client.email}`}
-                          onSelect={() => handleClientSelect(client)}
-                          className="flex items-center justify-between p-3"
-                        >
-                          <div className="flex flex-col">
-                            <div className="font-medium">
-                              {client.prenom} {client.nom}
-                            </div>
-                            <div className="text-sm text-muted-foreground">
-                              {client.CIN} •{" "}
-                              {calculateAge(client.date_naissance)} ans •{" "}
-                              {client.email}
-                            </div>
-                          </div>
-                          <Badge variant="outline">
-                            {client.groupe_sanguin}
-                          </Badge>
-                        </CommandItem>
-                      ))}
-                    </CommandGroup>
-                  </CommandList>
-                </Command>
-              </PopoverContent>
-            </Popover>
+                  </div>
+                )}
+              </>
+            ) : (
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-2 mb-4">
+                      <UserPlus className="h-4 w-4" />
+                      <span className="font-medium">Informations du nouveau patient</span>
+                    </div>
 
-            {selectedClient && (
-              <div className="p-3 bg-muted/50 rounded-lg">
-                <div className="flex items-center justify-between">
-                  <div className="space-y-1">
-                    <div className="font-medium">
-                      {selectedClient.prenom} {selectedClient.nom}
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="new-patient-prenom">Prénom *</Label>
+                        <Input
+                          id="new-patient-prenom"
+                          type="text"
+                          value={newPatientData.prenom || ""}
+                          onChange={(e) => handleNewPatientChange("prenom", e.target.value)}
+                          placeholder="Entrez le prénom"
+                          disabled={isSubmitting}
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="new-patient-nom">Nom *</Label>
+                        <Input
+                          id="new-patient-nom"
+                          type="text"
+                          value={newPatientData.nom || ""}
+                          onChange={(e) => handleNewPatientChange("nom", e.target.value)}
+                          placeholder="Entrez le nom"
+                          disabled={isSubmitting}
+                        />
+                      </div>
                     </div>
-                    <div className="text-sm text-muted-foreground">
-                      CIN: {selectedClient.CIN} • Âge:{" "}
-                      {calculateAge(selectedClient.date_naissance)} ans
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="new-patient-cin">CIN *</Label>
+                        <Input
+                          id="new-patient-cin"
+                          type="text"
+                          value={newPatientData.CIN || ""}
+                          onChange={(e) => handleNewPatientChange("CIN", e.target.value.toUpperCase())}
+                          placeholder="Ex: B1234567"
+                          disabled={isSubmitting}
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="new-patient-phone">Numéro de téléphone *</Label>
+                        <Input
+                          id="new-patient-phone"
+                          type="tel"
+                          value={newPatientData.numero_telephone || ""}
+                          onChange={(e) => handleNewPatientChange("numero_telephone", e.target.value)}
+                          placeholder="Ex: 0612345678"
+                          disabled={isSubmitting}
+                        />
+                      </div>
                     </div>
-                    <div className="text-sm text-muted-foreground">
-                      Email: {selectedClient.email} • Tél:{" "}
-                      {selectedClient.numero_telephone}
+
+                    <div className="text-xs text-muted-foreground">
+                      * Champs obligatoires. Le patient sera créé avec ces informations de base.
                     </div>
                   </div>
-                  <Badge variant="outline" className="gap-1">
-                    {selectedClient.groupe_sanguin}
-                  </Badge>
-                </div>
-              </div>
+                </CardContent>
+              </Card>
             )}
           </div>
 
