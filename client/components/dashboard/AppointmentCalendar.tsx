@@ -279,7 +279,7 @@ export default function AppointmentCalendar() {
                       {timeAppointments.map((appointment, aptIndex) => (
                         <div
                           key={appointment.id}
-                          className={`absolute inset-x-1 rounded-md bg-primary/10 border border-primary/20 p-2 text-xs overflow-hidden ${
+                          className={`absolute inset-x-1 rounded-md bg-primary/10 border border-primary/20 p-2 text-xs overflow-hidden cursor-pointer hover:bg-primary/20 hover:border-primary/30 transition-colors ${
                             timeAppointments.length > 1
                               ? `top-${aptIndex * 10 + 1} h-${Math.max(18, 78 / timeAppointments.length)}`
                               : 'top-1 bottom-1'
@@ -288,6 +288,8 @@ export default function AppointmentCalendar() {
                             top: `${aptIndex * (76 / timeAppointments.length) + 2}px`,
                             height: `${76 / timeAppointments.length - 2}px`
                           } : undefined}
+                          onClick={() => handleAppointmentClick(appointment.id)}
+                          title={`Cliquer pour voir les détails de ${appointment.patient}`}
                         >
                           <div className="flex items-center gap-1 mb-1">
                             <Clock className="h-3 w-3 text-primary" />
@@ -391,7 +393,9 @@ export default function AppointmentCalendar() {
                     .map((appointment) => (
                     <div
                       key={appointment.id}
-                      className="flex items-center gap-4 p-4 border border-border rounded-lg hover:bg-accent/50 transition-colors"
+                      className="flex items-center gap-4 p-4 border border-border rounded-lg hover:bg-accent/50 transition-colors cursor-pointer"
+                      onClick={() => handleAppointmentClick(appointment.id)}
+                      title={`Cliquer pour voir les détails de ${appointment.patient}`}
                     >
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Clock className="h-4 w-4" />
