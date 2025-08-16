@@ -871,7 +871,7 @@ export default function Documents() {
                               </DropdownMenuItem>
                               <DropdownMenuItem
                                 className="gap-2"
-                                onClick={() => handleDownloadPDF(document)}
+                                onClick={() => generatePDF(document)}
                               >
                                 <Download className="h-4 w-4" />
                                 Télécharger PDF
