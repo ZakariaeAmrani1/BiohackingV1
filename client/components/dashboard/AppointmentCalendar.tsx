@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { AppointmentsService, RendezVous } from "@/services/appointmentsService";
+import CalendarAppointmentModal from "./CalendarAppointmentModal";
 
 // Interface for calendar display
 interface CalendarAppointment {
@@ -35,6 +36,8 @@ export default function AppointmentCalendar() {
   const [view, setView] = useState<"week" | "day">("week");
   const [appointments, setAppointments] = useState<CalendarAppointment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedAppointmentId, setSelectedAppointmentId] = useState<number | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Convert RendezVous to CalendarAppointment format
   const convertToCalendarFormat = (rendezVous: RendezVous[]): CalendarAppointment[] => {
@@ -130,6 +133,18 @@ export default function AppointmentCalendar() {
     return appointments.filter(
       (apt) => apt.date.toDateString() === date.toDateString(),
     );
+  };
+
+  const handleAppointmentClick = (appointmentId: number) => {
+    setSelectedAppointmentId(appointmentId);
+    setIsModalOpen(true);
+  };
+
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+    setSelectedAppointmentId(null);
+    // Reload appointments to get any status updates
+    loadAppointments();
   };
 
   const isToday = (date: Date) => {
