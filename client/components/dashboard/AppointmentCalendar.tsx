@@ -48,6 +48,11 @@ export default function AppointmentCalendar() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
+  // Time slot appointments modal state
+  const [timeSlotAppointments, setTimeSlotAppointments] = useState<RendezVous[]>([]);
+  const [isTimeSlotModalOpen, setIsTimeSlotModalOpen] = useState(false);
+  const [selectedTimeSlot, setSelectedTimeSlot] = useState<string>('');
+
   const { toast } = useToast();
 
   // Load appointments on component mount and listen for activity updates
@@ -174,6 +179,16 @@ export default function AppointmentCalendar() {
     setIsDetailsModalOpen(false);
   };
 
+  const handleShowTimeSlotAppointments = (appointments: RendezVous[], timeSlot: string, date: Date) => {
+    setTimeSlotAppointments(appointments);
+    setSelectedTimeSlot(`${timeSlot} - ${date.toLocaleDateString('fr-FR', {
+      weekday: 'short',
+      day: 'numeric',
+      month: 'short'
+    })}`);
+    setIsTimeSlotModalOpen(true);
+  };
+
   const isToday = (date: Date) => {
     const today = new Date();
     return date.toDateString() === today.toDateString();
@@ -187,7 +202,7 @@ export default function AppointmentCalendar() {
       await loadAppointments(); // Reload appointments
       toast({
         title: "Succès",
-        description: "Le rendez-vous a été cr��é avec succès",
+        description: "Le rendez-vous a été créé avec succès",
       });
     } catch (error) {
       toast({
@@ -413,10 +428,7 @@ export default function AppointmentCalendar() {
                       {/* Show overflow indicator if there are more appointments */}
                       {hiddenCount > 0 && (
                         <div
-                          onClick={() => {
-                            // Show all appointments for this time slot in a popover or modal
-                            console.log('Show all appointments:', timeAppointments);
-                          }}
+                          onClick={() => handleShowTimeSlotAppointments(timeAppointments, time, date)}
                           className="absolute inset-x-1 bottom-1 h-4 rounded-md bg-muted/80 border border-border flex items-center justify-center cursor-pointer hover:bg-muted transition-colors"
                         >
                           <span className="text-[9px] font-medium text-muted-foreground">
