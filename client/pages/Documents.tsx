@@ -732,6 +732,7 @@ export default function Documents() {
           document={selectedDocument}
           patient={selectedClient}
           templates={templates}
+          clients={clients}
           isLoading={isSubmitting}
         />
 
