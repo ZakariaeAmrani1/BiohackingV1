@@ -188,7 +188,6 @@ export default function TimeSlotPicker({
             ))}
             {weekDates.map((date, index) => {
               const isPast = date < today;
-              const isAvailable = isDateAvailable(date);
               const isSelected = isDateSelected(date);
               const isWeekend = date.getDay() === 0 || date.getDay() === 6;
 
@@ -200,20 +199,19 @@ export default function TimeSlotPicker({
                   className={cn(
                     "h-12 p-1 flex flex-col items-center justify-center",
                     isPast && "opacity-50 cursor-not-allowed",
-                    isWeekend && "bg-muted/50",
-                    !isAvailable && !isPast && "opacity-60",
-                    isAvailable && !isPast && "hover:bg-primary/10",
+                    isWeekend && "bg-muted/50 opacity-60 cursor-not-allowed",
+                    !isPast && !isWeekend && "hover:bg-primary/10",
                   )}
                   onClick={() =>
-                    !isPast && isAvailable && handleDateSelect(date)
+                    !isPast && !isWeekend && handleDateSelect(date)
                   }
-                  disabled={disabled || isPast || !isAvailable}
+                  disabled={disabled || isPast || isWeekend}
                 >
                   <span className="text-sm font-medium">{date.getDate()}</span>
                   <span className="text-xs">
                     {formatDate(date).split(" ")[1]}
                   </span>
-                  {isAvailable && !isPast && (
+                  {!isPast && !isWeekend && (
                     <div className="w-1 h-1 bg-green-500 rounded-full mt-1" />
                   )}
                 </Button>
