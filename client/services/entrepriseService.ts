@@ -78,6 +78,8 @@ export class EntrepriseService {
             ? parseInt(data.patente)
             : data.patente,
         adresse: data.adresse,
+        email: data.email,
+        numero_telephone: data.numero_telephone,
       };
       const updatedEntreprise: Entreprise = {
         ...currentEntreprise!,
