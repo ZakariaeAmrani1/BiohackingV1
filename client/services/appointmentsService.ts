@@ -374,7 +374,7 @@ const WORKING_HOURS = {
   start: 10, // 10 AM
   end: 19, // 7 PM
   appointmentDuration: 60, // 1 hour in minutes
-  slotInterval: 15, // 15 minutes between slots
+  slotInterval: 30, // 30 minutes between slots
 };
 
 // Generate time slots for a specific date
