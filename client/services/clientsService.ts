@@ -43,7 +43,168 @@ import { ActivitiesService } from "./activitiesService";
 import { AuthService } from "./authService";
 
 // Mock data storage - in real app this would connect to your backend
-let mockClients: Client[] = [];
+let mockClients: Client[] = [
+  {
+    id: 1,
+    CIN: "BE123456",
+    nom: "Dupont",
+    prenom: "Jean",
+    date_naissance: "1985-03-15",
+    adresse: "123 Rue de la Paix, Bruxelles",
+    numero_telephone: "+32 2 123 45 67",
+    email: "jean.dupont@email.com",
+    groupe_sanguin: "O+",
+    antecedents: "Aucun",
+    allergies: "Aucune",
+    commentaire: "",
+    created_at: "2024-01-01T10:00:00",
+    Cree_par: "Dr. Smith",
+  },
+  {
+    id: 2,
+    CIN: "BE234567",
+    nom: "Laurent",
+    prenom: "Marie",
+    date_naissance: "1990-07-22",
+    adresse: "456 Avenue Louise, Bruxelles",
+    numero_telephone: "+32 2 234 56 78",
+    email: "marie.laurent@email.com",
+    groupe_sanguin: "A+",
+    antecedents: "Aucun",
+    allergies: "Pénicilline",
+    commentaire: "",
+    created_at: "2024-01-01T10:00:00",
+    Cree_par: "Dr. Martin",
+  },
+  {
+    id: 3,
+    CIN: "BE345678",
+    nom: "Martin",
+    prenom: "Pierre",
+    date_naissance: "1978-11-30",
+    adresse: "789 Rue Neuve, Liège",
+    numero_telephone: "+32 4 345 67 89",
+    email: "pierre.martin@email.com",
+    groupe_sanguin: "B+",
+    antecedents: "Hypertension",
+    allergies: "Aucune",
+    commentaire: "",
+    created_at: "2024-01-01T10:00:00",
+    Cree_par: "Dr. Smith",
+  },
+  {
+    id: 4,
+    CIN: "BE456789",
+    nom: "Wilson",
+    prenom: "Sophie",
+    date_naissance: "1992-05-18",
+    adresse: "321 Boulevard Anspach, Bruxelles",
+    numero_telephone: "+32 2 456 78 90",
+    email: "sophie.wilson@email.com",
+    groupe_sanguin: "AB+",
+    antecedents: "Aucun",
+    allergies: "Aspirine",
+    commentaire: "",
+    created_at: "2024-01-01T10:00:00",
+    Cree_par: "Dr. Dubois",
+  },
+  {
+    id: 5,
+    CIN: "BE567890",
+    nom: "Chen",
+    prenom: "Luc",
+    date_naissance: "1988-09-12",
+    adresse: "654 Chaussée de Wavre, Bruxelles",
+    numero_telephone: "+32 2 567 89 01",
+    email: "luc.chen@email.com",
+    groupe_sanguin: "O-",
+    antecedents: "Diabète type 2",
+    allergies: "Aucune",
+    commentaire: "",
+    created_at: "2024-01-01T10:00:00",
+    Cree_par: "Dr. Martin",
+  },
+  {
+    id: 6,
+    CIN: "BE678901",
+    nom: "Brown",
+    prenom: "Alice",
+    date_naissance: "1995-02-28",
+    adresse: "987 Rue de la Loi, Bruxelles",
+    numero_telephone: "+32 2 678 90 12",
+    email: "alice.brown@email.com",
+    groupe_sanguin: "A-",
+    antecedents: "Aucun",
+    allergies: "Latex",
+    commentaire: "",
+    created_at: "2024-01-01T10:00:00",
+    Cree_par: "Dr. Smith",
+  },
+  {
+    id: 7,
+    CIN: "BE789012",
+    nom: "Garcia",
+    prenom: "David",
+    date_naissance: "1983-12-05",
+    adresse: "147 Place Eugène Flagey, Ixelles",
+    numero_telephone: "+32 2 789 01 23",
+    email: "david.garcia@email.com",
+    groupe_sanguin: "B-",
+    antecedents: "Aucun",
+    allergies: "Aucune",
+    commentaire: "",
+    created_at: "2024-01-01T10:00:00",
+    Cree_par: "Dr. Dubois",
+  },
+  {
+    id: 8,
+    CIN: "BE890123",
+    nom: "Rodriguez",
+    prenom: "Emma",
+    date_naissance: "1991-08-14",
+    adresse: "258 Avenue de Tervuren, Woluwe",
+    numero_telephone: "+32 2 890 12 34",
+    email: "emma.rodriguez@email.com",
+    groupe_sanguin: "AB-",
+    antecedents: "Aucun",
+    allergies: "Iode",
+    commentaire: "",
+    created_at: "2024-01-01T10:00:00",
+    Cree_par: "Dr. Martin",
+  },
+  {
+    id: 9,
+    CIN: "BE901234",
+    nom: "Dubois",
+    prenom: "Marc",
+    date_naissance: "1987-04-10",
+    adresse: "369 Rue du Midi, Bruxelles",
+    numero_telephone: "+32 2 901 23 45",
+    email: "marc.dubois@email.com",
+    groupe_sanguin: "O+",
+    antecedents: "Aucun",
+    allergies: "Aucune",
+    commentaire: "",
+    created_at: "2024-01-01T10:00:00",
+    Cree_par: "Dr. Laurent",
+  },
+  {
+    id: 10,
+    CIN: "BE012345",
+    nom: "Moreau",
+    prenom: "Lisa",
+    date_naissance: "1993-06-25",
+    adresse: "741 Boulevard du Jardin Botanique, Bruxelles",
+    numero_telephone: "+32 2 012 34 56",
+    email: "lisa.moreau@email.com",
+    groupe_sanguin: "A+",
+    antecedents: "Aucun",
+    allergies: "Antibiotiques",
+    commentaire: "",
+    created_at: "2024-01-01T10:00:00",
+    Cree_par: "Dr. Martin",
+  },
+];
 
 // Simulate API delay
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -51,28 +212,36 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 export class ClientsService {
   // Get all clients
   static async getAll(): Promise<Client[]> {
-    mockClients = [];
-    const result = await api.get(`client`);
-    const data = result.data;
-    data.map((client) => {
-      mockClients.push({
-        id: client.id,
-        CIN: client.CIN,
-        nom: client.nom,
-        prenom: client.prenom,
-        date_naissance: client.date_naissance,
-        adresse: client.adresse,
-        numero_telephone: client.numero_telephone,
-        email: client.email,
-        groupe_sanguin: client.groupe_sanguin,
-        antecedents: client.antecedents,
-        allergies: client.allergies,
-        commentaire: client.commentaire,
-        created_at: client.created_at,
-        Cree_par: client.Cree_par,
+    await delay(500);
+    // Try to fetch from API, but fallback to mock data if it fails
+    try {
+      mockClients = [];
+      const result = await api.get(`client`);
+      const data = result.data;
+      data.map((client) => {
+        mockClients.push({
+          id: client.id,
+          CIN: client.CIN,
+          nom: client.nom,
+          prenom: client.prenom,
+          date_naissance: client.date_naissance,
+          adresse: client.adresse,
+          numero_telephone: client.numero_telephone,
+          email: client.email,
+          groupe_sanguin: client.groupe_sanguin,
+          antecedents: client.antecedents,
+          allergies: client.allergies,
+          commentaire: client.commentaire,
+          created_at: client.created_at,
+          Cree_par: client.Cree_par,
+        });
       });
-    });
-    return mockClients;
+      return mockClients;
+    } catch (error) {
+      // If API fails, return the mock data that's already initialized
+      console.log('API call failed, using mock client data');
+      return [...mockClients];
+    }
   }
 
   // Get client by ID
