@@ -102,16 +102,14 @@ export default function TimeSlotPicker({
   };
 
   const handleTimeSlotSelect = (slot: TimeSlot) => {
-    if (slot.available && !disabled) {
+    if (!disabled) {
       onChange(slot.datetime);
     }
   };
 
   const isDateAvailable = (date: Date): boolean => {
-    return availableDates.some(
-      (d) =>
-        d.date.toDateString() === date.toDateString() && d.hasAvailableSlots,
-    );
+    // All dates are now available (except past dates and weekends)
+    return true;
   };
 
   const isDateSelected = (date: Date): boolean => {
