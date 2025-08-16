@@ -8,6 +8,8 @@ export interface Entreprise {
   RIB: number;
   patente: number;
   adresse: string;
+  email?: string;
+  numero_telephone?: string;
   created_at: string;
 }
 
@@ -19,6 +21,8 @@ export interface EntrepriseFormData {
   RIB: number | string;
   patente: number | string;
   adresse: string;
+  email?: string;
+  numero_telephone?: string;
 }
 
 // Mock company data
@@ -43,6 +47,8 @@ export class EntrepriseService {
           RIB: data.RIB,
           patente: data.patente,
           adresse: data.adresse,
+          email: data.email,
+          numero_telephone: data.numero_telephone,
           created_at: data.created_at,
         };
         return currentEntreprise;
