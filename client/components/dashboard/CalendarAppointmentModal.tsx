@@ -33,10 +33,21 @@ import { Label } from "@/components/ui/label";
 import { RendezVous, AppointmentsService } from "@/services/appointmentsService";
 import { ClientsService, Client } from "@/services/clientsService";
 
+// Calendar appointment interface
+interface CalendarAppointment {
+  id: number;
+  time: string;
+  duration: number;
+  patient: string;
+  treatment: string;
+  status: string;
+  date: Date;
+}
+
 interface CalendarAppointmentModalProps {
   isOpen: boolean;
-  onClose: () => void;
-  appointmentId: number | null;
+  onClose: (statusChanged?: boolean) => void;
+  appointment: CalendarAppointment | null;
 }
 
 const statusColors = {
@@ -56,29 +67,30 @@ const statusLabels = {
 export default function CalendarAppointmentModal({
   isOpen,
   onClose,
-  appointmentId,
+  appointment,
 }: CalendarAppointmentModalProps) {
-  const [appointment, setAppointment] = useState<RendezVous | null>(null);
+  const [fullAppointment, setFullAppointment] = useState<RendezVous | null>(null);
   const [client, setClient] = useState<Client | null>(null);
   const [loading, setLoading] = useState(false);
   const [currentStatus, setCurrentStatus] = useState<string>("");
   const [updating, setUpdating] = useState(false);
 
-  // Load appointment and client data
+  // Load full appointment and client data when appointment changes
   useEffect(() => {
-    if (appointmentId && isOpen) {
+    if (appointment && isOpen) {
       loadAppointmentData();
     }
-  }, [appointmentId, isOpen]);
+  }, [appointment, isOpen]);
 
   const loadAppointmentData = async () => {
-    if (!appointmentId) return;
+    if (!appointment) return;
     
     try {
       setLoading(true);
-      const aptData = await AppointmentsService.getById(appointmentId);
+      // Get full appointment data
+      const aptData = await AppointmentsService.getById(appointment.id);
       if (aptData) {
-        setAppointment(aptData);
+        setFullAppointment(aptData);
         setCurrentStatus(aptData.status || "programmé");
         
         // Load client data if client_id exists
@@ -95,24 +107,26 @@ export default function CalendarAppointmentModal({
   };
 
   const handleStatusUpdate = async (newStatus: string) => {
-    if (!appointment) return;
+    if (!fullAppointment) return;
     
     try {
       setUpdating(true);
       
       // Create update data with new status
       const updateData = {
-        client_id: appointment.client_id || 0,
-        sujet: appointment.sujet,
-        date_rendez_vous: appointment.date_rendez_vous,
-        Cree_par: appointment.Cree_par,
+        client_id: fullAppointment.client_id || 0,
+        sujet: fullAppointment.sujet,
+        date_rendez_vous: fullAppointment.date_rendez_vous,
+        Cree_par: fullAppointment.Cree_par,
         status: newStatus as "programmé" | "confirmé" | "terminé" | "annulé",
       };
       
-      const updatedAppointment = await AppointmentsService.update(appointment.id, updateData);
+      const updatedAppointment = await AppointmentsService.update(fullAppointment.id, updateData);
       if (updatedAppointment) {
-        setAppointment(updatedAppointment);
+        setFullAppointment(updatedAppointment);
         setCurrentStatus(newStatus);
+        // Notify parent that status changed so it can reload
+        onClose(true);
       }
     } catch (error) {
       console.error("Error updating appointment status:", error);
@@ -142,18 +156,10 @@ export default function CalendarAppointmentModal({
     });
   };
 
-  const formatTime = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleTimeString("fr-FR", {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
-
-  if (!appointment && !loading) return null;
+  if (!appointment) return null;
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={() => onClose(false)}>
       <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -161,18 +167,15 @@ export default function CalendarAppointmentModal({
             Détails du rendez-vous
           </DialogTitle>
           <DialogDescription>
-            {appointment ? 
-              `Rendez-vous #${appointment.id} - ${appointment.patient_nom}` : 
-              "Chargement des informations..."
-            }
+            Rendez-vous #{appointment.id} - {appointment.patient}
           </DialogDescription>
         </DialogHeader>
 
         {loading ? (
           <div className="flex items-center justify-center py-8">
-            <div className="text-muted-foreground">Chargement...</div>
+            <div className="text-muted-foreground">Chargement des détails...</div>
           </div>
-        ) : appointment ? (
+        ) : (
           <div className="space-y-6">
             {/* Status Update Section */}
             <div className="space-y-3">
@@ -229,11 +232,11 @@ export default function CalendarAppointmentModal({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pl-7">
                 <div>
                   <FieldLabel>Nom complet</FieldLabel>
-                  <FieldValue>{appointment.patient_nom}</FieldValue>
+                  <FieldValue>{appointment.patient}</FieldValue>
                 </div>
                 <div>
                   <FieldLabel>Numéro CIN</FieldLabel>
-                  <FieldValue className="font-mono">{appointment.CIN}</FieldValue>
+                  <FieldValue className="font-mono">{fullAppointment?.CIN || "..."}</FieldValue>
                 </div>
                 {client && (
                   <>
@@ -275,7 +278,7 @@ export default function CalendarAppointmentModal({
               <div className="space-y-3 pl-7">
                 <div>
                   <FieldLabel>Type de consultation</FieldLabel>
-                  <FieldValue className="font-medium">{appointment.sujet}</FieldValue>
+                  <FieldValue className="font-medium">{appointment.treatment}</FieldValue>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -285,7 +288,12 @@ export default function CalendarAppointmentModal({
                       Date
                     </FieldLabel>
                     <FieldValue className="text-lg font-medium text-primary">
-                      {formatDate(appointment.date_rendez_vous)}
+                      {appointment.date.toLocaleDateString("fr-FR", {
+                        weekday: "long",
+                        day: "2-digit",
+                        month: "long",
+                        year: "numeric",
+                      })}
                     </FieldValue>
                   </div>
                   <div>
@@ -294,7 +302,7 @@ export default function CalendarAppointmentModal({
                       Heure
                     </FieldLabel>
                     <FieldValue className="text-lg font-medium text-primary">
-                      {formatTime(appointment.date_rendez_vous)}
+                      {appointment.time}
                     </FieldValue>
                   </div>
                 </div>
@@ -315,12 +323,14 @@ export default function CalendarAppointmentModal({
                   <FieldLabel>Créé par</FieldLabel>
                   <FieldValue className="flex items-center gap-2">
                     <UserCheck className="h-4 w-4" />
-                    {appointment.Cree_par}
+                    {fullAppointment?.Cree_par || "..."}
                   </FieldValue>
                 </div>
                 <div>
                   <FieldLabel>Date de création</FieldLabel>
-                  <FieldValue>{formatDate(appointment.created_at)}</FieldValue>
+                  <FieldValue>
+                    {fullAppointment ? formatDate(fullAppointment.created_at) : "..."}
+                  </FieldValue>
                 </div>
               </div>
             </div>
@@ -373,14 +383,10 @@ export default function CalendarAppointmentModal({
               </div>
             </div>
           </div>
-        ) : (
-          <div className="text-center py-8 text-muted-foreground">
-            Rendez-vous non trouvé
-          </div>
         )}
 
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>
+          <Button variant="outline" onClick={() => onClose(false)}>
             Fermer
           </Button>
         </DialogFooter>
