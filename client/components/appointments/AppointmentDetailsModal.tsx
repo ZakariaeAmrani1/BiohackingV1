@@ -8,6 +8,10 @@ import {
   Calendar,
   Edit,
   Trash2,
+  CheckCircle,
+  PlayCircle,
+  XCircle,
+  CircleDot,
 } from "lucide-react";
 import {
   Dialog,
@@ -20,7 +24,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { RendezVous } from "@/services/appointmentsService";
+import { RendezVous, AppointmentsService } from "@/services/appointmentsService";
+import { useToast } from "@/components/ui/use-toast";
+import { useState } from "react";
 
 interface AppointmentDetailsModalProps {
   isOpen: boolean;
@@ -28,6 +34,7 @@ interface AppointmentDetailsModalProps {
   appointment: RendezVous | null;
   onEdit?: (appointment: RendezVous) => void;
   onDelete?: (appointment: RendezVous) => void;
+  onStatusUpdate?: () => void;
 }
 
 const statusColors = {
@@ -50,7 +57,11 @@ export default function AppointmentDetailsModal({
   appointment,
   onEdit,
   onDelete,
+  onStatusUpdate,
 }: AppointmentDetailsModalProps) {
+  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+  const { toast } = useToast();
+
   if (!appointment) return null;
 
   const formatDateTime = (dateString: string) => {
@@ -90,6 +101,66 @@ export default function AppointmentDetailsModal({
     onClose();
   };
 
+  const handleStatusUpdate = async (newStatus: "programmé" | "confirmé" | "terminé" | "annulé") => {
+    if (!appointment) return;
+
+    try {
+      setIsUpdatingStatus(true);
+
+      // Create updated appointment data
+      const updateData = {
+        client_id: appointment.client_id!,
+        sujet: appointment.sujet,
+        date_rendez_vous: appointment.date_rendez_vous,
+        Cree_par: appointment.Cree_par,
+        status: newStatus,
+      };
+
+      await AppointmentsService.update(appointment.id, updateData);
+
+      toast({
+        title: "Succès",
+        description: `Le statut du rendez-vous a été mis à jour: ${statusLabels[newStatus]}`,
+      });
+
+      // Call parent callback to refresh data
+      if (onStatusUpdate) {
+        onStatusUpdate();
+      }
+
+      onClose();
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: "Impossible de mettre à jour le statut du rendez-vous",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUpdatingStatus(false);
+    }
+  };
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case "programmé":
+        return <CircleDot className="h-4 w-4" />;
+      case "confirmé":
+        return <PlayCircle className="h-4 w-4" />;
+      case "terminé":
+        return <CheckCircle className="h-4 w-4" />;
+      case "annulé":
+        return <XCircle className="h-4 w-4" />;
+      default:
+        return <CircleDot className="h-4 w-4" />;
+    }
+  };
+
+  const getAvailableStatusUpdates = () => {
+    const currentStatus = appointment.status;
+    const allStatuses = ["programmé", "confirmé", "terminé", "annulé"] as const;
+    return allStatuses.filter(status => status !== currentStatus);
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
@@ -114,6 +185,39 @@ export default function AppointmentDetailsModal({
             >
               {statusLabels[appointment.status as keyof typeof statusLabels]}
             </Badge>
+          </div>
+
+          <Separator />
+
+          {/* Quick Status Update */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold flex items-center gap-2">
+              <PlayCircle className="h-5 w-5" />
+              Mise à jour rapide du statut
+            </h3>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pl-7">
+              {getAvailableStatusUpdates().map((status) => (
+                <Button
+                  key={status}
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleStatusUpdate(status)}
+                  disabled={isUpdatingStatus}
+                  className={`gap-2 ${statusColors[status]} hover:opacity-80 transition-opacity`}
+                >
+                  {getStatusIcon(status)}
+                  {statusLabels[status]}
+                </Button>
+              ))}
+            </div>
+
+            {isUpdatingStatus && (
+              <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground pl-7">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+                Mise à jour en cours...
+              </div>
+            )}
           </div>
 
           <Separator />
@@ -204,12 +308,17 @@ export default function AppointmentDetailsModal({
         </div>
 
         <DialogFooter className="gap-2">
-          <Button variant="outline" onClick={onClose}>
+          <Button variant="outline" onClick={onClose} disabled={isUpdatingStatus}>
             Fermer
           </Button>
 
           {onEdit && (
-            <Button variant="outline" onClick={handleEdit} className="gap-2">
+            <Button
+              variant="outline"
+              onClick={handleEdit}
+              className="gap-2"
+              disabled={isUpdatingStatus}
+            >
               <Edit className="h-4 w-4" />
               Modifier
             </Button>
@@ -220,6 +329,7 @@ export default function AppointmentDetailsModal({
               variant="destructive"
               onClick={handleDelete}
               className="gap-2"
+              disabled={isUpdatingStatus}
             >
               <Trash2 className="h-4 w-4" />
               Supprimer
