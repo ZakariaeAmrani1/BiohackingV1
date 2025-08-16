@@ -122,10 +122,20 @@ export default function AppointmentCalendar() {
   };
 
   const getAppointmentsForDate = (date: Date) => {
-    return appointments.filter((apt) => {
+    const filtered = appointments.filter((apt) => {
       const appointmentDate = new Date(apt.date_rendez_vous);
-      return appointmentDate.toDateString() === date.toDateString();
+      const matches = appointmentDate.toDateString() === date.toDateString();
+      return matches;
     });
+
+    // Debug logging
+    if (date.toDateString() === new Date().toDateString()) {
+      console.log('Today\'s appointments:', filtered);
+      console.log('All appointments:', appointments);
+      console.log('Date filter:', date.toDateString());
+    }
+
+    return filtered;
   };
 
   const getTimeFromDateTime = (dateTimeString: string) => {
