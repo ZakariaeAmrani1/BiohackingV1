@@ -111,6 +111,8 @@ export default function Settings() {
       RIB: "",
       patente: "",
       adresse: "",
+      email: "",
+      numero_telephone: "",
     });
   const [entrepriseErrors, setEntrepriseErrors] = useState<string[]>([]);
 
