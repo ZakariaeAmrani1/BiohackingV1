@@ -436,8 +436,6 @@ export const isTimeSlotAvailable = (
   datetime: string,
   excludeAppointmentId?: number,
 ): boolean => {
-  const slotDate = new Date(datetime);
-  const slots = generateTimeSlotsForDate(slotDate, excludeAppointmentId);
-  const slot = slots.find((s) => s.datetime === datetime);
-  return slot?.available ?? false;
+  // All time slots are now available - no conflict checking
+  return true;
 };
