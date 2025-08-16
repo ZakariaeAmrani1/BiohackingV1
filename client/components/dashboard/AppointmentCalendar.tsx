@@ -303,7 +303,9 @@ export default function AppointmentCalendar() {
                     Aucun rendez-vous trouvé
                   </div>
                 ) : (
-                  appointments.map((appointment) => (
+                  getAppointmentsForDate(currentDate)
+                    .sort((a, b) => a.time.localeCompare(b.time))
+                    .map((appointment) => (
                     <div
                       key={appointment.id}
                       className="flex items-center gap-4 p-4 border border-border rounded-lg hover:bg-accent/50 transition-colors"
