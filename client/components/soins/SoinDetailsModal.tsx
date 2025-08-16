@@ -18,6 +18,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Soin, formatPrice, getSoinTypeColor } from "@/services/soinsService";
+import { Utilisateur } from "@/services/clientsService";
 
 interface SoinDetailsModalProps {
   isOpen: boolean;
@@ -25,6 +26,7 @@ interface SoinDetailsModalProps {
   soin: Soin | null;
   onEdit: (soin: Soin) => void;
   onDelete: (soin: Soin) => void;
+  users: Utilisateur[] | null;
 }
 
 export default function SoinDetailsModal({
@@ -33,6 +35,7 @@ export default function SoinDetailsModal({
   soin,
   onEdit,
   onDelete,
+  users,
 }: SoinDetailsModalProps) {
   if (!soin) return null;
 
@@ -68,6 +71,11 @@ export default function SoinDetailsModal({
       default:
         return "Service médical spécialisé";
     }
+  };
+
+  const getUserName = (CIN: string) => {
+    const user = users.find((user) => user.CIN === CIN);
+    return user.nom || CIN;
   };
 
   return (
@@ -146,7 +154,7 @@ export default function SoinDetailsModal({
               <div className="flex items-center gap-2 text-sm">
                 <User className="h-4 w-4 text-muted-foreground" />
                 <span className="font-medium">Créé par:</span>
-                <span>{soin.Cree_par}</span>
+                <span>{getUserName(soin.Cree_par)}</span>
               </div>
 
               <div className="flex items-center gap-2 text-sm">

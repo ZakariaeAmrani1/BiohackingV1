@@ -1,4 +1,5 @@
 import { CurrencyService } from "./currencyService";
+import api from "../api/axios";
 
 // Product types
 export interface Product {
@@ -18,74 +19,10 @@ export interface ProductFormData {
 }
 
 import { ActivitiesService } from "./activitiesService";
+import { AuthService } from "./authService";
 
 // Mock data storage
-let mockProducts: Product[] = [
-  {
-    id: 1,
-    Nom: "Paracétamol 500mg",
-    prix: 2.5,
-    stock: 150,
-    Cree_par: "Dr. Smith",
-    created_at: "2024-01-01T10:30:00",
-  },
-  {
-    id: 2,
-    Nom: "Bandages élastiques",
-    prix: 8.9,
-    stock: 45,
-    Cree_par: "Dr. Martin",
-    created_at: "2024-01-02T14:20:00",
-  },
-  {
-    id: 3,
-    Nom: "Seringues jetables (boîte de 100)",
-    prix: 15.75,
-    stock: 25,
-    Cree_par: "Dr. Smith",
-    created_at: "2024-01-03T09:15:00",
-  },
-  {
-    id: 4,
-    Nom: "Thermomètre digital",
-    prix: 12.3,
-    stock: 8,
-    Cree_par: "Dr. Dubois",
-    created_at: "2024-01-04T16:45:00",
-  },
-  {
-    id: 5,
-    Nom: "Gants latex (boîte de 100)",
-    prix: 18.5,
-    stock: 35,
-    Cree_par: "Dr. Martin",
-    created_at: "2024-01-05T11:30:00",
-  },
-  {
-    id: 6,
-    Nom: "Compresses stériles",
-    prix: 6.2,
-    stock: 75,
-    Cree_par: "Dr. Smith",
-    created_at: "2024-01-06T13:20:00",
-  },
-  {
-    id: 7,
-    Nom: "Désinfectant 500ml",
-    prix: 4.8,
-    stock: 22,
-    Cree_par: "Dr. Dubois",
-    created_at: "2024-01-07T08:10:00",
-  },
-  {
-    id: 8,
-    Nom: "Masques chirurgicaux (boîte de 50)",
-    prix: 12.9,
-    stock: 65,
-    Cree_par: "Dr. Martin",
-    created_at: "2024-01-08T15:40:00",
-  },
-];
+let mockProducts: Product[] = [];
 
 // Simulate API delay
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -93,7 +30,19 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 export class ProductsService {
   // Get all products
   static async getAll(): Promise<Product[]> {
-    await delay(500);
+    mockProducts = [];
+    const result = await api.get(`bien?type=PRODUIT`);
+    const data = result.data;
+    data.map((product) => {
+      mockProducts.push({
+        id: product.id,
+        Nom: product.Nom,
+        prix: product.prix,
+        stock: product.stock,
+        Cree_par: product.Cree_par,
+        created_at: product.created_at,
+      });
+    });
     return [...mockProducts];
   }
 
@@ -106,7 +55,15 @@ export class ProductsService {
 
   // Create new product
   static async create(data: ProductFormData): Promise<Product> {
-    await delay(800);
+    const currentUser = AuthService.getCurrentUser();
+    const result = await api.post(`bien`, {
+      Nom: data.Nom,
+      bien_type: "PRODUIT",
+      Type: "",
+      prix: data.prix,
+      stock: data.stock,
+      Cree_par: currentUser.CIN,
+    });
 
     const newProduct: Product = {
       id: Math.max(...mockProducts.map((product) => product.id)) + 1,
@@ -136,7 +93,15 @@ export class ProductsService {
     id: number,
     data: ProductFormData,
   ): Promise<Product | null> {
-    await delay(800);
+    const currentUser = AuthService.getCurrentUser();
+    const result = await api.patch(`bien/${id}`, {
+      Nom: data.Nom,
+      bien_type: "PRODUIT",
+      Type: "",
+      prix: data.prix,
+      stock: data.stock,
+      Cree_par: currentUser.CIN,
+    });
 
     const index = mockProducts.findIndex((product) => product.id === id);
     if (index === -1) return null;
@@ -152,7 +117,7 @@ export class ProductsService {
 
   // Delete product
   static async delete(id: number): Promise<boolean> {
-    await delay(500);
+    const result = await api.delete(`bien/${id}`);
 
     const index = mockProducts.findIndex((product) => product.id === id);
     if (index === -1) return false;
@@ -241,12 +206,12 @@ export const getStockStatus = (
   }
 };
 
-export const createEmptyProduct = (): ProductFormData => {
+export const createEmptyProduct = (CIN?: string): ProductFormData => {
   return {
     Nom: "",
     prix: 0,
     stock: 0,
-    Cree_par: "",
+    Cree_par: CIN || "",
   };
 };
 

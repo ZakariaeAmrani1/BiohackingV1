@@ -1,4 +1,8 @@
 // Document template types
+import api from "../api/axios";
+import { ActivitiesService } from "./activitiesService";
+import { AuthService } from "./authService";
+
 export interface DocumentField {
   name: string;
   type: "text" | "number" | "textarea" | "date" | "select" | "checkbox";
@@ -161,8 +165,19 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 export class DocumentTemplatesService {
   // Get all templates
   static async getAll(): Promise<DocumentTemplate[]> {
-    await delay(500);
-    return [...mockTemplates];
+    mockTemplates = [];
+    const result = await api.get(`document-templates`);
+    const data = result.data;
+    data.map((template) => {
+      mockTemplates.push({
+        id: template.id,
+        name: template.name,
+        sections_json: template.sections_json,
+        Cree_par: template.Cree_par,
+        created_at: template.created_at,
+      });
+    });
+    return mockTemplates;
   }
 
   // Get template by ID
@@ -176,15 +191,31 @@ export class DocumentTemplatesService {
   static async create(
     data: DocumentTemplateFormData,
   ): Promise<DocumentTemplate> {
-    await delay(800);
+    const currentUser = AuthService.getCurrentUser();
+    const result = await api.post(`document-templates`, {
+      name: data.name,
+      sections_json: data.sections_json,
+      Cree_par: currentUser.CIN,
+    });
 
     const newTemplate: DocumentTemplate = {
-      id: Math.max(...mockTemplates.map((template) => template.id)) + 1,
+      id: result.id,
       ...data,
-      created_at: new Date().toISOString(),
+      created_at: result.created_at,
     };
 
     mockTemplates.push(newTemplate);
+
+    ActivitiesService.logActivity(
+      "document_template",
+      "created",
+      newTemplate.id,
+      `${newTemplate.name}`,
+      data.Cree_par,
+    );
+
+    window.dispatchEvent(new CustomEvent("activityLogged"));
+
     return newTemplate;
   }
 
@@ -193,10 +224,15 @@ export class DocumentTemplatesService {
     id: number,
     data: DocumentTemplateFormData,
   ): Promise<DocumentTemplate | null> {
-    await delay(800);
-
     const index = mockTemplates.findIndex((template) => template.id === id);
     if (index === -1) return null;
+
+    const currentUser = AuthService.getCurrentUser();
+    const result = await api.patch(`document-templates/${id}`, {
+      name: data.name,
+      sections_json: data.sections_json,
+      Cree_par: currentUser.CIN,
+    });
 
     const updatedTemplate: DocumentTemplate = {
       ...mockTemplates[index],
@@ -209,7 +245,7 @@ export class DocumentTemplatesService {
 
   // Delete template
   static async delete(id: number): Promise<boolean> {
-    await delay(500);
+    const result = await api.delete(`document-templates/${id}`);
 
     const index = mockTemplates.findIndex((template) => template.id === id);
     if (index === -1) return false;
@@ -308,7 +344,7 @@ export const getFieldTypes = (): Array<{ value: string; label: string }> => {
   ];
 };
 
-export const createEmptyTemplate = (): DocumentTemplateFormData => {
+export const createEmptyTemplate = (CIN?: string): DocumentTemplateFormData => {
   return {
     name: "",
     sections_json: {
@@ -325,7 +361,7 @@ export const createEmptyTemplate = (): DocumentTemplateFormData => {
         },
       ],
     },
-    Cree_par: "",
+    Cree_par: CIN || "",
   };
 };
 

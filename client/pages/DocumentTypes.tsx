@@ -51,6 +51,8 @@ import {
   DocumentTemplateFormData,
   getAvailableDoctors,
 } from "@/services/documentTemplatesService";
+import { UserService } from "@/services/userService";
+import { Utilisateur } from "@/services/clientsService";
 
 export default function DocumentTypes() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -67,6 +69,7 @@ export default function DocumentTypes() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedTemplate, setSelectedTemplate] =
     useState<DocumentTemplate | null>(null);
+  const [users, setUsers] = useState<Utilisateur[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { toast } = useToast();
@@ -79,6 +82,10 @@ export default function DocumentTypes() {
   // Load templates on component mount
   useEffect(() => {
     loadTemplates();
+  }, []);
+
+  useEffect(() => {
+    loadUsers();
   }, []);
 
   // Add escape key handler to force close modals if stuck
@@ -109,6 +116,28 @@ export default function DocumentTypes() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const loadUsers = async () => {
+    try {
+      setIsLoading(true);
+      const data = await UserService.getCurrentAllUsers();
+      setUsers(data);
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: "Impossible de charger les utilisateurs",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const getUserName = (CIN: string) => {
+    const user = users.find((user) => user.CIN === CIN);
+    if (user && user.nom) return user.nom;
+    return CIN;
   };
 
   // Filter and search logic
@@ -350,7 +379,7 @@ export default function DocumentTypes() {
                   <SelectItem value="tous">Tous les créateurs</SelectItem>
                   {creators.map((creator) => (
                     <SelectItem key={creator} value={creator}>
-                      {creator}
+                      {getUserName(creator)}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -434,7 +463,9 @@ export default function DocumentTypes() {
                                 {getFieldCount(template)} champ(s)
                               </Badge>
                             </TableCell>
-                            <TableCell>{template.Cree_par}</TableCell>
+                            <TableCell>
+                              {getUserName(template.Cree_par)}
+                            </TableCell>
                             <TableCell>
                               {formatDate(template.created_at)}
                             </TableCell>
@@ -540,7 +571,7 @@ export default function DocumentTypes() {
                         <div className="flex items-center gap-2 text-sm">
                           <User className="h-4 w-4 text-muted-foreground" />
                           <span className="font-medium">Créé par:</span>
-                          <span>{template.Cree_par}</span>
+                          <span>{getUserName(template.Cree_par)}</span>
                         </div>
                         <div className="flex items-center gap-2 text-sm">
                           <Clock className="h-4 w-4 text-muted-foreground" />
@@ -630,6 +661,7 @@ export default function DocumentTypes() {
           }
           template={selectedTemplate}
           isLoading={isSubmitting}
+          users={users}
         />
 
         <DocumentTemplateDetailsModal
@@ -638,6 +670,7 @@ export default function DocumentTypes() {
           template={selectedTemplate}
           onEdit={openEditModal}
           onDelete={openDeleteModal}
+          users={users}
         />
 
         <DeleteDocumentTemplateModal

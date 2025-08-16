@@ -15,6 +15,7 @@ import {
   formatPrice,
   getStockStatus,
 } from "@/services/productsService";
+import { Utilisateur } from "@/services/clientsService";
 
 interface ProductDetailsModalProps {
   isOpen: boolean;
@@ -22,6 +23,7 @@ interface ProductDetailsModalProps {
   product: Product | null;
   onEdit: (product: Product) => void;
   onDelete: (product: Product) => void;
+  users: Utilisateur[] | null;
 }
 
 export default function ProductDetailsModal({
@@ -30,6 +32,7 @@ export default function ProductDetailsModal({
   product,
   onEdit,
   onDelete,
+  users,
 }: ProductDetailsModalProps) {
   if (!product) return null;
 
@@ -42,6 +45,11 @@ export default function ProductDetailsModal({
       hour: "2-digit",
       minute: "2-digit",
     });
+  };
+
+  const getUserName = (CIN: string) => {
+    const user = users.find((user) => user.CIN === CIN);
+    return user.nom || CIN;
   };
 
   const stockStatus = getStockStatus(product.stock);
@@ -117,7 +125,7 @@ export default function ProductDetailsModal({
               <div className="flex items-center gap-2 text-sm">
                 <User className="h-4 w-4 text-muted-foreground" />
                 <span className="font-medium">Créé par:</span>
-                <span>{product.Cree_par}</span>
+                <span>{getUserName(product.Cree_par)}</span>
               </div>
 
               <div className="flex items-center gap-2 text-sm">

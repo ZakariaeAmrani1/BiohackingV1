@@ -1,4 +1,6 @@
-// Soin types
+import api from "../api/axios"; // Soin types
+import { ActivitiesService } from "./activitiesService";
+import { AuthService } from "./authService";
 export interface Soin {
   id: number;
   Nom: string;
@@ -28,88 +30,7 @@ export enum SoinType {
 }
 
 // Mock data storage
-let mockSoins: Soin[] = [
-  {
-    id: 1,
-    Nom: "Consultation générale",
-    Type: SoinType.CONSULTATION,
-    prix: 50.0,
-    Cree_par: "Dr. Smith",
-    created_at: "2024-01-01T10:30:00",
-  },
-  {
-    id: 2,
-    Nom: "Radiographie thoracique",
-    Type: SoinType.DIAGNOSTIC,
-    prix: 75.0,
-    Cree_par: "Dr. Martin",
-    created_at: "2024-01-02T14:20:00",
-  },
-  {
-    id: 3,
-    Nom: "Vaccination antigrippale",
-    Type: SoinType.PREVENTIF,
-    prix: 25.0,
-    Cree_par: "Dr. Smith",
-    created_at: "2024-01-03T09:15:00",
-  },
-  {
-    id: 4,
-    Nom: "Séance de kinésithérapie",
-    Type: SoinType.REEDUCATION,
-    prix: 40.0,
-    Cree_par: "Dr. Dubois",
-    created_at: "2024-01-04T16:45:00",
-  },
-  {
-    id: 5,
-    Nom: "Chirurgie ambulatoire",
-    Type: SoinType.CHIRURGIE,
-    prix: 200.0,
-    Cree_par: "Dr. Martin",
-    created_at: "2024-01-05T11:30:00",
-  },
-  {
-    id: 6,
-    Nom: "Échographie abdominale",
-    Type: SoinType.DIAGNOSTIC,
-    prix: 80.0,
-    Cree_par: "Dr. Smith",
-    created_at: "2024-01-06T13:20:00",
-  },
-  {
-    id: 7,
-    Nom: "Consultation d'urgence",
-    Type: SoinType.URGENCE,
-    prix: 70.0,
-    Cree_par: "Dr. Dubois",
-    created_at: "2024-01-07T08:10:00",
-  },
-  {
-    id: 8,
-    Nom: "Suivi post-opératoire",
-    Type: SoinType.SUIVI,
-    prix: 45.0,
-    Cree_par: "Dr. Martin",
-    created_at: "2024-01-08T15:40:00",
-  },
-  {
-    id: 9,
-    Nom: "Bilan sanguin complet",
-    Type: SoinType.DIAGNOSTIC,
-    prix: 35.0,
-    Cree_par: "Dr. Smith",
-    created_at: "2024-01-09T10:15:00",
-  },
-  {
-    id: 10,
-    Nom: "Thérapie manuelle",
-    Type: SoinType.THERAPEUTIQUE,
-    prix: 55.0,
-    Cree_par: "Dr. Dubois",
-    created_at: "2024-01-10T14:30:00",
-  },
-];
+let mockSoins: Soin[] = [];
 
 // Simulate API delay
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -117,7 +38,19 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 export class SoinsService {
   // Get all soins
   static async getAll(): Promise<Soin[]> {
-    await delay(500);
+    mockSoins = [];
+    const result = await api.get(`bien?type=SERVICE`);
+    const data = result.data;
+    data.map((service) => {
+      mockSoins.push({
+        id: service.id,
+        Nom: service.Nom,
+        Type: service.Type,
+        prix: service.prix,
+        Cree_par: service.Cree_par,
+        created_at: service.created_at,
+      });
+    });
     return [...mockSoins];
   }
 
@@ -130,7 +63,15 @@ export class SoinsService {
 
   // Create new soin
   static async create(data: SoinFormData): Promise<Soin> {
-    await delay(800);
+    const currentUser = AuthService.getCurrentUser();
+    const result = await api.post(`bien`, {
+      Nom: data.Nom,
+      bien_type: "SERVICE",
+      Type: data.Type,
+      prix: data.prix,
+      stock: 1,
+      Cree_par: currentUser.CIN,
+    });
 
     const newSoin: Soin = {
       id: Math.max(...mockSoins.map((soin) => soin.id)) + 1,
@@ -139,12 +80,31 @@ export class SoinsService {
     };
 
     mockSoins.push(newSoin);
+
+    ActivitiesService.logActivity(
+      "soin",
+      "created",
+      newSoin.id,
+      newSoin.Nom,
+      data.Cree_par,
+    );
+
+    window.dispatchEvent(new CustomEvent("activityLogged"));
+
     return newSoin;
   }
 
   // Update existing soin
   static async update(id: number, data: SoinFormData): Promise<Soin | null> {
-    await delay(800);
+    const currentUser = AuthService.getCurrentUser();
+    const result = await api.patch(`bien/${id}`, {
+      Nom: data.Nom,
+      bien_type: "SERVICE",
+      Type: data.Type,
+      prix: data.prix,
+      stock: 1,
+      Cree_par: currentUser.CIN,
+    });
 
     const index = mockSoins.findIndex((soin) => soin.id === id);
     if (index === -1) return null;
@@ -160,7 +120,7 @@ export class SoinsService {
 
   // Delete soin
   static async delete(id: number): Promise<boolean> {
-    await delay(500);
+    const result = await api.delete(`bien/${id}`);
 
     const index = mockSoins.findIndex((soin) => soin.id === id);
     if (index === -1) return false;
@@ -270,12 +230,12 @@ export const formatPrice = (price: number): string => {
   }).format(price);
 };
 
-export const createEmptySoin = (): SoinFormData => {
+export const createEmptySoin = (CIN?: string): SoinFormData => {
   return {
     Nom: "",
     Type: SoinType.CONSULTATION,
     prix: 0,
-    Cree_par: "",
+    Cree_par: CIN || "",
   };
 };
 

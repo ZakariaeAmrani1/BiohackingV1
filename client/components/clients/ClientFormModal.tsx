@@ -135,6 +135,7 @@ export default function ClientFormModal({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (formData.date_naissance === "") formData.date_naissance = "2000-01-01";
     // Validate form data
     const validationErrors = validateClientData(formData);
     if (validationErrors.length > 0) {

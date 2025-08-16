@@ -138,6 +138,8 @@ export class ClientsService {
     id: number,
     data: ClientFormData,
   ): Promise<Client | null> {
+    const index = mockClients.findIndex((client) => client.id === id);
+    if (index === -1) return null;
     const currentUser = AuthService.getCurrentUser();
     const result = await api.patch(`client/${id}`, {
       CIN: data.CIN,
@@ -153,10 +155,6 @@ export class ClientsService {
       antecedents: data.antecedents,
       Cree_par: currentUser.CIN,
     });
-
-    const index = mockClients.findIndex((client) => client.id === id);
-    if (index === -1) return null;
-
     const updatedClient: Client = {
       ...mockClients[index],
       ...data,
@@ -269,9 +267,18 @@ export const validateClientData = (data: ClientFormData): string[] => {
     errors.push("Le prénom est obligatoire");
   }
 
-  if (!data.date_naissance) {
-    errors.push("La date de naissance est obligatoire");
-  } else {
+  // if (!data.date_naissance) {
+  //   errors.push("La date de naissance est obligatoire");
+  // } else {
+  //   const birthDate = new Date(data.date_naissance);
+  //   const now = new Date();
+  //   const age = now.getFullYear() - birthDate.getFullYear();
+  //   if (age < 0 || age > 120) {
+  //     errors.push("La date de naissance n'est pas valide");
+  //   }
+  // }
+
+  if (data.date_naissance) {
     const birthDate = new Date(data.date_naissance);
     const now = new Date();
     const age = now.getFullYear() - birthDate.getFullYear();
@@ -280,13 +287,22 @@ export const validateClientData = (data: ClientFormData): string[] => {
     }
   }
 
-  if (!data.adresse.trim()) {
-    errors.push("L'adresse est obligatoire");
-  }
+  // if (!data.adresse.trim()) {
+  //   errors.push("L'adresse est obligatoire");
+  // }
 
-  if (!data.numero_telephone.trim()) {
-    errors.push("Le numéro de téléphone est obligatoire");
-  } else if (
+  // if (!data.numero_telephone.trim()) {
+  //   errors.push("Le numéro de téléphone est obligatoire");
+  // } else if (
+  //   !/^(\+212|0|\+33)[1-9]\d{7,8}$/.test(
+  //     data.numero_telephone.replace(/\s/g, ""),
+  //   )
+  // ) {
+  //   errors.push("Le numéro de téléphone n'est pas au format belge valide");
+  // }
+
+  if (
+    data.numero_telephone.trim() &&
     !/^(\+212|0|\+33)[1-9]\d{7,8}$/.test(
       data.numero_telephone.replace(/\s/g, ""),
     )
@@ -294,15 +310,19 @@ export const validateClientData = (data: ClientFormData): string[] => {
     errors.push("Le numéro de téléphone n'est pas au format belge valide");
   }
 
-  if (!data.email.trim()) {
-    errors.push("L'email est obligatoire");
-  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+  // if (!data.email.trim()) {
+  //   errors.push("L'email est obligatoire");
+  // } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+  //   errors.push("L'email n'est pas valide");
+  // }
+
+  if (data.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
     errors.push("L'email n'est pas valide");
   }
 
-  if (!data.groupe_sanguin.trim()) {
-    errors.push("Le groupe sanguin est obligatoire");
-  }
+  // if (!data.groupe_sanguin.trim()) {
+  //   errors.push("Le groupe sanguin est obligatoire");
+  // }
 
   if (!data.Cree_par.trim()) {
     errors.push("Le créateur est obligatoire");

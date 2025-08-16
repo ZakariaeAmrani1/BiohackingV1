@@ -28,6 +28,8 @@ import {
   getSoinTypes,
   createEmptySoin,
 } from "@/services/soinsService";
+import { Utilisateur } from "@/services/clientsService";
+import { AuthService } from "@/services/authService";
 
 interface SoinFormModalProps {
   isOpen: boolean;
@@ -35,6 +37,7 @@ interface SoinFormModalProps {
   onSubmit: (data: SoinFormData) => Promise<void>;
   soin?: Soin | null;
   isLoading?: boolean;
+  users: Utilisateur[] | null;
 }
 
 export default function SoinFormModal({
@@ -43,6 +46,7 @@ export default function SoinFormModal({
   onSubmit,
   soin,
   isLoading = false,
+  users,
 }: SoinFormModalProps) {
   const [formData, setFormData] = useState<SoinFormData>(createEmptySoin());
   const [errors, setErrors] = useState<string[]>([]);
@@ -54,15 +58,16 @@ export default function SoinFormModal({
 
   // Initialize form data when soin changes
   useEffect(() => {
+    const user = AuthService.getCurrentUser();
     if (soin) {
       setFormData({
         Nom: soin.Nom,
         Type: soin.Type,
         prix: soin.prix,
-        Cree_par: soin.Cree_par,
+        Cree_par: soin.Cree_par || user.CIN,
       });
     } else {
-      setFormData(createEmptySoin());
+      setFormData(createEmptySoin(user.CIN));
     }
     setErrors([]);
   }, [soin, isOpen]);
@@ -200,17 +205,23 @@ export default function SoinFormModal({
             <Select
               value={formData.Cree_par}
               onValueChange={(value) => handleInputChange("Cree_par", value)}
-              disabled={isSubmitting}
+              disabled={true}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Sélectionnez le créateur" />
               </SelectTrigger>
               <SelectContent>
-                {availableDoctors.map((doctor) => (
-                  <SelectItem key={doctor} value={doctor}>
-                    {doctor}
-                  </SelectItem>
-                ))}
+                {Array.isArray(users) && users.length > 0 ? (
+                  users.map((user) => (
+                    <SelectItem key={user.CIN} value={user.CIN}>
+                      {user.nom}
+                    </SelectItem>
+                  ))
+                ) : (
+                  <div className="p-2 text-sm text-gray-500">
+                    Aucun médecin trouvé
+                  </div>
+                )}
               </SelectContent>
             </Select>
           </div>

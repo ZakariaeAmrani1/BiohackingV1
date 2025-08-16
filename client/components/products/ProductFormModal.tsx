@@ -26,6 +26,8 @@ import {
   getAvailableDoctors,
   createEmptyProduct,
 } from "@/services/productsService";
+import { Utilisateur } from "@/services/clientsService";
+import { AuthService } from "@/services/authService";
 
 interface ProductFormModalProps {
   isOpen: boolean;
@@ -33,6 +35,7 @@ interface ProductFormModalProps {
   onSubmit: (data: ProductFormData) => Promise<void>;
   product?: Product | null;
   isLoading?: boolean;
+  users: Utilisateur[] | null;
 }
 
 export default function ProductFormModal({
@@ -41,6 +44,7 @@ export default function ProductFormModal({
   onSubmit,
   product,
   isLoading = false,
+  users,
 }: ProductFormModalProps) {
   const [formData, setFormData] =
     useState<ProductFormData>(createEmptyProduct());
@@ -52,15 +56,16 @@ export default function ProductFormModal({
 
   // Initialize form data when product changes
   useEffect(() => {
+    const user = AuthService.getCurrentUser();
     if (product) {
       setFormData({
         Nom: product.Nom,
         prix: product.prix,
         stock: product.stock,
-        Cree_par: product.Cree_par,
+        Cree_par: product.Cree_par || user.CIN,
       });
     } else {
-      setFormData(createEmptyProduct());
+      setFormData(createEmptyProduct(user.CIN));
     }
     setErrors([]);
   }, [product, isOpen]);
@@ -191,17 +196,23 @@ export default function ProductFormModal({
             <Select
               value={formData.Cree_par}
               onValueChange={(value) => handleInputChange("Cree_par", value)}
-              disabled={isSubmitting}
+              disabled={true}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Sélectionnez le créateur" />
               </SelectTrigger>
               <SelectContent>
-                {availableDoctors.map((doctor) => (
-                  <SelectItem key={doctor} value={doctor}>
-                    {doctor}
-                  </SelectItem>
-                ))}
+                {Array.isArray(users) && users.length > 0 ? (
+                  users.map((user) => (
+                    <SelectItem key={user.CIN} value={user.CIN}>
+                      {user.nom}
+                    </SelectItem>
+                  ))
+                ) : (
+                  <div className="p-2 text-sm text-gray-500">
+                    Aucun médecin trouvé
+                  </div>
+                )}
               </SelectContent>
             </Select>
           </div>

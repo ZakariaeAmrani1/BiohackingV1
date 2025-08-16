@@ -59,6 +59,8 @@ import {
   getSoinTypeColor,
   getRevenueStatistics,
 } from "@/services/soinsService";
+import { Utilisateur } from "@/services/clientsService";
+import { UserService } from "@/services/userService";
 
 export default function Soins() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -68,6 +70,7 @@ export default function Soins() {
 
   // Data state
   const [soins, setSoins] = useState<Soin[]>([]);
+  const [users, setUsers] = useState<Utilisateur[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   // Modal states
@@ -85,6 +88,10 @@ export default function Soins() {
   // Load soins on component mount
   useEffect(() => {
     loadSoins();
+  }, []);
+
+  useEffect(() => {
+    loadUsers();
   }, []);
 
   // Add escape key handler to force close modals if stuck
@@ -115,6 +122,28 @@ export default function Soins() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const loadUsers = async () => {
+    try {
+      setIsLoading(true);
+      const data = await UserService.getCurrentAllUsers();
+      setUsers(data);
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: "Impossible de charger les utilisateurs",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const getUserName = (CIN: string) => {
+    const user = users.find((user) => user.CIN === CIN);
+    if (user && user.nom) return user.nom;
+    return CIN;
   };
 
   // Filter and search logic
@@ -408,7 +437,7 @@ export default function Soins() {
                   <SelectItem value="tous">Tous les créateurs</SelectItem>
                   {creators.map((creator) => (
                     <SelectItem key={creator} value={creator}>
-                      {creator}
+                      {getUserName(creator)}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -492,7 +521,7 @@ export default function Soins() {
                             <TableCell className="font-mono">
                               {formatPrice(soin.prix)}
                             </TableCell>
-                            <TableCell>{soin.Cree_par}</TableCell>
+                            <TableCell>{getUserName(soin.Cree_par)}</TableCell>
                             <TableCell>{formatDate(soin.created_at)}</TableCell>
                             <TableCell className="text-right">
                               <DropdownMenu>
@@ -593,7 +622,7 @@ export default function Soins() {
                         <div className="flex items-center gap-2 text-sm">
                           <User className="h-4 w-4 text-muted-foreground" />
                           <span className="font-medium">Créé par:</span>
-                          <span>{soin.Cree_par}</span>
+                          <span>{getUserName(soin.Cree_par)}</span>
                         </div>
                         <div className="flex items-center gap-2 text-sm">
                           <Clock className="h-4 w-4 text-muted-foreground" />
@@ -669,6 +698,7 @@ export default function Soins() {
           onSubmit={selectedSoin ? handleUpdateSoin : handleCreateSoin}
           soin={selectedSoin}
           isLoading={isSubmitting}
+          users={users}
         />
 
         <SoinDetailsModal
@@ -677,6 +707,7 @@ export default function Soins() {
           soin={selectedSoin}
           onEdit={openEditModal}
           onDelete={openDeleteModal}
+          users={users}
         />
 
         <DeleteSoinModal

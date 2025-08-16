@@ -409,7 +409,7 @@ export default function Patients() {
                   <SelectItem value="tous">Tous les créateurs</SelectItem>
                   {creators.map((creator) => (
                     <SelectItem key={creator} value={creator}>
-                      {creator}
+                      {getUserName(creator)}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -632,7 +632,7 @@ export default function Patients() {
                         <div className="flex items-center gap-2 text-sm">
                           <User className="h-4 w-4 text-muted-foreground" />
                           <span className="font-medium">Créé par:</span>
-                          <span>{client.Cree_par}</span>
+                          <span>{getUserName(client.Cree_par)}</span>
                         </div>
                       </div>
 

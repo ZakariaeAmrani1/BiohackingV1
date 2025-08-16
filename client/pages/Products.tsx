@@ -58,6 +58,8 @@ import {
   getStockStatistics,
 } from "@/services/productsService";
 import { CurrencyService } from "@/services/currencyService";
+import { Utilisateur } from "@/services/clientsService";
+import { UserService } from "@/services/userService";
 
 export default function Products() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -67,6 +69,7 @@ export default function Products() {
 
   // Data state
   const [products, setProducts] = useState<Product[]>([]);
+  const [users, setUsers] = useState<Utilisateur[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   // Modal states
@@ -86,6 +89,10 @@ export default function Products() {
   // Load products on component mount
   useEffect(() => {
     loadProducts();
+  }, []);
+
+  useEffect(() => {
+    loadUsers();
   }, []);
 
   // Add escape key handler to force close modals if stuck
@@ -116,6 +123,28 @@ export default function Products() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const loadUsers = async () => {
+    try {
+      setIsLoading(true);
+      const data = await UserService.getCurrentAllUsers();
+      setUsers(data);
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: "Impossible de charger les utilisateurs",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const getUserName = (CIN: string) => {
+    const user = users.find((user) => user.CIN === CIN);
+    if (user && user.nom) return user.nom;
+    return CIN;
   };
 
   // Filter and search logic
@@ -406,7 +435,7 @@ export default function Products() {
                   <SelectItem value="tous">Tous les créateurs</SelectItem>
                   {creators.map((creator) => (
                     <SelectItem key={creator} value={creator}>
-                      {creator}
+                      {getUserName(creator)}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -512,7 +541,9 @@ export default function Products() {
                                   {stockStatus.status}
                                 </Badge>
                               </TableCell>
-                              <TableCell>{product.Cree_par}</TableCell>
+                              <TableCell>
+                                {getUserName(product.Cree_par)}
+                              </TableCell>
                               <TableCell>
                                 {formatDate(product.created_at)}
                               </TableCell>
@@ -627,7 +658,7 @@ export default function Products() {
                           <div className="flex items-center gap-2 text-sm">
                             <User className="h-4 w-4 text-muted-foreground" />
                             <span className="font-medium">Créé par:</span>
-                            <span>{product.Cree_par}</span>
+                            <span>{getUserName(product.Cree_par)}</span>
                           </div>
                           <div className="flex items-center gap-2 text-sm">
                             <Clock className="h-4 w-4 text-muted-foreground" />
@@ -706,6 +737,7 @@ export default function Products() {
           onSubmit={selectedProduct ? handleUpdateProduct : handleCreateProduct}
           product={selectedProduct}
           isLoading={isSubmitting}
+          users={users}
         />
 
         <ProductDetailsModal
@@ -714,6 +746,7 @@ export default function Products() {
           product={selectedProduct}
           onEdit={openEditModal}
           onDelete={openDeleteModal}
+          users={users}
         />
 
         <DeleteProductModal
