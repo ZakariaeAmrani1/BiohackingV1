@@ -102,7 +102,7 @@ export default function TimeSlotPicker({
   };
 
   const handleTimeSlotSelect = (slot: TimeSlot) => {
-    if (slot.available && !disabled) {
+    if (!disabled) {
       onChange(slot.datetime);
     }
   };
@@ -202,20 +202,20 @@ export default function TimeSlotPicker({
                   className={cn(
                     "h-12 p-1 flex flex-col items-center justify-center",
                     isPast && "opacity-50 cursor-not-allowed",
-                    isWeekend && "bg-muted/50",
-                    !isAvailable && !isPast && "opacity-60",
-                    isAvailable && !isPast && "hover:bg-primary/10",
+                    isWeekend && !isSelected && "bg-muted/50",
+                    !isPast && "hover:bg-primary/10",
+                    isSelected &&
+                      isWeekend &&
+                      "bg-primary text-primary-foreground",
                   )}
-                  onClick={() =>
-                    !isPast && isAvailable && handleDateSelect(date)
-                  }
-                  disabled={disabled || isPast || !isAvailable}
+                  onClick={() => !isPast && handleDateSelect(date)}
+                  disabled={disabled || isPast}
                 >
                   <span className="text-sm font-medium">{date.getDate()}</span>
                   <span className="text-xs">
                     {formatDate(date).split(" ")[1]}
                   </span>
-                  {isAvailable && !isPast && (
+                  {!isPast && (
                     <div className="w-1 h-1 bg-green-500 rounded-full mt-1" />
                   )}
                 </Button>
@@ -247,23 +247,14 @@ export default function TimeSlotPicker({
                   <Button
                     key={index}
                     type="button"
-                    variant={
-                      value === slot.datetime
-                        ? "default"
-                        : slot.available
-                          ? "outline"
-                          : "ghost"
-                    }
+                    variant={value === slot.datetime ? "default" : "outline"}
                     className={cn(
-                      "h-10 text-sm",
-                      !slot.available &&
-                        "opacity-50 cursor-not-allowed bg-muted",
-                      slot.available && "hover:bg-primary/10",
+                      "h-10 text-sm hover:bg-primary/10",
                       value === slot.datetime &&
                         "bg-primary text-primary-foreground",
                     )}
                     onClick={() => handleTimeSlotSelect(slot)}
-                    disabled={disabled || !slot.available}
+                    disabled={disabled}
                   >
                     {slot.time}
                   </Button>
@@ -272,7 +263,7 @@ export default function TimeSlotPicker({
             ) : (
               <div className="text-center py-8 text-muted-foreground">
                 <Clock className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                <p>Aucun créneau disponible pour cette date</p>
+                <p>Aucun créneau pour cette date</p>
               </div>
             )}
           </CardContent>
