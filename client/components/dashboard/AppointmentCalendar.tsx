@@ -292,6 +292,52 @@ export default function AppointmentCalendar() {
           </div>
         ) : (
           <div className="p-4">
+            {/* Day view header with date navigation */}
+            <div className="flex items-center justify-between mb-6 pb-4 border-b border-border">
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => {
+                    const newDate = new Date(currentDate);
+                    newDate.setDate(newDate.getDate() - 1);
+                    setCurrentDate(newDate);
+                  }}
+                  className="h-8 w-8"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <div className="text-center">
+                  <h3 className="font-semibold text-lg">
+                    {currentDate.toLocaleDateString("fr-FR", {
+                      weekday: "long",
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })}
+                  </h3>
+                  {isToday(currentDate) && (
+                    <span className="text-sm text-primary font-medium">Aujourd'hui</span>
+                  )}
+                </div>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => {
+                    const newDate = new Date(currentDate);
+                    newDate.setDate(newDate.getDate() + 1);
+                    setCurrentDate(newDate);
+                  }}
+                  className="h-8 w-8"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+              <div className="text-sm text-muted-foreground">
+                {getAppointmentsForDate(currentDate).length} rendez-vous
+              </div>
+            </div>
+
             {loading ? (
               <div className="flex items-center justify-center py-8">
                 <div className="text-muted-foreground">Chargement des rendez-vous...</div>
