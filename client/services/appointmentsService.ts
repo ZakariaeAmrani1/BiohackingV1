@@ -321,12 +321,7 @@ export const validateAppointmentData = (
       errors.push("La date du rendez-vous ne peut pas être dans le passé");
     }
 
-    // Check if the selected time slot is available
-    if (!isTimeSlotAvailable(data.date_rendez_vous, excludeAppointmentId)) {
-      errors.push(
-        "Ce créneau horaire n'est plus disponible. Veuillez sélectionner un autre créneau.",
-      );
-    }
+    // Note: We've removed time slot availability checking to allow any time booking
   }
 
   if (!data.Cree_par.trim()) {
