@@ -447,7 +447,7 @@ export default function AppointmentCalendar() {
         appointment={selectedAppointment}
         onEdit={handleEditAppointment}
         onDelete={handleDeleteAppointment}
-        onStatusUpdate={loadAppointments}
+        onStatusUpdate={handleStatusUpdateSuccess}
       />
 
       {/* Appointment Edit Modal */}
