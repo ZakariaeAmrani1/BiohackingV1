@@ -202,8 +202,9 @@ export default function TimeSlotPicker({
                   className={cn(
                     "h-12 p-1 flex flex-col items-center justify-center",
                     isPast && "opacity-50 cursor-not-allowed",
-                    isWeekend && "bg-muted/50",
+                    isWeekend && !isSelected && "bg-muted/50",
                     !isPast && "hover:bg-primary/10",
+                    isSelected && isWeekend && "bg-primary text-primary-foreground",
                   )}
                   onClick={() =>
                     !isPast && handleDateSelect(date)
