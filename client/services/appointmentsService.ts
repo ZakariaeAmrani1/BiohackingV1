@@ -368,8 +368,8 @@ export interface TimeSlot {
 
 // Working hours configuration
 const WORKING_HOURS = {
-  start: 8, // 8 AM
-  end: 18, // 6 PM
+  start: 10, // 10 AM
+  end: 19, // 7 PM
   appointmentDuration: 60, // 1 hour in minutes
   slotInterval: 30, // 30 minutes between slots
 };
