@@ -74,6 +74,10 @@ const statusTranslations = {
 export default function AppointmentCalendar() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [view, setView] = useState<"week" | "day">("week");
+  const [isAppointmentModalOpen, setIsAppointmentModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const { toast } = useToast();
 
   const weekDays = [
     "Lundi",
