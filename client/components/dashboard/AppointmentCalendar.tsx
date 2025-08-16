@@ -98,7 +98,7 @@ export default function AppointmentCalendar() {
     "Samedi",
     "Dimanche",
   ];
-  const timeSlots = Array.from({ length: 12 }, (_, i) => `${8 + i}:00`);
+  const timeSlots = Array.from({ length: 10 }, (_, i) => `${10 + i}:00`);
 
   const navigateWeek = (direction: "prev" | "next") => {
     const newDate = new Date(currentDate);
