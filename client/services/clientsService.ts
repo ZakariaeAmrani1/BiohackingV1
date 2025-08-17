@@ -51,34 +51,41 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 export class ClientsService {
   // Get all clients
   static async getAll(): Promise<Client[]> {
-    mockClients = [];
     const result = await api.get(`client`);
     const data = result.data;
-    data.map((client) => {
-      mockClients.push({
-        id: client.id,
-        CIN: client.CIN,
-        nom: client.nom,
-        prenom: client.prenom,
-        date_naissance: client.date_naissance,
-        adresse: client.adresse,
-        numero_telephone: client.numero_telephone,
-        email: client.email,
-        groupe_sanguin: client.groupe_sanguin,
-        antecedents: client.antecedents,
-        allergies: client.allergies,
-        commentaire: client.commentaire,
-        created_at: client.created_at,
-        Cree_par: client.Cree_par,
-      });
-    });
+    mockClients = data.map((client) => ({
+      id: client.id,
+      CIN: client.CIN,
+      nom: client.nom,
+      prenom: client.prenom,
+      date_naissance: client.date_naissance,
+      adresse: client.adresse,
+      numero_telephone: client.numero_telephone,
+      email: client.email,
+      groupe_sanguin: client.groupe_sanguin,
+      antecedents: client.antecedents,
+      allergies: client.allergies,
+      commentaire: client.commentaire,
+      created_at: client.created_at,
+      Cree_par: client.Cree_par,
+    }));
     return mockClients;
   }
 
   // Get client by ID
   static async getById(id: number): Promise<Client | null> {
-    await delay(300);
+    if (mockClients.length === 0) {
+      await this.getAll();
+    }
     const client = mockClients.find((client) => client.id === id);
+    return client || null;
+  }
+
+  static async getByCIN(CIN: string): Promise<Client | null> {
+    if (mockClients.length === 0) {
+      await this.getAll();
+    }
+    const client = mockClients.find((client) => client.CIN === CIN);
     return client || null;
   }
 
@@ -204,8 +211,6 @@ export class ClientsService {
 
   // Search clients
   static async search(query: string): Promise<Client[]> {
-    await delay(300);
-
     const lowerQuery = query.toLowerCase();
     return mockClients.filter(
       (client) =>
@@ -223,8 +228,6 @@ export class ClientsService {
     creator?: string;
     ageRange?: string;
   }): Promise<Client[]> {
-    await delay(300);
-
     return mockClients.filter((client) => {
       if (
         filters.groupeSanguin &&

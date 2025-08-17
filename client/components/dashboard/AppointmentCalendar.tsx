@@ -15,6 +15,9 @@ import {
   RendezVous,
 } from "@/services/appointmentsService";
 import CalendarAppointmentModal from "./CalendarAppointmentModal";
+import { UserService } from "@/services/userService";
+import { Utilisateur } from "@/services/clientsService";
+import { useToast } from "@/hooks/use-toast";
 
 // Interface for calendar display
 interface CalendarAppointment {
@@ -45,10 +48,12 @@ export default function AppointmentCalendar() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [view, setView] = useState<"week" | "day">("week");
   const [appointments, setAppointments] = useState<CalendarAppointment[]>([]);
+  const [users, setUsers] = useState<Utilisateur[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedAppointment, setSelectedAppointment] =
     useState<CalendarAppointment | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const { toast } = useToast();
 
   // Convert RendezVous to CalendarAppointment format
   const convertToCalendarFormat = (
@@ -79,9 +84,7 @@ export default function AppointmentCalendar() {
     try {
       setLoading(true);
       const data = await AppointmentsService.getAll();
-      console.log("Calendar loaded appointments from service:", data);
       const calendarAppointments = convertToCalendarFormat(data);
-      console.log("Calendar converted appointments:", calendarAppointments);
       setAppointments(calendarAppointments);
     } catch (error) {
       console.error("Error loading appointments:", error);
@@ -90,9 +93,29 @@ export default function AppointmentCalendar() {
     }
   };
 
+  const loadUsers = async () => {
+    try {
+      setLoading(true);
+      const data = await UserService.getCurrentAllUsers();
+      setUsers(data);
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: "Impossible de charger les utilisateurs",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Load appointments on component mount
   useEffect(() => {
     loadAppointments();
+  }, []);
+
+  useEffect(() => {
+    loadUsers();
   }, []);
 
   // Listen for appointment updates
@@ -475,6 +498,7 @@ export default function AppointmentCalendar() {
         isOpen={isModalOpen}
         onClose={handleModalClose}
         appointment={selectedAppointment}
+        users={users}
       />
     </Card>
   );

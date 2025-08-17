@@ -34,7 +34,7 @@ import {
   RendezVous,
   AppointmentsService,
 } from "@/services/appointmentsService";
-import { ClientsService, Client } from "@/services/clientsService";
+import { ClientsService, Client, Utilisateur } from "@/services/clientsService";
 
 // Calendar appointment interface
 interface CalendarAppointment {
@@ -51,6 +51,7 @@ interface CalendarAppointmentModalProps {
   isOpen: boolean;
   onClose: (statusChanged?: boolean) => void;
   appointment: CalendarAppointment | null;
+  users: Utilisateur[] | null;
 }
 
 const statusColors = {
@@ -71,6 +72,7 @@ export default function CalendarAppointmentModal({
   isOpen,
   onClose,
   appointment,
+  users,
 }: CalendarAppointmentModalProps) {
   const [fullAppointment, setFullAppointment] = useState<RendezVous | null>(
     null,
@@ -112,6 +114,12 @@ export default function CalendarAppointmentModal({
     }
   };
 
+  const getUserName = (CIN: string) => {
+    const user = users.find((user) => user.CIN === CIN);
+    if (user && user.nom) return user.nom;
+    return CIN;
+  };
+
   const handleStatusUpdate = async (newStatus: string) => {
     if (!fullAppointment) return;
 
@@ -121,6 +129,7 @@ export default function CalendarAppointmentModal({
       // Create update data with new status
       const updateData = {
         client_id: fullAppointment.client_id || 0,
+        CIN: fullAppointment.CIN,
         sujet: fullAppointment.sujet,
         date_rendez_vous: fullAppointment.date_rendez_vous,
         Cree_par: fullAppointment.Cree_par,
@@ -321,7 +330,7 @@ export default function CalendarAppointmentModal({
                 <FieldLabel>Créé par</FieldLabel>
                 <FieldValue className="flex items-center gap-2">
                   <UserCheck className="h-4 w-4" />
-                  {fullAppointment?.Cree_par || "Chargement..."}
+                  {getUserName(fullAppointment?.Cree_par) || "Chargement..."}
                 </FieldValue>
               </div>
               <div>

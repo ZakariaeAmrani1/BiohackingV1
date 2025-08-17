@@ -1,5 +1,7 @@
 import { ClientsService, Client } from "./clientsService";
 import { ActivitiesService } from "./activitiesService";
+import api from "../api/axios";
+import { AuthService } from "./authService";
 
 // Type matching your database structure
 export interface RendezVous {
@@ -11,12 +13,14 @@ export interface RendezVous {
   Cree_par: string;
   status?: "programmé" | "confirmé" | "terminé" | "annulé";
   patient_nom?: string; // Additional field for display
+  email?: string;
   client_id?: number; // Reference to client table
 }
 
 // Create/Update form data interface
 export interface AppointmentFormData {
   client_id: number;
+  CIN: string;
   sujet: string;
   date_rendez_vous: string;
   Cree_par: string;
@@ -24,7 +28,11 @@ export interface AppointmentFormData {
 }
 
 // Helper function to get dates relative to today
-const getRelativeDate = (daysFromToday: number, hour: number = 10, minute: number = 0): string => {
+const getRelativeDate = (
+  daysFromToday: number,
+  hour: number = 10,
+  minute: number = 0,
+): string => {
   const date = new Date();
   date.setDate(date.getDate() + daysFromToday);
   date.setHours(hour, minute, 0, 0);
@@ -32,96 +40,7 @@ const getRelativeDate = (daysFromToday: number, hour: number = 10, minute: numbe
 };
 
 // Mock data storage - in real app this would connect to your backend
-let mockAppointments: RendezVous[] = [
-  {
-    id: 1,
-    CIN: "BE123456",
-    sujet: "Consultation Biohacking",
-    date_rendez_vous: getRelativeDate(0, 11, 0), // Today at 11:00
-    created_at: getRelativeDate(-2, 14, 30),
-    Cree_par: "Dr. Smith",
-    status: "confirmé",
-    patient_nom: "Jean Dupont",
-    client_id: 1,
-  },
-  {
-    id: 2,
-    CIN: "BE234567",
-    sujet: "Thérapie IV",
-    date_rendez_vous: getRelativeDate(0, 14, 30), // Today at 14:30
-    created_at: getRelativeDate(-1, 9, 15),
-    Cree_par: "Dr. Martin",
-    status: "programmé",
-    patient_nom: "Marie Laurent",
-    client_id: 2,
-  },
-  {
-    id: 3,
-    CIN: "BE345678",
-    sujet: "Séance de Cryothérapie",
-    date_rendez_vous: getRelativeDate(1, 15, 0), // Tomorrow at 15:00
-    created_at: getRelativeDate(-3, 16, 45),
-    Cree_par: "Dr. Smith",
-    status: "confirmé",
-    patient_nom: "Pierre Martin",
-    client_id: 3,
-  },
-  {
-    id: 4,
-    CIN: "BE456789",
-    sujet: "Analyse du Bilan Sanguin",
-    date_rendez_vous: getRelativeDate(-1, 12, 0), // Yesterday at 12:00
-    created_at: getRelativeDate(-5, 10, 20),
-    Cree_par: "Dr. Dubois",
-    status: "terminé",
-    patient_nom: "Sophie Wilson",
-    client_id: 4,
-  },
-  {
-    id: 5,
-    CIN: "BE567890",
-    sujet: "Consultation Bien-être",
-    date_rendez_vous: getRelativeDate(2, 16, 0), // Day after tomorrow at 16:00
-    created_at: getRelativeDate(0, 11, 30),
-    Cree_par: "Dr. Martin",
-    status: "programmé",
-    patient_nom: "Luc Chen",
-    client_id: 5,
-  },
-  {
-    id: 6,
-    CIN: "BE678901",
-    sujet: "Suivi Post-Traitement",
-    date_rendez_vous: getRelativeDate(-2, 13, 30), // 2 days ago at 13:30
-    created_at: getRelativeDate(-7, 15, 10),
-    Cree_par: "Dr. Smith",
-    status: "annulé",
-    patient_nom: "Alice Brown",
-    client_id: 6,
-  },
-  {
-    id: 7,
-    CIN: "BE789012",
-    sujet: "Thérapie par Ondes de Choc",
-    date_rendez_vous: getRelativeDate(3, 17, 30), // 3 days from now at 17:30
-    created_at: getRelativeDate(1, 8, 45),
-    Cree_par: "Dr. Dubois",
-    status: "confirmé",
-    patient_nom: "David Garcia",
-    client_id: 7,
-  },
-  {
-    id: 8,
-    CIN: "BE890123",
-    sujet: "Consultation Nutritionnelle",
-    date_rendez_vous: getRelativeDate(4, 10, 0), // 4 days from now at 10:00
-    created_at: getRelativeDate(2, 12, 20),
-    Cree_par: "Dr. Martin",
-    status: "programmé",
-    patient_nom: "Emma Rodriguez",
-    client_id: 8,
-  },
-];
+let mockAppointments: RendezVous[] = [];
 
 // Simulate API delay
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -129,26 +48,48 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 export class AppointmentsService {
   // Get all appointments
   static async getAll(): Promise<RendezVous[]> {
-    await delay(500); // Simulate API delay
-    return [...mockAppointments];
+    const result = await api.get(`rendez-vous`);
+    const appointments = result.data;
+    mockAppointments = appointments.map((appointment) => ({
+      id: appointment.id,
+      CIN: appointment.CIN,
+      sujet: appointment.sujet,
+      date_rendez_vous: appointment.date_rendez_vous,
+      created_at: appointment.created_at,
+      Cree_par: appointment.Cree_par,
+      status: appointment.status,
+      patient_nom: `${appointment.client.prenom} ${appointment.client.nom}`,
+      client_id: appointment.client.id,
+      email: appointment.client.email,
+    }));
+    return mockAppointments;
   }
 
   // Get appointment by ID
   static async getById(id: number): Promise<RendezVous | null> {
-    await delay(300);
     const appointment = mockAppointments.find((apt) => apt.id === id);
     return appointment || null;
   }
 
   // Create new appointment
   static async create(data: AppointmentFormData): Promise<RendezVous> {
-    await delay(800);
+    const currentUser = AuthService.getCurrentUser();
 
     // Get client information from client_id
     const client = await ClientsService.getById(data.client_id);
     if (!client) {
       throw new Error("Client non trouvé");
     }
+
+    const date = new Date(data.date_rendez_vous);
+
+    await api.post(`rendez-vous`, {
+      CIN: client.CIN,
+      sujet: data.sujet,
+      date_rendez_vous: date.toISOString(),
+      status: data.status,
+      Cree_par: currentUser.CIN,
+    });
 
     const newAppointment: RendezVous = {
       id: Math.max(...mockAppointments.map((apt) => apt.id)) + 1,
@@ -188,8 +129,6 @@ export class AppointmentsService {
     id: number,
     data: AppointmentFormData,
   ): Promise<RendezVous | null> {
-    await delay(800);
-
     const index = mockAppointments.findIndex((apt) => apt.id === id);
     if (index === -1) return null;
 
@@ -198,6 +137,16 @@ export class AppointmentsService {
     if (!client) {
       throw new Error("Client non trouvé");
     }
+
+    const currentUser = AuthService.getCurrentUser();
+    const date = new Date(data.date_rendez_vous);
+    const result = await api.patch(`rendez-vous/${id}`, {
+      CIN: client.CIN,
+      sujet: data.sujet,
+      date_rendez_vous: date.toISOString(),
+      status: data.status,
+      Cree_par: currentUser.CIN,
+    });
 
     const updatedAppointment: RendezVous = {
       ...mockAppointments[index],
@@ -233,7 +182,7 @@ export class AppointmentsService {
 
   // Delete appointment
   static async delete(id: number): Promise<boolean> {
-    await delay(500);
+    const result = await api.delete(`rendez-vous/${id}`);
 
     const index = mockAppointments.findIndex((apt) => apt.id === id);
     if (index === -1) return false;
@@ -262,8 +211,6 @@ export class AppointmentsService {
 
   // Search appointments
   static async search(query: string): Promise<RendezVous[]> {
-    await delay(300);
-
     const lowerQuery = query.toLowerCase();
     return mockAppointments.filter(
       (appointment) =>
@@ -279,8 +226,6 @@ export class AppointmentsService {
     creator?: string;
     dateRange?: string;
   }): Promise<RendezVous[]> {
-    await delay(300);
-
     return mockAppointments.filter((appointment) => {
       if (
         filters.status &&

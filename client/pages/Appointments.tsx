@@ -50,6 +50,8 @@ import {
   RendezVous,
   AppointmentFormData,
 } from "@/services/appointmentsService";
+import { Utilisateur } from "@/services/clientsService";
+import { UserService } from "@/services/userService";
 
 const statusColors = {
   programmé: "bg-blue-100 text-blue-700 border-blue-200",
@@ -67,6 +69,7 @@ export default function Appointments() {
 
   // Data state
   const [appointments, setAppointments] = useState<RendezVous[]>([]);
+  const [users, setUsers] = useState<Utilisateur[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   // Modal states
@@ -85,6 +88,10 @@ export default function Appointments() {
   // Load appointments on component mount
   useEffect(() => {
     loadAppointments();
+  }, []);
+
+  useEffect(() => {
+    loadUsers();
   }, []);
 
   // Add escape key handler to force close modals if stuck
@@ -116,6 +123,28 @@ export default function Appointments() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const loadUsers = async () => {
+    try {
+      setIsLoading(true);
+      const data = await UserService.getCurrentAllUsers();
+      setUsers(data);
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: "Impossible de charger les utilisateurs",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const getUserName = (CIN: string) => {
+    const user = users.find((user) => user.CIN === CIN);
+    if (user && user.nom) return user.nom;
+    return CIN;
   };
 
   // Filter and search logic
@@ -377,7 +406,7 @@ export default function Appointments() {
                   <SelectItem value="tous">Tous les créateurs</SelectItem>
                   {creators.map((creator) => (
                     <SelectItem key={creator} value={creator}>
-                      {creator}
+                      {getUserName(creator)}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -478,7 +507,9 @@ export default function Appointments() {
                                 {appointment.status}
                               </Badge>
                             </TableCell>
-                            <TableCell>{appointment.Cree_par}</TableCell>
+                            <TableCell>
+                              {getUserName(appointment.Cree_par)}
+                            </TableCell>
                             <TableCell>
                               {formatDate(appointment.created_at)}
                             </TableCell>
@@ -591,7 +622,7 @@ export default function Appointments() {
                         <div className="flex items-center gap-2 text-sm">
                           <User className="h-4 w-4 text-muted-foreground" />
                           <span className="font-medium">Créé par:</span>
-                          <span>{appointment.Cree_par}</span>
+                          <span>{getUserName(appointment.Cree_par)}</span>
                         </div>
                       </div>
 
@@ -672,6 +703,7 @@ export default function Appointments() {
           }
           appointment={selectedAppointment}
           isLoading={isSubmitting}
+          users={users}
         />
 
         <AppointmentDetailsModal
@@ -680,6 +712,7 @@ export default function Appointments() {
           appointment={selectedAppointment}
           onEdit={openEditModal}
           onDelete={openDeleteModal}
+          users={users}
         />
 
         <DeleteConfirmationModal

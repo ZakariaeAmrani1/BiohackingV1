@@ -59,7 +59,9 @@ import {
   ClientFormData,
   calculateAge,
   validateClientData,
+  Utilisateur,
 } from "@/services/clientsService";
+import { AuthService } from "@/services/authService";
 
 interface AppointmentFormModalProps {
   isOpen: boolean;
@@ -67,6 +69,7 @@ interface AppointmentFormModalProps {
   onSubmit: (data: AppointmentFormData) => Promise<void>;
   appointment?: RendezVous | null;
   isLoading?: boolean;
+  users: Utilisateur[] | null;
 }
 
 export default function AppointmentFormModal({
@@ -75,9 +78,11 @@ export default function AppointmentFormModal({
   onSubmit,
   appointment,
   isLoading = false,
+  users,
 }: AppointmentFormModalProps) {
   const [formData, setFormData] = useState<AppointmentFormData>({
     client_id: 0,
+    CIN: "",
     sujet: "",
     date_rendez_vous: "",
     Cree_par: "",
@@ -113,6 +118,7 @@ export default function AppointmentFormModal({
 
   // Initialize form data when appointment changes
   useEffect(() => {
+    const user = AuthService.getCurrentUser();
     if (appointment) {
       // Convert ISO string to datetime-local format
       const dateTime = appointment.date_rendez_vous
@@ -121,6 +127,7 @@ export default function AppointmentFormModal({
 
       setFormData({
         client_id: appointment.client_id || 0,
+        CIN: appointment.CIN || "",
         sujet: appointment.sujet || "",
         date_rendez_vous: dateTime,
         Cree_par: appointment.Cree_par || "",
@@ -135,9 +142,10 @@ export default function AppointmentFormModal({
       // Reset form for new appointment
       setFormData({
         client_id: 0,
+        CIN: "",
         sujet: "",
         date_rendez_vous: "",
-        Cree_par: "",
+        Cree_par: user.CIN,
         status: "programmé",
       });
       setSelectedClient(null);
@@ -155,6 +163,7 @@ export default function AppointmentFormModal({
   const loadClients = async () => {
     try {
       const clientsData = await ClientsService.getAll();
+      console.log(clientsData);
       setClients(clientsData);
     } catch (error) {
       setErrors(["Erreur lors du chargement des patients"]);
@@ -609,17 +618,23 @@ export default function AppointmentFormModal({
             <Select
               value={formData.Cree_par}
               onValueChange={(value) => handleInputChange("Cree_par", value)}
-              disabled={isSubmitting}
+              disabled={true}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Sélectionnez le médecin" />
               </SelectTrigger>
               <SelectContent>
-                {availableDoctors.map((doctor) => (
-                  <SelectItem key={doctor} value={doctor}>
-                    {doctor}
-                  </SelectItem>
-                ))}
+                {Array.isArray(users) && users.length > 0 ? (
+                  users.map((user) => (
+                    <SelectItem key={user.CIN} value={user.CIN}>
+                      {user.nom}
+                    </SelectItem>
+                  ))
+                ) : (
+                  <div className="p-2 text-sm text-gray-500">
+                    Aucun médecin trouvé
+                  </div>
+                )}
               </SelectContent>
             </Select>
           </div>

@@ -21,6 +21,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { RendezVous } from "@/services/appointmentsService";
+import { Utilisateur } from "@/services/clientsService";
 
 interface AppointmentDetailsModalProps {
   isOpen: boolean;
@@ -28,6 +29,7 @@ interface AppointmentDetailsModalProps {
   appointment: RendezVous | null;
   onEdit?: (appointment: RendezVous) => void;
   onDelete?: (appointment: RendezVous) => void;
+  users: Utilisateur[] | null;
 }
 
 const statusColors = {
@@ -50,6 +52,7 @@ export default function AppointmentDetailsModal({
   appointment,
   onEdit,
   onDelete,
+  users,
 }: AppointmentDetailsModalProps) {
   if (!appointment) return null;
 
@@ -74,6 +77,11 @@ export default function AppointmentDetailsModal({
       hour: "2-digit",
       minute: "2-digit",
     });
+  };
+
+  const getUserName = (CIN: string) => {
+    const user = users.find((user) => user.CIN === CIN);
+    return user.nom || CIN;
   };
 
   const handleEdit = () => {
@@ -178,7 +186,7 @@ export default function AppointmentDetailsModal({
                 <Label>Créé par</Label>
                 <Value className="flex items-center gap-2">
                   <UserCheck className="h-4 w-4" />
-                  {appointment.Cree_par}
+                  {getUserName(appointment.Cree_par)}
                 </Value>
               </div>
               <div>
