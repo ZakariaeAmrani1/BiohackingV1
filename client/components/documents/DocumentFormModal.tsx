@@ -9,6 +9,7 @@ import {
   List,
   CheckSquare,
   AlignLeft,
+  Search,
 } from "lucide-react";
 import {
   Dialog,
@@ -34,6 +35,20 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "@/components/ui/popover";
+import {
+  Command,
+  CommandInput,
+  CommandList,
+  CommandEmpty,
+  CommandGroup,
+  CommandItem,
+} from "@/components/ui/command";
+import { Badge } from "@/components/ui/badge";
+import {
   DocumentFormData,
   Document,
   validateDocumentData,
@@ -41,12 +56,17 @@ import {
   createEmptyDocumentData,
   getFieldValue,
   setFieldValue,
+  computeFieldKey,
 } from "@/services/documentsService";
 import {
   DocumentTemplate,
   DocumentField,
 } from "@/services/documentTemplatesService";
-import { Client } from "@/services/clientsService";
+import {
+  Client,
+  ClientsService,
+  calculateAge,
+} from "@/services/clientsService";
 
 interface DocumentFormModalProps {
   isOpen: boolean;
@@ -74,9 +94,43 @@ export default function DocumentFormModal({
     useState<DocumentTemplate | null>(null);
   const [errors, setErrors] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [clients, setClients] = useState<Client[]>([]);
+  const [isClientsLoading, setIsClientsLoading] = useState(false);
+  const [isClientSelectorOpen, setIsClientSelectorOpen] = useState(false);
+  const [clientSearchQuery, setClientSearchQuery] = useState("");
+  const [selectedClient, setSelectedClient] = useState<Client | null>(null);
 
   const isEditMode = !!document;
   const availableDoctors = getAvailableDoctors();
+
+  // Load clients for selection when patient is not preselected
+  useEffect(() => {
+    if (!patient && !isEditMode) {
+      setIsClientsLoading(true);
+      ClientsService.getAll()
+        .then((list) => setClients(list))
+        .catch(() => setClients([]))
+        .finally(() => setIsClientsLoading(false));
+    }
+  }, [patient, isEditMode]);
+
+  const filteredClients = clients.filter((client) => {
+    const q = clientSearchQuery.toLowerCase();
+    return (
+      client.nom.toLowerCase().includes(q) ||
+      client.prenom.toLowerCase().includes(q) ||
+      client.CIN.toLowerCase().includes(q) ||
+      client.email.toLowerCase().includes(q)
+    );
+  });
+
+  const handleClientSelect = (client: Client) => {
+    setSelectedClient(client);
+    setFormData((prev) => ({ ...prev, CIN: client.CIN }));
+    setIsClientSelectorOpen(false);
+    setClientSearchQuery("");
+    if (errors.length > 0) setErrors([]);
+  };
 
   // Initialize form data when document or patient changes
   useEffect(() => {
@@ -121,10 +175,14 @@ export default function DocumentFormModal({
     }
   };
 
-  const handleFieldChange = (fieldName: string, value: any) => {
+  const handleFieldChange = (
+    fieldKey: string,
+    value: any,
+    fallbackName?: string,
+  ) => {
     setFormData((prev) => ({
       ...prev,
-      data_json: setFieldValue(prev.data_json, fieldName, value),
+      data_json: setFieldValue(prev.data_json, fieldKey, value, fallbackName),
     }));
 
     if (errors.length > 0) {
@@ -161,15 +219,30 @@ export default function DocumentFormModal({
     }
   };
 
-  const renderField = (field: DocumentField) => {
-    const currentValue = getFieldValue(formData.data_json, field.name);
+  const renderField = (
+    field: DocumentField,
+    sectionIndex: number,
+    fieldIndex: number,
+  ) => {
+    const fieldKey = computeFieldKey(
+      formData.template_id,
+      sectionIndex,
+      fieldIndex,
+    );
+    const currentValue = getFieldValue(
+      formData.data_json,
+      fieldKey,
+      field.name,
+    );
 
     switch (field.type) {
       case "text":
         return (
           <Input
             value={currentValue || ""}
-            onChange={(e) => handleFieldChange(field.name, e.target.value)}
+            onChange={(e) =>
+              handleFieldChange(fieldKey, e.target.value, field.name)
+            }
             disabled={isSubmitting}
             placeholder={`Saisir ${field.name.toLowerCase()}`}
           />
@@ -182,8 +255,9 @@ export default function DocumentFormModal({
             value={currentValue || ""}
             onChange={(e) =>
               handleFieldChange(
-                field.name,
+                fieldKey,
                 e.target.value ? parseFloat(e.target.value) : "",
+                field.name,
               )
             }
             disabled={isSubmitting}
@@ -195,7 +269,9 @@ export default function DocumentFormModal({
         return (
           <Textarea
             value={currentValue || ""}
-            onChange={(e) => handleFieldChange(field.name, e.target.value)}
+            onChange={(e) =>
+              handleFieldChange(fieldKey, e.target.value, field.name)
+            }
             disabled={isSubmitting}
             placeholder={`Saisir ${field.name.toLowerCase()}`}
             rows={3}
@@ -207,7 +283,9 @@ export default function DocumentFormModal({
           <Input
             type="date"
             value={currentValue || ""}
-            onChange={(e) => handleFieldChange(field.name, e.target.value)}
+            onChange={(e) =>
+              handleFieldChange(fieldKey, e.target.value, field.name)
+            }
             disabled={isSubmitting}
           />
         );
@@ -216,7 +294,9 @@ export default function DocumentFormModal({
         return (
           <Select
             value={currentValue || ""}
-            onValueChange={(value) => handleFieldChange(field.name, value)}
+            onValueChange={(value) =>
+              handleFieldChange(fieldKey, value, field.name)
+            }
             disabled={isSubmitting}
           >
             <SelectTrigger>
@@ -240,7 +320,7 @@ export default function DocumentFormModal({
             <Checkbox
               checked={currentValue === true}
               onCheckedChange={(checked) =>
-                handleFieldChange(field.name, checked)
+                handleFieldChange(fieldKey, checked, field.name)
               }
               disabled={isSubmitting}
             />
@@ -252,7 +332,9 @@ export default function DocumentFormModal({
         return (
           <Input
             value={currentValue || ""}
-            onChange={(e) => handleFieldChange(field.name, e.target.value)}
+            onChange={(e) =>
+              handleFieldChange(fieldKey, e.target.value, field.name)
+            }
             disabled={isSubmitting}
             placeholder={`Saisir ${field.name.toLowerCase()}`}
           />
@@ -273,12 +355,13 @@ export default function DocumentFormModal({
     if (selectedTemplate) {
       const templateErrors: string[] = [];
 
-      selectedTemplate.sections_json.sections.forEach((section) => {
-        section.fields.forEach((field) => {
+      selectedTemplate.sections_json.sections.forEach((section, sIdx) => {
+        section.fields.forEach((field, fIdx) => {
           if (field.required) {
-            const value = getFieldValue(formData.data_json, field.name);
+            const key = computeFieldKey(formData.template_id, sIdx, fIdx);
+            const value = getFieldValue(formData.data_json, key, field.name);
             if (!value && value !== 0 && value !== false) {
-              templateErrors.push(`Le champ "${field.name}" est obligatoire`);
+              templateErrors.push(`Le champ \"${field.name}\" est obligatoire`);
             }
           }
         });
@@ -389,19 +472,133 @@ export default function DocumentFormModal({
 
             <div className="space-y-2">
               <Label>Patient</Label>
-              <div className="p-3 bg-muted rounded-lg">
-                <div className="flex items-center gap-2">
-                  <User className="h-4 w-4" />
-                  <span className="font-medium">
-                    {patient
-                      ? `${patient.prenom} ${patient.nom}`
-                      : "Patient non sélectionné"}
-                  </span>
-                  <span className="text-muted-foreground">
-                    ({formData.CIN})
-                  </span>
+              {patient ? (
+                <div className="p-3 bg-muted rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <User className="h-4 w-4" />
+                    <span className="font-medium">
+                      {`${patient.prenom} ${patient.nom}`}
+                    </span>
+                    <span className="text-muted-foreground">
+                      ({formData.CIN})
+                    </span>
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <>
+                  <Popover
+                    open={isClientSelectorOpen}
+                    onOpenChange={setIsClientSelectorOpen}
+                    modal={true as any}
+                  >
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        role="combobox"
+                        aria-expanded={isClientSelectorOpen}
+                        className="w-full justify-between"
+                        disabled={isSubmitting}
+                      >
+                        {selectedClient ? (
+                          <div className="flex items-center gap-2">
+                            <span>
+                              {selectedClient.prenom} {selectedClient.nom}
+                            </span>
+                            <Badge variant="outline" className="text-xs">
+                              {selectedClient.CIN}
+                            </Badge>
+                          </div>
+                        ) : (
+                          "Rechercher et sélectionner un patient..."
+                        )}
+                        <Search className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent
+                      className="w-[500px] p-0 z-[60] shadow-lg border-2"
+                      sideOffset={5}
+                      align="start"
+                    >
+                      <Command>
+                        <CommandInput
+                          placeholder="Rechercher par nom, prénom, CIN, email..."
+                          value={clientSearchQuery}
+                          onValueChange={setClientSearchQuery}
+                        />
+                        <CommandList>
+                          <CommandEmpty>Aucun patient trouvé.</CommandEmpty>
+                          <CommandGroup>
+                            {clients
+                              .filter((c) => {
+                                const q = clientSearchQuery.toLowerCase();
+                                return (
+                                  c.nom.toLowerCase().includes(q) ||
+                                  c.prenom.toLowerCase().includes(q) ||
+                                  c.CIN.toLowerCase().includes(q) ||
+                                  c.email.toLowerCase().includes(q)
+                                );
+                              })
+                              .map((c) => (
+                                <CommandItem
+                                  key={c.id}
+                                  value={`${c.prenom} ${c.nom} ${c.CIN} ${c.email}`}
+                                  onSelect={() => {
+                                    setSelectedClient(c);
+                                    setFormData((prev) => ({
+                                      ...prev,
+                                      CIN: c.CIN,
+                                    }));
+                                    setIsClientSelectorOpen(false);
+                                    setClientSearchQuery("");
+                                    if (errors.length > 0) setErrors([]);
+                                  }}
+                                  className="flex items-center justify-between p-3"
+                                >
+                                  <div className="flex flex-col">
+                                    <div className="font-medium">
+                                      {c.prenom} {c.nom}
+                                    </div>
+                                    <div className="text-sm text-muted-foreground">
+                                      {c.CIN} • Âge:{" "}
+                                      {calculateAge(c.date_naissance)} ans •{" "}
+                                      {c.email}
+                                    </div>
+                                  </div>
+                                  <Badge variant="outline">
+                                    {c.groupe_sanguin}
+                                  </Badge>
+                                </CommandItem>
+                              ))}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+
+                  {selectedClient && (
+                    <div className="p-3 bg-muted/50 rounded-lg">
+                      <div className="flex items-center justify-between">
+                        <div className="space-y-1">
+                          <div className="font-medium">
+                            {selectedClient.prenom} {selectedClient.nom}
+                          </div>
+                          <div className="text-sm text-muted-foreground">
+                            CIN: {selectedClient.CIN} • Âge:{" "}
+                            {calculateAge(selectedClient.date_naissance)} ans
+                          </div>
+                          <div className="text-sm text-muted-foreground">
+                            Email: {selectedClient.email} • Tél:{" "}
+                            {selectedClient.numero_telephone}
+                          </div>
+                        </div>
+                        <Badge variant="outline" className="gap-1">
+                          {selectedClient.groupe_sanguin}
+                        </Badge>
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
             </div>
           </div>
 
@@ -431,7 +628,7 @@ export default function DocumentFormModal({
                                 <span className="text-red-500">*</span>
                               )}
                             </Label>
-                            {renderField(field)}
+                            {renderField(field, sectionIndex, fieldIndex)}
                           </div>
                         ))}
                       </CardContent>
@@ -469,7 +666,7 @@ export default function DocumentFormModal({
             </Button>
             <Button
               type="submit"
-              disabled={isSubmitting || !selectedTemplate}
+              disabled={isSubmitting || !selectedTemplate || !formData.CIN}
               className="min-w-[120px]"
             >
               {isSubmitting ? (

@@ -10,6 +10,7 @@ import {
   Stethoscope,
   Euro,
   Hash,
+  Search,
 } from "lucide-react";
 import {
   Dialog,
@@ -34,6 +35,20 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "@/components/ui/popover";
+import {
+  Command,
+  CommandInput,
+  CommandList,
+  CommandEmpty,
+  CommandGroup,
+  CommandItem,
+} from "@/components/ui/command";
+import { Badge } from "@/components/ui/badge";
+import {
   FactureFormData,
   FactureWithDetails,
   FactureItem,
@@ -50,7 +65,11 @@ import {
 } from "@/services/invoicesService";
 import { ProductsService, Product } from "@/services/productsService";
 import { SoinsService, Soin } from "@/services/soinsService";
-import { ClientsService, Client } from "@/services/clientsService";
+import {
+  ClientsService,
+  Client,
+  calculateAge,
+} from "@/services/clientsService";
 
 interface InvoiceFormModalProps {
   isOpen: boolean;
@@ -74,6 +93,9 @@ export default function InvoiceFormModal({
 
   // Data for dropdowns
   const [clients, setClients] = useState<Client[]>([]);
+  const [isClientSelectorOpen, setIsClientSelectorOpen] = useState(false);
+  const [clientSearchQuery, setClientSearchQuery] = useState("");
+  const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [soins, setSoins] = useState<Soin[]>([]);
   const [isLoadingData, setIsLoadingData] = useState(true);
@@ -237,6 +259,24 @@ export default function InvoiceFormModal({
     return client ? `${client.prenom} ${client.nom}` : cin;
   };
 
+  const filteredClients = clients.filter((client) => {
+    const q = clientSearchQuery.toLowerCase();
+    return (
+      client.nom.toLowerCase().includes(q) ||
+      client.prenom.toLowerCase().includes(q) ||
+      client.CIN.toLowerCase().includes(q) ||
+      client.email.toLowerCase().includes(q)
+    );
+  });
+
+  const handleClientSelect = (client: Client) => {
+    setSelectedClient(client);
+    setFormData((prev) => ({ ...prev, CIN: client.CIN }));
+    setIsClientSelectorOpen(false);
+    setClientSearchQuery("");
+    if (errors.length > 0) setErrors([]);
+  };
+
   const totals = calculateInvoiceTotals(formData.items);
 
   return (
@@ -278,22 +318,88 @@ export default function InvoiceFormModal({
                   <User className="h-4 w-4" />
                   Patient
                 </Label>
-                <Select
-                  value={formData.CIN}
-                  onValueChange={(value) => handleInputChange("CIN", value)}
-                  disabled={isSubmitting || isLoadingData}
+                <Popover
+                  open={isClientSelectorOpen}
+                  onOpenChange={setIsClientSelectorOpen}
+                  modal={true as any}
                 >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Sélectionnez un patient" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {clients.map((client) => (
-                      <SelectItem key={client.CIN} value={client.CIN}>
-                        {client.prenom} {client.nom} ({client.CIN})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      aria-expanded={isClientSelectorOpen}
+                      className="w-full justify-between"
+                      disabled={isSubmitting || isLoadingData}
+                    >
+                      {formData.CIN ? (
+                        <div className="flex items-center gap-2">
+                          <span>{getPatientName(formData.CIN)}</span>
+                          <Badge variant="outline" className="text-xs">
+                            {formData.CIN}
+                          </Badge>
+                        </div>
+                      ) : (
+                        "Rechercher et sélectionner un patient..."
+                      )}
+                      <Search className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent
+                    className="w-[500px] p-0 z-[60] shadow-lg border-2"
+                    sideOffset={5}
+                    align="start"
+                  >
+                    <Command>
+                      <CommandInput
+                        placeholder="Rechercher par nom, prénom, CIN, email..."
+                        value={clientSearchQuery}
+                        onValueChange={setClientSearchQuery}
+                      />
+                      <CommandList>
+                        <CommandEmpty>Aucun patient trouvé.</CommandEmpty>
+                        <CommandGroup>
+                          {filteredClients.map((c) => (
+                            <CommandItem
+                              key={c.id}
+                              value={`${c.prenom} ${c.nom} ${c.CIN} ${c.email}`}
+                              onSelect={() => handleClientSelect(c)}
+                              className="flex items-center justify-between p-3"
+                            >
+                              <div className="flex flex-col">
+                                <div className="font-medium">
+                                  {c.prenom} {c.nom}
+                                </div>
+                                <div className="text-sm text-muted-foreground">
+                                  {c.CIN} • Âge:{" "}
+                                  {calculateAge(c.date_naissance)} ans •{" "}
+                                  {c.email}
+                                </div>
+                              </div>
+                              <Badge variant="outline">
+                                {c.groupe_sanguin}
+                              </Badge>
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
+
+                {formData.CIN && (
+                  <div className="p-3 bg-muted/50 rounded-lg">
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-1">
+                        <div className="font-medium">
+                          {getPatientName(formData.CIN)}
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          CIN: {formData.CIN}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -335,7 +441,7 @@ export default function InvoiceFormModal({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="Cree_par">Créé par</Label>
+                <Label htmlFor="Cree_par">Cré�� par</Label>
                 <Select
                   value={formData.Cree_par}
                   onValueChange={(value) =>
@@ -599,7 +705,9 @@ export default function InvoiceFormModal({
             </Button>
             <Button
               type="submit"
-              disabled={isSubmitting || formData.items.length === 0}
+              disabled={
+                isSubmitting || formData.items.length === 0 || !formData.CIN
+              }
               className="min-w-[120px]"
             >
               {isSubmitting ? (

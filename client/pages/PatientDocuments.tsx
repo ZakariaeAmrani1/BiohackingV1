@@ -59,6 +59,8 @@ import {
   Document,
   DocumentFormData,
   getAvailableDoctors,
+  getFieldValue,
+  computeFieldKey,
 } from "@/services/documentsService";
 import {
   ClientsService,
@@ -413,12 +415,17 @@ export default function PatientDocuments() {
             template
               ? template.sections_json.sections
                   .map(
-                    (section) => `
+                    (section, sIdx) => `
             <div class="section">
               <div class="section-title">${section.title}</div>
               ${section.fields
-                .map((field) => {
-                  const value = document.data_json[field.name];
+                .map((field, fIdx) => {
+                  const key = computeFieldKey(document.template_id, sIdx, fIdx);
+                  const value = getFieldValue(
+                    document.data_json,
+                    key,
+                    field.name,
+                  );
                   let displayValue = value;
 
                   if (value === null || value === undefined || value === "") {

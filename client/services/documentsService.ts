@@ -240,24 +240,50 @@ export const createEmptyDocumentData = (): DocumentFormData => {
   };
 };
 
-// Helper function to get field value from document data
-export const getFieldValue = (
-  data: Record<string, any>,
-  fieldName: string,
-): any => {
-  return data[fieldName] || "";
+// Compute a stable storage key for a field based on its position in the template
+export const computeFieldKey = (
+  templateId: number,
+  sectionIndex: number,
+  fieldIndex: number,
+): string => {
+  return `fld:${templateId}:${sectionIndex}:${fieldIndex}`;
 };
 
-// Helper function to set field value in document data
+// Helper function to get field value from document data with support for fallback by name
+export const getFieldValue = (
+  data: Record<string, any>,
+  fieldKeyOrName: string,
+  fallbackName?: string,
+): any => {
+  if (Object.prototype.hasOwnProperty.call(data, fieldKeyOrName)) {
+    return data[fieldKeyOrName];
+  }
+  if (
+    fallbackName &&
+    Object.prototype.hasOwnProperty.call(data, fallbackName)
+  ) {
+    return data[fallbackName];
+  }
+  return "";
+};
+
+// Helper function to set field value in document data, migrating away from name-based keys if needed
 export const setFieldValue = (
   data: Record<string, any>,
-  fieldName: string,
+  fieldKeyOrName: string,
   value: any,
+  fallbackName?: string,
 ): Record<string, any> => {
-  return {
-    ...data,
-    [fieldName]: value,
-  };
+  const next = { ...data, [fieldKeyOrName]: value } as Record<string, any>;
+  // If we provided a fallback name (old name-based key), remove it to avoid duplication
+  if (
+    fallbackName &&
+    fallbackName !== fieldKeyOrName &&
+    Object.prototype.hasOwnProperty.call(next, fallbackName)
+  ) {
+    delete next[fallbackName];
+  }
+  return next;
 };
 
 // Helper to format document data for display

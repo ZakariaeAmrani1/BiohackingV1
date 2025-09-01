@@ -25,7 +25,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Document, formatDocumentData } from "@/services/documentsService";
+import {
+  Document,
+  formatDocumentData,
+  getFieldValue,
+  computeFieldKey,
+} from "@/services/documentsService";
 import {
   DocumentTemplate,
   DocumentField,
@@ -131,6 +136,7 @@ export default function DocumentDetailsModal({
   const renderSectionData = (
     section: any,
     sectionData: Record<string, any>,
+    sectionIndex: number,
   ) => {
     if (!section.fields || section.fields.length === 0) {
       return (
@@ -143,7 +149,12 @@ export default function DocumentDetailsModal({
     return (
       <div className="space-y-3">
         {section.fields.map((field: DocumentField, fieldIndex: number) => {
-          const value = sectionData[field.name];
+          const key = computeFieldKey(
+            document.template_id,
+            sectionIndex,
+            fieldIndex,
+          );
+          const value = getFieldValue(sectionData, key, field.name);
 
           return (
             <div
@@ -260,7 +271,11 @@ export default function DocumentDetailsModal({
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    {renderSectionData(section, document.data_json)}
+                    {renderSectionData(
+                      section,
+                      document.data_json,
+                      sectionIndex,
+                    )}
                   </CardContent>
                 </Card>
               ))
