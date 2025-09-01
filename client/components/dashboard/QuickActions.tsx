@@ -27,7 +27,11 @@ import {
   AppointmentFormData,
   AppointmentsService,
 } from "@/services/appointmentsService";
-import { ClientFormData, ClientsService } from "@/services/clientsService";
+import {
+  ClientFormData,
+  ClientsService,
+  Utilisateur,
+} from "@/services/clientsService";
 import { ProductFormData, ProductsService } from "@/services/productsService";
 import { SoinFormData, SoinsService } from "@/services/soinsService";
 import { FactureFormData, InvoicesService } from "@/services/invoicesService";
@@ -40,6 +44,7 @@ import {
   DocumentTemplatesService,
   DocumentTemplate,
 } from "@/services/documentTemplatesService";
+import { UserService } from "@/services/userService";
 
 interface QuickAction {
   title: string;
@@ -68,9 +73,15 @@ export default function QuickActions() {
     DocumentTemplate[]
   >([]);
 
+  const [users, setUsers] = useState<Utilisateur[]>([]);
+
   // Load document templates when component mounts
   useEffect(() => {
     loadDocumentTemplates();
+  }, []);
+
+  useEffect(() => {
+    loadUsers();
   }, []);
 
   const loadDocumentTemplates = async () => {
@@ -80,6 +91,26 @@ export default function QuickActions() {
     } catch (error) {
       console.error("Error loading document templates:", error);
     }
+  };
+
+  const loadUsers = async () => {
+    try {
+      const data = await UserService.getCurrentAllUsers();
+      setUsers(data);
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: "Impossible de charger les utilisateurs",
+        variant: "destructive",
+      });
+    } finally {
+    }
+  };
+
+  const getUserName = (CIN: string) => {
+    const user = users.find((user) => user.CIN === CIN);
+    if (user && user.nom) return user.nom;
+    return CIN;
   };
 
   const quickActions: QuickAction[] = [
@@ -331,6 +362,7 @@ export default function QuickActions() {
         onClose={() => closeModal("appointment")}
         onSubmit={handleCreateAppointment}
         isLoading={isSubmitting.appointment}
+        users={users}
       />
 
       <ClientFormModal
@@ -338,6 +370,7 @@ export default function QuickActions() {
         onClose={() => closeModal("patient")}
         onSubmit={handleCreateClient}
         isLoading={isSubmitting.patient}
+        users={users}
       />
 
       <ProductFormModal
@@ -345,6 +378,7 @@ export default function QuickActions() {
         onClose={() => closeModal("product")}
         onSubmit={handleCreateProduct}
         isLoading={isSubmitting.product}
+        users={users}
       />
 
       <SoinFormModal
@@ -352,6 +386,7 @@ export default function QuickActions() {
         onClose={() => closeModal("soin")}
         onSubmit={handleCreateSoin}
         isLoading={isSubmitting.soin}
+        users={users}
       />
 
       <InvoiceFormModal
@@ -368,6 +403,7 @@ export default function QuickActions() {
         isLoading={isSubmitting.document}
         patient={null}
         templates={documentTemplates}
+        users={users}
       />
 
       <DocumentTemplateFormModal
@@ -375,6 +411,7 @@ export default function QuickActions() {
         onClose={() => closeModal("documentTemplate")}
         onSubmit={handleCreateDocumentTemplate}
         isLoading={isSubmitting.documentTemplate}
+        users={users}
       />
     </>
   );

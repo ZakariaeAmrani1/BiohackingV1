@@ -236,17 +236,14 @@ export default function InvoiceDetailsModal({
                       <div className="flex items-center justify-between text-sm">
                         <span>Sous-total (HT):</span>
                         <span className="font-mono font-medium">
-                          {formatPrice(
-                            invoice.prix_ht || invoice.prix_total / 1.2,
-                          )}
+                          {formatPrice(invoice.prix_total / 1.2)}
                         </span>
                       </div>
                       <div className="flex items-center justify-between text-sm">
                         <span>TVA ({invoice.tva_rate || 20}%):</span>
                         <span className="font-mono font-medium">
                           {formatPrice(
-                            invoice.tva_amount ||
-                              invoice.prix_total - invoice.prix_total / 1.2,
+                            invoice.prix_total - invoice.prix_total / 1.2,
                           )}
                         </span>
                       </div>

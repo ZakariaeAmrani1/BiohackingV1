@@ -34,130 +34,7 @@ export interface DocumentTemplateFormData {
 }
 
 // Mock data storage
-let mockTemplates: DocumentTemplate[] = [
-  {
-    id: 1,
-    name: "Consultation Médicale Standard",
-    sections_json: {
-      sections: [
-        {
-          title: "Informations Générales",
-          fields: [
-            { name: "Date de consultation", type: "date", required: true },
-            { name: "Motif de consultation", type: "textarea", required: true },
-            { name: "Durée (minutes)", type: "number", required: false },
-          ],
-        },
-        {
-          title: "Examen Clinique",
-          fields: [
-            { name: "Tension artérielle", type: "text", required: false },
-            { name: "Poids (kg)", type: "number", required: false },
-            { name: "Taille (cm)", type: "number", required: false },
-            { name: "Température (°C)", type: "number", required: false },
-          ],
-        },
-        {
-          title: "Observations",
-          fields: [
-            { name: "Symptômes observés", type: "textarea", required: false },
-            { name: "Diagnostic", type: "textarea", required: false },
-            { name: "Recommandations", type: "textarea", required: false },
-          ],
-        },
-      ],
-    },
-    Cree_par: "Dr. Smith",
-    created_at: "2024-01-01T10:30:00",
-  },
-  {
-    id: 2,
-    name: "Évaluation Psychologique",
-    sections_json: {
-      sections: [
-        {
-          title: "État Mental",
-          fields: [
-            {
-              name: "Niveau de stress",
-              type: "select",
-              required: true,
-              options: ["Faible", "Modéré", "Élevé", "Très élevé"],
-            },
-            {
-              name: "Humeur générale",
-              type: "select",
-              required: true,
-              options: ["Excellente", "Bonne", "Moyenne", "Mauvaise"],
-            },
-            { name: "Troubles du sommeil", type: "checkbox", required: false },
-          ],
-        },
-        {
-          title: "Évaluation Cognitive",
-          fields: [
-            {
-              name: "Concentration",
-              type: "select",
-              required: false,
-              options: ["Excellente", "Bonne", "Moyenne", "Faible"],
-            },
-            {
-              name: "Mémoire",
-              type: "select",
-              required: false,
-              options: ["Excellente", "Bonne", "Moyenne", "Faible"],
-            },
-            { name: "Notes additionnelles", type: "textarea", required: false },
-          ],
-        },
-      ],
-    },
-    Cree_par: "Dr. Martin",
-    created_at: "2024-01-02T14:20:00",
-  },
-  {
-    id: 3,
-    name: "Suivi Post-Opératoire",
-    sections_json: {
-      sections: [
-        {
-          title: "Détails de l'Intervention",
-          fields: [
-            { name: "Type d'intervention", type: "text", required: true },
-            { name: "Date de l'opération", type: "date", required: true },
-            { name: "Chirurgien", type: "text", required: true },
-          ],
-        },
-        {
-          title: "État de Guérison",
-          fields: [
-            {
-              name: "Niveau de douleur (1-10)",
-              type: "number",
-              required: false,
-            },
-            {
-              name: "Cicatrisation",
-              type: "select",
-              required: false,
-              options: ["Excellente", "Bonne", "Moyenne", "Problématique"],
-            },
-            {
-              name: "Mobilité",
-              type: "select",
-              required: false,
-              options: ["Normale", "Limitée", "Très limitée", "Aucune"],
-            },
-            { name: "Complications", type: "textarea", required: false },
-          ],
-        },
-      ],
-    },
-    Cree_par: "Dr. Dubois",
-    created_at: "2024-01-03T09:15:00",
-  },
-];
+let mockTemplates: DocumentTemplate[] = [];
 
 // Simulate API delay
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -182,7 +59,6 @@ export class DocumentTemplatesService {
 
   // Get template by ID
   static async getById(id: number): Promise<DocumentTemplate | null> {
-    await delay(300);
     const template = mockTemplates.find((template) => template.id === id);
     return template || null;
   }
@@ -256,8 +132,6 @@ export class DocumentTemplatesService {
 
   // Search templates
   static async search(query: string): Promise<DocumentTemplate[]> {
-    await delay(300);
-
     const lowerQuery = query.toLowerCase();
     return mockTemplates.filter(
       (template) =>

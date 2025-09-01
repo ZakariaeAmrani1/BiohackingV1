@@ -1,4 +1,7 @@
 // Document types
+import api from "../api/axios";
+import { AuthService } from "./authService";
+
 export interface Document {
   id: number;
   template_id: number;
@@ -16,100 +19,7 @@ export interface DocumentFormData {
 }
 
 // Mock data storage
-let mockDocuments: Document[] = [
-  {
-    id: 1,
-    template_id: 1, // Consultation Médicale Standard
-    CIN: "BE123456",
-    data_json: {
-      "Date de consultation": "2024-01-15",
-      "Motif de consultation": "Contrôle de routine",
-      "Durée (minutes)": 30,
-      "Tension artérielle": "120/80",
-      "Poids (kg)": 75,
-      "Taille (cm)": 175,
-      "Température (°C)": 36.5,
-      "Symptômes observés": "Aucun symptôme particulier observé",
-      Diagnostic: "État de santé général bon",
-      Recommandations:
-        "Maintenir un mode de vie sain, prochain contrôle dans 6 mois",
-    },
-    Cree_par: "Dr. Smith",
-    created_at: "2024-01-15T10:30:00",
-  },
-  {
-    id: 2,
-    template_id: 2, // Évaluation Psychologique
-    CIN: "BE123456",
-    data_json: {
-      "Niveau de stress": "Modéré",
-      "Humeur générale": "Bonne",
-      "Troubles du sommeil": false,
-      Concentration: "Bonne",
-      Mémoire: "Excellente",
-      "Notes additionnelles":
-        "Patient montre des signes de fatigue liés au travail",
-    },
-    Cree_par: "Dr. Martin",
-    created_at: "2024-01-20T14:20:00",
-  },
-  {
-    id: 3,
-    template_id: 1, // Consultation Médicale Standard
-    CIN: "BE234567",
-    data_json: {
-      "Date de consultation": "2024-01-18",
-      "Motif de consultation": "Suivi post-vaccination",
-      "Durée (minutes)": 15,
-      "Tension artérielle": "110/70",
-      "Poids (kg)": 65,
-      "Taille (cm)": 168,
-      "Température (°C)": 36.2,
-      "Symptômes observés": "Légère douleur au point d'injection",
-      Diagnostic: "Réaction normale post-vaccination",
-      Recommandations: "Surveillance des symptômes, paracétamol si nécessaire",
-    },
-    Cree_par: "Dr. Dubois",
-    created_at: "2024-01-18T09:15:00",
-  },
-  {
-    id: 4,
-    template_id: 3, // Suivi Post-Opératoire
-    CIN: "BE345678",
-    data_json: {
-      "Type d'intervention": "Arthroscopie du genou",
-      "Date de l'opération": "2023-12-15",
-      Chirurgien: "Dr. Laurent",
-      "Niveau de douleur (1-10)": 3,
-      Cicatrisation: "Bonne",
-      Mobilité: "Limitée",
-      Complications:
-        "Aucune complication observée, récupération dans les normes",
-    },
-    Cree_par: "Dr. Smith",
-    created_at: "2024-01-10T16:45:00",
-  },
-  {
-    id: 5,
-    template_id: 1, // Consultation Médicale Standard
-    CIN: "BE456789",
-    data_json: {
-      "Date de consultation": "2024-01-22",
-      "Motif de consultation": "Migraine persistante",
-      "Durée (minutes)": 45,
-      "Tension artérielle": "130/85",
-      "Poids (kg)": 62,
-      "Taille (cm)": 165,
-      "Température (°C)": 36.8,
-      "Symptômes observés": "Maux de tête fréquents, sensibilité à la lumière",
-      Diagnostic: "Migraine chronique - ajustement du traitement",
-      Recommandations:
-        "Nouveau traitement préventif, éviter les déclencheurs identifiés",
-    },
-    Cree_par: "Dr. Dubois",
-    created_at: "2024-01-22T11:30:00",
-  },
-];
+let mockDocuments: Document[] = [];
 
 // Simulate API delay
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -117,29 +27,46 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 export class DocumentsService {
   // Get all documents
   static async getAll(): Promise<Document[]> {
-    await delay(500);
+    mockDocuments = [];
+    const result = await api.get(`document`);
+    const data = result.data;
+    data.map((document) => {
+      mockDocuments.push({
+        id: document.id,
+        template_id: document.template_id,
+        CIN: document.CIN,
+        data_json: document.data_json,
+        Cree_par: document.Cree_par,
+        created_at: document.created_at,
+      });
+    });
     return [...mockDocuments];
   }
 
   // Get documents by patient CIN
   static async getByPatientCIN(cin: string): Promise<Document[]> {
-    await delay(500);
+    await this.getAll();
     return mockDocuments.filter((doc) => doc.CIN === cin);
   }
 
   // Get document by ID
   static async getById(id: number): Promise<Document | null> {
-    await delay(300);
+    await this.getAll();
     const document = mockDocuments.find((doc) => doc.id === id);
     return document || null;
   }
 
   // Create new document
   static async create(data: DocumentFormData): Promise<Document> {
-    await delay(800);
-
+    const currentUser = AuthService.getCurrentUser();
+    const result = await api.post(`document`, {
+      template_id: data.template_id,
+      CIN: data.CIN,
+      data_json: data.data_json,
+      Cree_par: currentUser.CIN,
+    });
     const newDocument: Document = {
-      id: Math.max(...mockDocuments.map((doc) => doc.id)) + 1,
+      id: result.data.id,
       ...data,
       created_at: new Date().toISOString(),
     };
@@ -153,10 +80,16 @@ export class DocumentsService {
     id: number,
     data: DocumentFormData,
   ): Promise<Document | null> {
-    await delay(800);
-
     const index = mockDocuments.findIndex((doc) => doc.id === id);
     if (index === -1) return null;
+
+    const currentUser = AuthService.getCurrentUser();
+    const result = await api.patch(`document/${id}`, {
+      template_id: data.template_id,
+      CIN: data.CIN,
+      data_json: data.data_json,
+      Cree_par: currentUser.CIN,
+    });
 
     const updatedDocument: Document = {
       ...mockDocuments[index],
@@ -169,8 +102,7 @@ export class DocumentsService {
 
   // Delete document
   static async delete(id: number): Promise<boolean> {
-    await delay(500);
-
+    const result = await api.delete(`document/${id}`);
     const index = mockDocuments.findIndex((doc) => doc.id === id);
     if (index === -1) return false;
 
@@ -180,8 +112,6 @@ export class DocumentsService {
 
   // Search documents
   static async search(query: string, cin?: string): Promise<Document[]> {
-    await delay(300);
-
     const lowerQuery = query.toLowerCase();
     let filteredDocs = mockDocuments;
 
@@ -198,7 +128,6 @@ export class DocumentsService {
 
   // Get documents by template ID
   static async getByTemplateId(templateId: number): Promise<Document[]> {
-    await delay(300);
     return mockDocuments.filter((doc) => doc.template_id === templateId);
   }
 }
@@ -232,11 +161,12 @@ export const getAvailableDoctors = (): string[] => {
 };
 
 export const createEmptyDocumentData = (): DocumentFormData => {
+  const user = AuthService.getCurrentUser();
   return {
     template_id: 0,
     CIN: "",
     data_json: {},
-    Cree_par: "",
+    Cree_par: user.CIN,
   };
 };
 

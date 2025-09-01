@@ -66,11 +66,13 @@ import {
   ClientsService,
   Client,
   calculateAge,
+  Utilisateur,
 } from "@/services/clientsService";
 import {
   DocumentTemplatesService,
   DocumentTemplate,
 } from "@/services/documentTemplatesService";
+import { UserService } from "@/services/userService";
 
 export default function PatientDocuments() {
   const { cin } = useParams<{ cin: string }>();
@@ -79,6 +81,7 @@ export default function PatientDocuments() {
   const [templateFilter, setTemplateFilter] = useState<string>("tous");
   const [creatorFilter, setCreatorFilter] = useState<string>("tous");
   const [viewMode, setViewMode] = useState<"table" | "cards">("table");
+  const [users, setUsers] = useState<Utilisateur[]>([]);
 
   // Data state
   const [documents, setDocuments] = useState<Document[]>([]);
@@ -128,6 +131,10 @@ export default function PatientDocuments() {
     };
   }, []);
 
+  useEffect(() => {
+    loadUsers();
+  }, []);
+
   const loadPatientData = async () => {
     if (!cin) return;
 
@@ -172,6 +179,28 @@ export default function PatientDocuments() {
     } catch (error) {
       console.error("Failed to load templates:", error);
     }
+  };
+
+  const loadUsers = async () => {
+    try {
+      setIsLoading(true);
+      const data = await UserService.getCurrentAllUsers();
+      setUsers(data);
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: "Impossible de charger les utilisateurs",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const getUserName = (CIN: string) => {
+    const user = users.find((user) => user.CIN === CIN);
+    if (user && user.nom) return user.nom;
+    return CIN;
   };
 
   // Filter and search logic
@@ -632,7 +661,7 @@ export default function PatientDocuments() {
                     <SelectItem value="tous">Tous les créateurs</SelectItem>
                     {creators.map((creator) => (
                       <SelectItem key={creator} value={creator}>
-                        {creator}
+                        {getUserName(creator)}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -704,7 +733,9 @@ export default function PatientDocuments() {
                                 </div>
                               </div>
                             </TableCell>
-                            <TableCell>{document.Cree_par}</TableCell>
+                            <TableCell>
+                              {getUserName(document.Cree_par)}
+                            </TableCell>
                             <TableCell>
                               {formatDate(document.created_at)}
                             </TableCell>
@@ -797,7 +828,7 @@ export default function PatientDocuments() {
                           <div className="flex items-center gap-2 text-sm">
                             <User className="h-4 w-4 text-muted-foreground" />
                             <span className="font-medium">Créé par:</span>
-                            <span>{document.Cree_par}</span>
+                            <span>{getUserName(document.Cree_par)}</span>
                           </div>
                           <div className="flex items-center gap-2 text-sm">
                             <Clock className="h-4 w-4 text-muted-foreground" />
@@ -1040,6 +1071,7 @@ export default function PatientDocuments() {
           patient={patient}
           templates={templates}
           isLoading={isSubmitting}
+          users={users}
         />
 
         <DocumentDetailsModal
@@ -1053,6 +1085,7 @@ export default function PatientDocuments() {
           }
           onEdit={openEditModal}
           onDelete={openDeleteModal}
+          users={users}
         />
 
         <DeleteDocumentModal

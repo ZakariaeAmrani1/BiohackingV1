@@ -65,8 +65,10 @@ import {
 import {
   Client,
   ClientsService,
+  Utilisateur,
   calculateAge,
 } from "@/services/clientsService";
+import { AuthService } from "@/services/authService";
 
 interface DocumentFormModalProps {
   isOpen: boolean;
@@ -76,6 +78,7 @@ interface DocumentFormModalProps {
   patient: Client | null;
   templates: DocumentTemplate[];
   isLoading?: boolean;
+  users: Utilisateur[] | null;
 }
 
 export default function DocumentFormModal({
@@ -86,6 +89,7 @@ export default function DocumentFormModal({
   patient,
   templates,
   isLoading = false,
+  users,
 }: DocumentFormModalProps) {
   const [formData, setFormData] = useState<DocumentFormData>(
     createEmptyDocumentData(),
@@ -134,6 +138,7 @@ export default function DocumentFormModal({
 
   // Initialize form data when document or patient changes
   useEffect(() => {
+    const user = AuthService.getCurrentUser();
     if (document) {
       setFormData({
         template_id: document.template_id,
@@ -149,7 +154,7 @@ export default function DocumentFormModal({
         template_id: 0,
         CIN: patient.CIN,
         data_json: {},
-        Cree_par: "",
+        Cree_par: user.CIN,
       });
       setSelectedTemplate(null);
     } else {
@@ -454,17 +459,23 @@ export default function DocumentFormModal({
                   onValueChange={(value) =>
                     handleBasicFieldChange("Cree_par", value)
                   }
-                  disabled={isSubmitting}
+                  disabled={true}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Sélectionnez le médecin" />
                   </SelectTrigger>
                   <SelectContent>
-                    {availableDoctors.map((doctor) => (
-                      <SelectItem key={doctor} value={doctor}>
-                        {doctor}
-                      </SelectItem>
-                    ))}
+                    {Array.isArray(users) && users.length > 0 ? (
+                      users.map((user) => (
+                        <SelectItem key={user.CIN} value={user.CIN}>
+                          {user.nom}
+                        </SelectItem>
+                      ))
+                    ) : (
+                      <div className="p-2 text-sm text-gray-500">
+                        Aucun médecin trouvé
+                      </div>
+                    )}
                   </SelectContent>
                 </Select>
               </div>

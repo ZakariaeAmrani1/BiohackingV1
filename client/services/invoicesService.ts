@@ -1,4 +1,6 @@
 import { CurrencyService } from "./currencyService";
+import api from "../api/axios";
+import { AuthService } from "./authService";
 
 // Invoice types
 export interface Facture {
@@ -6,9 +8,9 @@ export interface Facture {
   CIN: string;
   date: string;
   prix_total: number;
-  prix_ht: number; // Prix hors taxes
-  tva_amount: number; // Montant TVA
-  tva_rate: number; // Taux TVA (20%)
+  prix_ht: number;
+  tva_amount: number;
+  tva_rate: number;
   statut: FactureStatut;
   notes: string;
   Cree_par: string;
@@ -22,8 +24,8 @@ export interface FactureBien {
   type_bien: TypeBien;
   quantite: number;
   Cree_par: string;
-  prix_unitaire: number; // We'll store this for historical purposes
-  nom_bien: string; // We'll store this for display purposes
+  prix_unitaire: number;
+  nom_bien: string;
 }
 
 export interface FactureFormData {
@@ -63,156 +65,69 @@ export enum TypeBien {
 }
 
 // Mock data storage
-let mockFactures: Facture[] = [
-  {
-    id: 1,
-    CIN: "BE123456",
-    date: "2024-01-15T10:30:00",
-    prix_ht: 123.0,
-    tva_amount: 24.6,
-    tva_rate: 20,
-    prix_total: 147.6,
-    statut: FactureStatut.PAYEE,
-    notes: "Consultation et médicaments prescrits",
-    Cree_par: "Dr. Smith",
-    created_at: "2024-01-15T10:30:00",
-  },
-  {
-    id: 2,
-    CIN: "BE234567",
-    date: "2024-01-18T14:20:00",
-    prix_ht: 75.0,
-    tva_amount: 15.0,
-    tva_rate: 20,
-    prix_total: 90.0,
-    statut: FactureStatut.ENVOYEE,
-    notes: "Suivi vaccination",
-    Cree_par: "Dr. Martin",
-    created_at: "2024-01-18T14:20:00",
-  },
-  {
-    id: 3,
-    CIN: "BE123456",
-    date: "2024-01-22T09:15:00",
-    prix_ht: 200.0,
-    tva_amount: 40.0,
-    tva_rate: 20,
-    prix_total: 240.0,
-    statut: FactureStatut.BROUILLON,
-    notes: "Consultation spécialisée avec examens",
-    Cree_par: "Dr. Dubois",
-    created_at: "2024-01-22T09:15:00",
-  },
-  {
-    id: 4,
-    CIN: "BE345678",
-    date: "2024-01-10T16:45:00",
-    prix_ht: 45.0,
-    tva_amount: 9.0,
-    tva_rate: 20,
-    prix_total: 54.0,
-    statut: FactureStatut.EN_RETARD,
-    notes: "Séance de kinésithérapie",
-    Cree_par: "Dr. Smith",
-    created_at: "2024-01-10T16:45:00",
-  },
-];
+let mockFactures: Facture[] = [];
 
-let mockFactureBiens: FactureBien[] = [
-  {
-    id: 1,
-    id_facture: 1,
-    id_bien: 1, // Paracétamol
-    type_bien: TypeBien.PRODUIT,
-    quantite: 2,
-    Cree_par: "Dr. Smith",
-    prix_unitaire: 2.5,
-    nom_bien: "Paracétamol 500mg",
-  },
-  {
-    id: 2,
-    id_facture: 1,
-    id_bien: 1, // Consultation générale
-    type_bien: TypeBien.SOIN,
-    quantite: 1,
-    Cree_par: "Dr. Smith",
-    prix_unitaire: 50.0,
-    nom_bien: "Consultation générale",
-  },
-  {
-    id: 3,
-    id_facture: 1,
-    id_bien: 2, // Radiographie
-    type_bien: TypeBien.SOIN,
-    quantite: 1,
-    Cree_par: "Dr. Smith",
-    prix_unitaire: 70.5,
-    nom_bien: "Radiographie thoracique",
-  },
-  {
-    id: 4,
-    id_facture: 2,
-    id_bien: 3, // Vaccination
-    type_bien: TypeBien.SOIN,
-    quantite: 1,
-    Cree_par: "Dr. Martin",
-    prix_unitaire: 25.0,
-    nom_bien: "Vaccination antigrippale",
-  },
-  {
-    id: 5,
-    id_facture: 2,
-    id_bien: 1, // Consultation
-    type_bien: TypeBien.SOIN,
-    quantite: 1,
-    Cree_par: "Dr. Martin",
-    prix_unitaire: 50.0,
-    nom_bien: "Consultation générale",
-  },
-  {
-    id: 6,
-    id_facture: 3,
-    id_bien: 5, // Chirurgie
-    type_bien: TypeBien.SOIN,
-    quantite: 1,
-    Cree_par: "Dr. Dubois",
-    prix_unitaire: 200.0,
-    nom_bien: "Chirurgie ambulatoire",
-  },
-  {
-    id: 7,
-    id_facture: 4,
-    id_bien: 4, // Kinésithérapie
-    type_bien: TypeBien.SOIN,
-    quantite: 1,
-    Cree_par: "Dr. Smith",
-    prix_unitaire: 45.0,
-    nom_bien: "Séance de kinésithérapie",
-  },
-];
+let mockFactureBiens: FactureBien[] = [];
 
 // Simulate API delay
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export class InvoicesService {
-  // Get all invoices
   static async getAll(): Promise<Facture[]> {
-    await delay(500);
+    mockFactures = [];
+    mockFactureBiens = [];
+    const result = await api.get(`facture`);
+    const data = result.data;
+    data.map((facture) => {
+      mockFactures.push({
+        id: facture.id,
+        CIN: facture.CIN,
+        date: facture.date,
+        prix_ht: facture.date,
+        tva_amount: facture.date,
+        tva_rate: 20,
+        prix_total: facture.prix_total,
+        statut:
+          facture.statut === "Brouillon"
+            ? FactureStatut.BROUILLON
+            : facture.statut === "Envoyée"
+              ? FactureStatut.ENVOYEE
+              : facture.statut === "Payée"
+                ? FactureStatut.PAYEE
+                : facture.statut === "Annulée"
+                  ? FactureStatut.ANNULEE
+                  : FactureStatut.EN_RETARD,
+        notes: facture.notes,
+        Cree_par: facture.Cree_par,
+        created_at: facture.created_at,
+      });
+    });
+
+    const result1 = await api.get(`facture-bien`);
+    const data1 = result1.data;
+    data1.map((facture) => {
+      mockFactureBiens.push({
+        id: facture.id,
+        id_facture: facture.id_facture,
+        id_bien: facture.id_bien,
+        type_bien: facture.type_bien,
+        quantite: facture.quantite,
+        Cree_par: facture.Cree_par,
+        nom_bien: facture.bien.Nom,
+        prix_unitaire: facture.bien.prix,
+      });
+    });
     return [...mockFactures];
   }
 
-  // Get all invoices with details
   static async getAllWithDetails(): Promise<FactureWithDetails[]> {
-    await delay(500);
     return mockFactures.map((facture) => ({
       ...facture,
       items: mockFactureBiens.filter((item) => item.id_facture === facture.id),
     }));
   }
 
-  // Get invoice by ID
   static async getById(id: number): Promise<FactureWithDetails | null> {
-    await delay(300);
     const facture = mockFactures.find((facture) => facture.id === id);
     if (!facture) return null;
 
@@ -225,15 +140,11 @@ export class InvoicesService {
 
   // Get invoices by patient CIN
   static async getByPatientCIN(cin: string): Promise<Facture[]> {
-    await delay(500);
     return mockFactures.filter((facture) => facture.CIN === cin);
   }
 
   // Create new invoice
   static async create(data: FactureFormData): Promise<FactureWithDetails> {
-    await delay(800);
-
-    // Calculate prices with TVA
     const prix_ht = data.items.reduce(
       (total, item) => total + item.prix_unitaire * item.quantite,
       0,
@@ -241,9 +152,18 @@ export class InvoicesService {
     const tva_rate = 20;
     const tva_amount = parseFloat((prix_ht * (tva_rate / 100)).toFixed(2));
     const prix_total = parseFloat((prix_ht + tva_amount).toFixed(2));
-
+    const currentUser = AuthService.getCurrentUser();
+    const result = await api.post(`facture`, {
+      CIN: data.CIN,
+      date: data.date,
+      prix_total: prix_total,
+      statut: data.statut,
+      notes: data.notes,
+      Cree_par: currentUser.CIN,
+    });
+    const facture_id = result.data.id;
     const newFacture: Facture = {
-      id: Math.max(...mockFactures.map((facture) => facture.id)) + 1,
+      id: facture_id,
       CIN: data.CIN,
       date: data.date,
       prix_ht,
@@ -257,18 +177,27 @@ export class InvoicesService {
     };
 
     mockFactures.push(newFacture);
+    const newItems: FactureBien[] = [];
+    data.items.map(async (item) => {
+      const res = await api.post(`facture-bien`, {
+        id_facture: facture_id,
+        id_bien: item.id_bien,
+        type_bien: item.type_bien,
+        quantite: item.quantite,
+        Cree_par: currentUser.CIN,
+      });
 
-    // Create facture items
-    const newItems: FactureBien[] = data.items.map((item, index) => ({
-      id: Math.max(...mockFactureBiens.map((item) => item.id)) + index + 1,
-      id_facture: newFacture.id,
-      id_bien: item.id_bien,
-      type_bien: item.type_bien,
-      quantite: item.quantite,
-      Cree_par: data.Cree_par,
-      prix_unitaire: item.prix_unitaire,
-      nom_bien: item.nom_bien,
-    }));
+      newItems.push({
+        id: res.data.id,
+        id_facture: newFacture.id,
+        id_bien: item.id_bien,
+        type_bien: item.type_bien,
+        quantite: item.quantite,
+        Cree_par: data.Cree_par,
+        prix_unitaire: item.prix_unitaire,
+        nom_bien: item.nom_bien,
+      });
+    });
 
     mockFactureBiens.push(...newItems);
 
@@ -283,12 +212,9 @@ export class InvoicesService {
     id: number,
     data: FactureFormData,
   ): Promise<FactureWithDetails | null> {
-    await delay(800);
-
     const index = mockFactures.findIndex((facture) => facture.id === id);
     if (index === -1) return null;
 
-    // Calculate prices with TVA
     const prix_ht = data.items.reduce(
       (total, item) => total + item.prix_unitaire * item.quantite,
       0,
@@ -296,6 +222,16 @@ export class InvoicesService {
     const tva_rate = 20;
     const tva_amount = parseFloat((prix_ht * (tva_rate / 100)).toFixed(2));
     const prix_total = parseFloat((prix_ht + tva_amount).toFixed(2));
+
+    const currentUser = AuthService.getCurrentUser();
+    const result = await api.patch(`facture/${id}`, {
+      CIN: data.CIN,
+      date: data.date,
+      prix_total: prix_total,
+      statut: data.statut,
+      notes: data.notes,
+      Cree_par: currentUser.CIN,
+    });
 
     const updatedFacture: Facture = {
       ...mockFactures[index],
@@ -312,21 +248,33 @@ export class InvoicesService {
 
     mockFactures[index] = updatedFacture;
 
-    // Remove old items and add new ones
+    await api.delete(`facture-bien/${id}`);
+
     mockFactureBiens = mockFactureBiens.filter(
       (item) => item.id_facture !== id,
     );
 
-    const newItems: FactureBien[] = data.items.map((item, itemIndex) => ({
-      id: Math.max(...mockFactureBiens.map((item) => item.id)) + itemIndex + 1,
-      id_facture: id,
-      id_bien: item.id_bien,
-      type_bien: item.type_bien,
-      quantite: item.quantite,
-      Cree_par: data.Cree_par,
-      prix_unitaire: item.prix_unitaire,
-      nom_bien: item.nom_bien,
-    }));
+    const newItems: FactureBien[] = [];
+    data.items.map(async (item) => {
+      const res = await api.post(`facture-bien`, {
+        id_facture: id,
+        id_bien: item.id_bien,
+        type_bien: item.type_bien,
+        quantite: item.quantite,
+        Cree_par: currentUser.CIN,
+      });
+
+      newItems.push({
+        id: res.data.id,
+        id_facture: id,
+        id_bien: item.id_bien,
+        type_bien: item.type_bien,
+        quantite: item.quantite,
+        Cree_par: data.Cree_par,
+        prix_unitaire: item.prix_unitaire,
+        nom_bien: item.nom_bien,
+      });
+    });
 
     mockFactureBiens.push(...newItems);
 
@@ -338,12 +286,12 @@ export class InvoicesService {
 
   // Delete invoice
   static async delete(id: number): Promise<boolean> {
-    await delay(500);
-
     const index = mockFactures.findIndex((facture) => facture.id === id);
     if (index === -1) return false;
 
-    // Remove invoice and its items
+    await api.delete(`facture-bien/${id}`);
+    await api.delete(`facture/${id}`);
+
     mockFactures.splice(index, 1);
     mockFactureBiens = mockFactureBiens.filter(
       (item) => item.id_facture !== id,
@@ -353,8 +301,6 @@ export class InvoicesService {
 
   // Search invoices
   static async search(query: string): Promise<Facture[]> {
-    await delay(300);
-
     const lowerQuery = query.toLowerCase();
     return mockFactures.filter(
       (facture) =>
@@ -369,11 +315,11 @@ export class InvoicesService {
     id: number,
     status: FactureStatut,
   ): Promise<Facture | null> {
-    await delay(500);
-
     const index = mockFactures.findIndex((facture) => facture.id === id);
     if (index === -1) return null;
-
+    await api.patch(`facture/${id}`, {
+      statut: status,
+    });
     mockFactures[index].statut = status;
     return mockFactures[index];
   }

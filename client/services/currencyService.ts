@@ -1,3 +1,4 @@
+import { aM } from "vitest/dist/chunks/reporters.d.C-cu31ET.js";
 import { AppSettingsService } from "./appSettingsService";
 
 export class CurrencyService {

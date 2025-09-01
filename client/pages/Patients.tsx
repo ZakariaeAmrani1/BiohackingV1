@@ -57,6 +57,7 @@ import {
   Utilisateur,
 } from "@/services/clientsService";
 import { UserService } from "@/services/userService";
+import { DocumentsService } from "@/services/documentsService";
 
 export default function Patients() {
   const navigate = useNavigate();
@@ -95,6 +96,10 @@ export default function Patients() {
     loadUsers();
   }, []);
 
+  useEffect(() => {
+    loadDocuments();
+  }, []);
+
   // Add escape key handler to force close modals if stuck
   useEffect(() => {
     const handleEscapeKey = (event: KeyboardEvent) => {
@@ -119,6 +124,21 @@ export default function Patients() {
       toast({
         title: "Erreur",
         description: "Impossible de charger les patients",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const loadDocuments = async () => {
+    try {
+      setIsLoading(true);
+      const data = await DocumentsService.getAll();
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: "Impossible de charger les documents",
         variant: "destructive",
       });
     } finally {

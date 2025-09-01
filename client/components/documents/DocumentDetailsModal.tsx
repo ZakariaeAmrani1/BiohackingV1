@@ -35,6 +35,7 @@ import {
   DocumentTemplate,
   DocumentField,
 } from "@/services/documentTemplatesService";
+import { Utilisateur } from "@/services/clientsService";
 
 interface DocumentDetailsModalProps {
   isOpen: boolean;
@@ -43,6 +44,7 @@ interface DocumentDetailsModalProps {
   template: DocumentTemplate | null;
   onEdit: (document: Document) => void;
   onDelete: (document: Document) => void;
+  users: Utilisateur[] | null;
 }
 
 export default function DocumentDetailsModal({
@@ -52,6 +54,7 @@ export default function DocumentDetailsModal({
   template,
   onEdit,
   onDelete,
+  users,
 }: DocumentDetailsModalProps) {
   if (!document) return null;
 
@@ -83,6 +86,11 @@ export default function DocumentDetailsModal({
       default:
         return <Type className="h-4 w-4" />;
     }
+  };
+
+  const getUserName = (CIN: string) => {
+    const user = users.find((user) => user.CIN === CIN);
+    return user.nom || CIN;
   };
 
   const formatFieldValue = (
@@ -229,7 +237,7 @@ export default function DocumentDetailsModal({
                 </div>
                 <div className="flex items-center gap-2">
                   <User className="h-4 w-4" />
-                  {document.Cree_par}
+                  {getUserName(document.Cree_par)}
                 </div>
               </div>
 
@@ -333,7 +341,7 @@ export default function DocumentDetailsModal({
                   </div>
                   <div>
                     <span className="font-medium">Créé par:</span>{" "}
-                    {template.Cree_par}
+                    {getUserName(template.Cree_par)}
                   </div>
                   <div>
                     <span className="font-medium">Structure:</span>{" "}
