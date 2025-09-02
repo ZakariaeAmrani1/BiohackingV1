@@ -15,7 +15,7 @@ export interface AppSettings {
 
 // Default settings
 const defaultSettings: AppSettings = {
-  theme: "system",
+  theme: "light",
   fontSize: "medium",
   compactMode: false,
   showAnimations: true,
