@@ -254,12 +254,12 @@ export class AuthService {
   } {
     return {
       admin: {
-        email: "admin@biohacking-clinic.be",
-        password: "admin123",
+        email: "admin5@gmail.com",
+        password: "Admin@@88",
       },
       doctor: {
-        email: "doctor@biohacking-clinic.be",
-        password: "doctor123",
+        email: "admin5@gmail.com",
+        password: "Admin@@88",
       },
     };
   }
