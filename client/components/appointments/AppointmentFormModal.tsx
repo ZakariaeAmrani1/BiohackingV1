@@ -220,19 +220,20 @@ export default function AppointmentFormModal({
     // If in new patient mode, create the patient first
     if (isNewPatientMode) {
       // Validate new patient data (only required fields)
+      const currentUser = AuthService.getCurrentUser();
       const requiredPatientData: ClientFormData = {
         nom: newPatientData.nom || "",
         prenom: newPatientData.prenom || "",
-        CIN: newPatientData.CIN || "",
+        date_naissance: "2025-09-02T19:30",
+        adresse: "dazzdzazd",
         numero_telephone: newPatientData.numero_telephone || "",
-        date_naissance: "",
-        adresse: "",
-        email: "",
-        groupe_sanguin: "",
-        antecedents: "",
-        allergies: "",
-        commentaire: "",
-        Cree_par: "",
+        groupe_sanguin: "A+",
+        email: "test@gmail.com",
+        commentaire: "dzadazdazd",
+        CIN: newPatientData.CIN || "",
+        allergies: "dzadad",
+        antecedents: "dazdzad",
+        Cree_par: currentUser.CIN,
       };
 
       // Validate required fields for new patient
@@ -261,7 +262,11 @@ export default function AppointmentFormModal({
         const newClient = await ClientsService.create(requiredPatientData);
         clientId = newClient.id;
       } catch (error) {
-        setErrors(["Erreur lors de la création du patient"]);
+        console.error(error);
+        setErrors([
+          error.response.data.message ||
+            "Erreur lors de la création du patient",
+        ]);
         return;
       }
     }

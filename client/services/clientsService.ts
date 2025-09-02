@@ -108,7 +108,7 @@ export class ClientsService {
     });
 
     const newClient: Client = {
-      id: result.id,
+      id: result.data.id,
       CIN: data.CIN,
       nom: data.nom,
       prenom: data.prenom,
