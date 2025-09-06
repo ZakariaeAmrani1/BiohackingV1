@@ -45,9 +45,6 @@ import { AuthService } from "./authService";
 // Mock data storage - in real app this would connect to your backend
 let mockClients: Client[] = [];
 
-// Simulate API delay
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
 export class ClientsService {
   // Get all clients
   static async getAll(): Promise<Client[]> {

@@ -24,9 +24,6 @@ import { AuthService } from "./authService";
 // Mock data storage
 let mockProducts: Product[] = [];
 
-// Simulate API delay
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
 export class ProductsService {
   // Get all products
   static async getAll(): Promise<Product[]> {
@@ -48,7 +45,6 @@ export class ProductsService {
 
   // Get product by ID
   static async getById(id: number): Promise<Product | null> {
-    await delay(300);
     const product = mockProducts.find((product) => product.id === id);
     return product || null;
   }
@@ -128,8 +124,6 @@ export class ProductsService {
 
   // Search products
   static async search(query: string): Promise<Product[]> {
-    await delay(300);
-
     const lowerQuery = query.toLowerCase();
     return mockProducts.filter(
       (product) =>
@@ -140,7 +134,6 @@ export class ProductsService {
 
   // Get low stock products (stock <= threshold)
   static async getLowStock(threshold: number = 10): Promise<Product[]> {
-    await delay(300);
     return mockProducts.filter((product) => product.stock <= threshold);
   }
 
@@ -149,8 +142,6 @@ export class ProductsService {
     id: number,
     newStock: number,
   ): Promise<Product | null> {
-    await delay(500);
-
     const index = mockProducts.findIndex((product) => product.id === id);
     if (index === -1) return null;
 

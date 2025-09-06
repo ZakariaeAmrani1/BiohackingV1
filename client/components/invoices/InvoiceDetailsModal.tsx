@@ -29,6 +29,7 @@ import {
   getStatusColor,
   TypeBien,
 } from "@/services/invoicesService";
+import { Utilisateur } from "@/services/clientsService";
 
 interface InvoiceDetailsModalProps {
   isOpen: boolean;
@@ -36,6 +37,7 @@ interface InvoiceDetailsModalProps {
   invoice: FactureWithDetails | null;
   onEdit: (invoice: FactureWithDetails) => void;
   onDelete: (invoice: FactureWithDetails) => void;
+  users: Utilisateur[] | null;
 }
 
 export default function InvoiceDetailsModal({
@@ -44,6 +46,7 @@ export default function InvoiceDetailsModal({
   invoice,
   onEdit,
   onDelete,
+  users,
 }: InvoiceDetailsModalProps) {
   if (!invoice) return null;
 
@@ -77,6 +80,11 @@ export default function InvoiceDetailsModal({
 
   const getItemTypeLabel = (type: TypeBien) => {
     return type === TypeBien.PRODUIT ? "Produit" : "Soin";
+  };
+
+  const getUserName = (CIN: string) => {
+    const user = users.find((user) => user.CIN === CIN);
+    return user.nom || CIN;
   };
 
   return (
@@ -138,7 +146,7 @@ export default function InvoiceDetailsModal({
                 </div>
                 <div className="flex items-center gap-2">
                   <User className="h-4 w-4" />
-                  {invoice.Cree_par}
+                  {getUserName(invoice.Cree_par)}
                 </div>
               </div>
 

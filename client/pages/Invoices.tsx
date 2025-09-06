@@ -63,6 +63,8 @@ import {
   formatPrice,
   getInvoiceStatistics,
 } from "@/services/invoicesService";
+import { Utilisateur } from "@/services/clientsService";
+import { UserService } from "@/services/userService";
 
 export default function Invoices() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -72,6 +74,7 @@ export default function Invoices() {
 
   // Data state
   const [invoices, setInvoices] = useState<Facture[]>([]);
+  const [users, setUsers] = useState<Utilisateur[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   // Modal states
@@ -92,6 +95,10 @@ export default function Invoices() {
   // Load invoices on component mount
   useEffect(() => {
     loadInvoices();
+  }, []);
+
+  useEffect(() => {
+    loadUsers();
   }, []);
 
   // Add escape key handler to force close modals if stuck
@@ -122,6 +129,28 @@ export default function Invoices() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const loadUsers = async () => {
+    try {
+      setIsLoading(true);
+      const data = await UserService.getCurrentAllUsers();
+      setUsers(data);
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: "Impossible de charger les utilisateurs",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const getUserName = (CIN: string) => {
+    const user = users.find((user) => user.CIN === CIN);
+    if (user && user.nom) return user.nom;
+    return CIN;
   };
 
   // Filter and search logic
@@ -731,7 +760,7 @@ export default function Invoices() {
                 </div>
                 <div class="info-row">
                   <span class="info-label">Créé par:</span>
-                  <span class="info-value">${invoice.Cree_par}</span>
+                  <span class="info-value">${getUserName(invoice.Cree_par)}</span>
                 </div>
                 <div class="info-row">
                   <span class="info-label">Statut:</span>
@@ -940,7 +969,7 @@ export default function Invoices() {
                   <SelectItem value="tous">Tous les créateurs</SelectItem>
                   {creators.map((creator) => (
                     <SelectItem key={creator} value={creator}>
-                      {creator}
+                      {getUserName(creator)}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -1036,7 +1065,9 @@ export default function Invoices() {
                                 {invoice.statut}
                               </span>
                             </TableCell>
-                            <TableCell>{invoice.Cree_par}</TableCell>
+                            <TableCell>
+                              {getUserName(invoice.Cree_par)}
+                            </TableCell>
                             <TableCell className="text-right">
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
@@ -1168,7 +1199,7 @@ export default function Invoices() {
                         <div className="flex items-center gap-2 text-sm">
                           <User className="h-4 w-4 text-muted-foreground" />
                           <span className="font-medium">Créé par:</span>
-                          <span>{invoice.Cree_par}</span>
+                          <span>{getUserName(invoice.Cree_par)}</span>
                         </div>
                         {invoice.notes && (
                           <div className="flex items-start gap-2 text-sm">
@@ -1274,6 +1305,7 @@ export default function Invoices() {
           onSubmit={selectedInvoice ? handleUpdateInvoice : handleCreateInvoice}
           invoice={selectedInvoice}
           isLoading={isSubmitting}
+          users={users}
         />
 
         <InvoiceDetailsModal
@@ -1282,6 +1314,7 @@ export default function Invoices() {
           invoice={selectedInvoice}
           onEdit={openEditModal}
           onDelete={openDeleteModal}
+          users={users}
         />
 
         <DeleteInvoiceModal

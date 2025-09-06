@@ -69,7 +69,9 @@ import {
   ClientsService,
   Client,
   calculateAge,
+  Utilisateur,
 } from "@/services/clientsService";
+import { AuthService } from "@/services/authService";
 
 interface InvoiceFormModalProps {
   isOpen: boolean;
@@ -77,6 +79,7 @@ interface InvoiceFormModalProps {
   onSubmit: (data: FactureFormData) => Promise<void>;
   invoice?: FactureWithDetails | null;
   isLoading?: boolean;
+  users: Utilisateur[] | null;
 }
 
 export default function InvoiceFormModal({
@@ -85,6 +88,7 @@ export default function InvoiceFormModal({
   onSubmit,
   invoice,
   isLoading = false,
+  users,
 }: InvoiceFormModalProps) {
   const [formData, setFormData] =
     useState<FactureFormData>(createEmptyFacture());
@@ -131,6 +135,7 @@ export default function InvoiceFormModal({
 
   // Initialize form data when invoice changes
   useEffect(() => {
+    const user = AuthService.getCurrentUser();
     if (invoice) {
       const items: FactureItem[] = invoice.items.map((item) => ({
         id_bien: item.id_bien,
@@ -145,11 +150,11 @@ export default function InvoiceFormModal({
         date: new Date(invoice.date).toISOString().slice(0, 16),
         statut: invoice.statut,
         notes: invoice.notes,
-        Cree_par: invoice.Cree_par,
+        Cree_par: invoice.Cree_par || user.CIN,
         items,
       });
     } else {
-      setFormData(createEmptyFacture());
+      setFormData(createEmptyFacture(user.CIN));
     }
     setErrors([]);
   }, [invoice, isOpen]);
@@ -441,23 +446,29 @@ export default function InvoiceFormModal({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="Cree_par">Cré�� par</Label>
+                <Label htmlFor="Cree_par">Créer par</Label>
                 <Select
                   value={formData.Cree_par}
                   onValueChange={(value) =>
                     handleInputChange("Cree_par", value)
                   }
-                  disabled={isSubmitting}
+                  disabled={true}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Sélectionnez le créateur" />
                   </SelectTrigger>
                   <SelectContent>
-                    {availableDoctors.map((doctor) => (
-                      <SelectItem key={doctor} value={doctor}>
-                        {doctor}
-                      </SelectItem>
-                    ))}
+                    {Array.isArray(users) && users.length > 0 ? (
+                      users.map((user) => (
+                        <SelectItem key={user.CIN} value={user.CIN}>
+                          {user.nom}
+                        </SelectItem>
+                      ))
+                    ) : (
+                      <div className="p-2 text-sm text-gray-500">
+                        Aucun médecin trouvé
+                      </div>
+                    )}
                   </SelectContent>
                 </Select>
               </div>

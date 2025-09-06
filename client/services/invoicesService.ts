@@ -69,9 +69,6 @@ let mockFactures: Facture[] = [];
 
 let mockFactureBiens: FactureBien[] = [];
 
-// Simulate API delay
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
 export class InvoicesService {
   static async getAll(): Promise<Facture[]> {
     mockFactures = [];
@@ -394,13 +391,13 @@ export const formatPrice = (price: number): string => {
   return CurrencyService.formatCurrency(price);
 };
 
-export const createEmptyFacture = (): FactureFormData => {
+export const createEmptyFacture = (CIN?: string): FactureFormData => {
   return {
     CIN: "",
     date: new Date().toISOString().slice(0, 16), // Current date/time for datetime-local input
     statut: FactureStatut.BROUILLON,
     notes: "",
-    Cree_par: "",
+    Cree_par: CIN,
     items: [],
   };
 };

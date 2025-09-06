@@ -27,13 +27,9 @@ let mockPayments: Payment[] = [
   },
 ];
 
-// Simulate API delay
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
 export class PaymentsService {
   // Get all payments
   static async getAll(): Promise<Payment[]> {
-    await delay(500);
     return [...mockPayments].sort(
       (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
     );
@@ -41,8 +37,6 @@ export class PaymentsService {
 
   // Get all payments with invoice details
   static async getAllWithDetails(): Promise<PaymentWithInvoiceDetails[]> {
-    await delay(500);
-
     // Import invoices service to get invoice data
     const { InvoicesService } = await import("./invoicesService");
     const invoices = await InvoicesService.getAll();
@@ -63,14 +57,12 @@ export class PaymentsService {
 
   // Get payment by ID
   static async getById(id: number): Promise<Payment | null> {
-    await delay(300);
     const payment = mockPayments.find((payment) => payment.id === id);
     return payment || null;
   }
 
   // Get payments by doctor
   static async getByDoctor(doctor: string): Promise<Payment[]> {
-    await delay(500);
     return mockPayments.filter((payment) => payment.Cree_par === doctor);
   }
 
@@ -79,7 +71,6 @@ export class PaymentsService {
     startDate: string,
     endDate: string,
   ): Promise<Payment[]> {
-    await delay(500);
     const start = new Date(startDate);
     const end = new Date(endDate);
 
@@ -91,7 +82,6 @@ export class PaymentsService {
 
   // Search payments
   static async search(query: string): Promise<Payment[]> {
-    await delay(300);
     const lowerQuery = query.toLowerCase();
 
     return mockPayments.filter(
@@ -106,8 +96,6 @@ export class PaymentsService {
     invoiceId: number,
     createdBy: string,
   ): Promise<Payment> {
-    await delay(500);
-
     // Import invoices service to get invoice data
     const { InvoicesService } = await import("./invoicesService");
     const invoice = await InvoicesService.getById(invoiceId);

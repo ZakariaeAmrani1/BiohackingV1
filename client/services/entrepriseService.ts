@@ -28,9 +28,6 @@ export interface EntrepriseFormData {
 // Mock company data
 let currentEntreprise: Entreprise | null = null;
 
-// Simulate API delay
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
 export class EntrepriseService {
   // Get company information
   static async getEntreprise(): Promise<Entreprise | null> {

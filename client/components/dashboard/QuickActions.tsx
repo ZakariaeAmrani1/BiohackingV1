@@ -394,6 +394,7 @@ export default function QuickActions() {
         onClose={() => closeModal("invoice")}
         onSubmit={handleCreateInvoice}
         isLoading={isSubmitting.invoice}
+        users={users}
       />
 
       <DocumentFormModal

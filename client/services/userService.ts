@@ -45,9 +45,6 @@ let currentUser: User = {
   created_at: "",
 };
 
-// Simulate API delay
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
 export class UserService {
   static async getCurrentAllUsers() {
     const allUSers = [];

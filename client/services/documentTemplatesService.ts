@@ -36,9 +36,6 @@ export interface DocumentTemplateFormData {
 // Mock data storage
 let mockTemplates: DocumentTemplate[] = [];
 
-// Simulate API delay
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
 export class DocumentTemplatesService {
   // Get all templates
   static async getAll(): Promise<DocumentTemplate[]> {

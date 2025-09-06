@@ -45,13 +45,9 @@ let currentSettings: AppSettings = (() => {
   return defaultSettings;
 })();
 
-// Simulate API delay
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
 export class AppSettingsService {
   // Get current settings
   static async getSettings(): Promise<AppSettings> {
-    await delay(200);
     return { ...currentSettings };
   }
 
@@ -59,8 +55,6 @@ export class AppSettingsService {
   static async updateSettings(
     newSettings: Partial<AppSettings>,
   ): Promise<AppSettings> {
-    await delay(300);
-
     currentSettings = { ...currentSettings, ...newSettings };
 
     try {
@@ -151,8 +145,6 @@ export class AppSettingsService {
 
   // Reset to defaults
   static async resetToDefaults(): Promise<AppSettings> {
-    await delay(300);
-
     currentSettings = { ...defaultSettings };
 
     try {
@@ -255,14 +247,11 @@ export class AppSettingsService {
 
   // Export settings
   static async exportSettings(): Promise<string> {
-    await delay(100);
     return JSON.stringify(currentSettings, null, 2);
   }
 
   // Import settings
   static async importSettings(settingsJson: string): Promise<AppSettings> {
-    await delay(300);
-
     try {
       const importedSettings = JSON.parse(settingsJson);
 

@@ -32,9 +32,6 @@ export enum SoinType {
 // Mock data storage
 let mockSoins: Soin[] = [];
 
-// Simulate API delay
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
 export class SoinsService {
   // Get all soins
   static async getAll(): Promise<Soin[]> {
@@ -56,7 +53,6 @@ export class SoinsService {
 
   // Get soin by ID
   static async getById(id: number): Promise<Soin | null> {
-    await delay(300);
     const soin = mockSoins.find((soin) => soin.id === id);
     return soin || null;
   }
@@ -131,8 +127,6 @@ export class SoinsService {
 
   // Search soins
   static async search(query: string): Promise<Soin[]> {
-    await delay(300);
-
     const lowerQuery = query.toLowerCase();
     return mockSoins.filter(
       (soin) =>
@@ -144,7 +138,6 @@ export class SoinsService {
 
   // Get soins by type
   static async getByType(type: SoinType): Promise<Soin[]> {
-    await delay(300);
     return mockSoins.filter((soin) => soin.Type === type);
   }
 
@@ -154,7 +147,6 @@ export class SoinsService {
     max: number;
     avg: number;
   }> {
-    await delay(200);
     const prices = mockSoins.map((soin) => soin.prix);
     return {
       min: Math.min(...prices),

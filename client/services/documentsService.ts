@@ -21,9 +21,6 @@ export interface DocumentFormData {
 // Mock data storage
 let mockDocuments: Document[] = [];
 
-// Simulate API delay
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
 export class DocumentsService {
   // Get all documents
   static async getAll(): Promise<Document[]> {

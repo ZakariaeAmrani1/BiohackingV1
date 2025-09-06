@@ -42,9 +42,6 @@ const getRelativeDate = (
 // Mock data storage - in real app this would connect to your backend
 let mockAppointments: RendezVous[] = [];
 
-// Simulate API delay
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
 export class AppointmentsService {
   // Get all appointments
   static async getAll(): Promise<RendezVous[]> {
