@@ -19,7 +19,6 @@ export interface SoinFormData {
   Cabinet: string;
 }
 
-
 // Mock data storage
 let mockSoins: Soin[] = [];
 
@@ -29,18 +28,17 @@ export class SoinsService {
     mockSoins = [];
     const result = await api.get(`bien?type=SERVICE`);
     const data = result.data;
-    data.map((service) => {
-      mockSoins.push({
-        id: service.id,
-        Nom: service.Nom,
-        Type: service.Type,
-        prix: service.prix,
-        Cree_par: service.Cree_par,
-        created_at: service.created_at,
-        Cabinet: service.Cabinet ?? "Biohacking",
-      });
-    });
-    return [...mockSoins];
+
+    mockSoins = data.map((service) => ({
+      id: service.id,
+      Nom: service.Nom,
+      Type: service.Type,
+      prix: service.prix,
+      Cree_par: service.Cree_par,
+      created_at: service.created_at,
+      Cabinet: service.cabinet,
+    }));
+    return mockSoins;
   }
 
   // Get soin by ID
@@ -58,8 +56,8 @@ export class SoinsService {
       Type: data.Type,
       prix: data.prix,
       stock: 1,
+      cabinet: data.Cabinet,
       Cree_par: currentUser.CIN,
-      // Cabinet intentionally not sent if backend doesn't support it
     });
 
     const newSoin: Soin = {
@@ -91,6 +89,7 @@ export class SoinsService {
       bien_type: "SERVICE",
       Type: data.Type,
       prix: data.prix,
+      cabinet: data.Cabinet,
       stock: 1,
       Cree_par: currentUser.CIN,
       // Cabinet intentionally not sent if backend doesn't support it
@@ -181,8 +180,6 @@ export const validateSoinData = (data: SoinFormData): string[] => {
 export const getAvailableDoctors = (): string[] => {
   return ["Dr. Smith", "Dr. Martin", "Dr. Dubois", "Dr. Laurent"];
 };
-
-
 
 export const getSoinTypeColor = (type: string): string => {
   switch (type) {

@@ -47,7 +47,10 @@ import {
 } from "@/services/paymentsService";
 import { AnalyticsService } from "@/services/analyticsService";
 import { CurrencyService } from "@/services/currencyService";
-import { AppointmentsService, RendezVous } from "@/services/appointmentsService";
+import {
+  AppointmentsService,
+  RendezVous,
+} from "@/services/appointmentsService";
 import { UserService } from "@/services/userService";
 import InvoiceDetailsModal from "@/components/invoices/InvoiceDetailsModal";
 
@@ -64,7 +67,8 @@ export default function PatientOperations() {
   const [appointments, setAppointments] = useState<RendezVous[]>([]);
   const [users, setUsers] = useState<Utilisateur[]>([]);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
-  const [selectedInvoice, setSelectedInvoice] = useState<FactureWithDetails | null>(null);
+  const [selectedInvoice, setSelectedInvoice] =
+    useState<FactureWithDetails | null>(null);
 
   useEffect(() => {
     if (!cin) {
@@ -116,14 +120,18 @@ export default function PatientOperations() {
       });
       setInvoices(Array.from(uniqueInvoicesMap.values()));
 
-      const byPatientPayments = allPayments.filter((p) => p.patient_cin === cin);
+      const byPatientPayments = allPayments.filter(
+        (p) => p.patient_cin === cin,
+      );
       const uniquePaymentsMap = new Map<number, PaymentWithInvoiceDetails>();
       byPatientPayments.forEach((p) => {
         if (!uniquePaymentsMap.has(p.id)) uniquePaymentsMap.set(p.id, p);
       });
       setPayments(Array.from(uniquePaymentsMap.values()));
 
-      const byPatientAppointments = allAppointments.filter((a) => a.CIN === cin);
+      const byPatientAppointments = allAppointments.filter(
+        (a) => a.CIN === cin,
+      );
       setAppointments(byPatientAppointments);
     } catch (e) {
       toast({
@@ -141,6 +149,12 @@ export default function PatientOperations() {
       const data = await UserService.getCurrentAllUsers();
       setUsers(data);
     } catch {}
+  };
+
+  const getUserName = (CIN: string) => {
+    const user = users.find((user) => user.CIN === CIN);
+    if (user && user.nom) return user.nom;
+    return CIN;
   };
 
   const summary = useMemo(() => {
@@ -166,16 +180,18 @@ export default function PatientOperations() {
 
   const itemsSummary = (items: FactureWithDetails["items"]) => {
     if (!items || items.length === 0) return "—";
-    return items
-      .map((it) => `${it.nom_bien} ×${it.quantite}`)
-      .join(", ");
+    return items.map((it) => `${it.nom_bien} ×${it.quantite}`).join(", ");
   };
 
   return (
     <DashboardLayout>
       <div className="p-6 md:p-8 space-y-6">
         <div className="flex items-center justify-between">
-          <Button size="sm" onClick={() => navigate("/patients")} className="gap-2">
+          <Button
+            size="sm"
+            onClick={() => navigate("/patients")}
+            className="gap-2"
+          >
             <ArrowLeft className="h-4 w-4" />
             Retour aux patients
           </Button>
@@ -183,9 +199,13 @@ export default function PatientOperations() {
 
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Opérations Patient</h1>
+            <h1 className="text-3xl font-bold tracking-tight">
+              Opérations Patient
+            </h1>
             <p className="text-muted-foreground">
-              {patient ? `${patient.prenom} ${patient.nom} (${patient.CIN})` : `CIN: ${cin}`}
+              {patient
+                ? `${patient.prenom} ${patient.nom} (${patient.CIN})`
+                : `CIN: ${cin}`}
             </p>
           </div>
           <div className="hidden md:flex items-center gap-2 text-sm text-muted-foreground">
@@ -221,14 +241,27 @@ export default function PatientOperations() {
                           appointments
                             .slice()
                             .sort(
-                              (a, b) => new Date(b.date_rendez_vous).getTime() - new Date(a.date_rendez_vous).getTime(),
+                              (a, b) =>
+                                new Date(b.date_rendez_vous).getTime() -
+                                new Date(a.date_rendez_vous).getTime(),
                             )
                             .map((apt, idx) => (
-                              <TableRow key={`apt-${apt.id}-${idx}`} className="hover:bg-muted/50">
-                                <TableCell className="font-medium">{apt.sujet}</TableCell>
-                                <TableCell>{formatDate(apt.date_rendez_vous)}</TableCell>
-                                <TableCell>{apt.status || "programmé"}</TableCell>
-                                <TableCell>{apt.Cree_par}</TableCell>
+                              <TableRow
+                                key={`apt-${apt.id}-${idx}`}
+                                className="hover:bg-muted/50"
+                              >
+                                <TableCell className="font-medium">
+                                  {apt.sujet}
+                                </TableCell>
+                                <TableCell>
+                                  {formatDate(apt.date_rendez_vous)}
+                                </TableCell>
+                                <TableCell>
+                                  {apt.status || "programmé"}
+                                </TableCell>
+                                <TableCell>
+                                  {getUserName(apt.Cree_par)}
+                                </TableCell>
                               </TableRow>
                             ))
                         ) : (
@@ -236,7 +269,9 @@ export default function PatientOperations() {
                             <TableCell colSpan={4} className="text-center py-8">
                               <div className="flex flex-col items-center gap-2">
                                 <Calendar className="h-8 w-8 text-muted-foreground" />
-                                <p className="text-muted-foreground">Aucun rendez-vous trouvé</p>
+                                <p className="text-muted-foreground">
+                                  Aucun rendez-vous trouvé
+                                </p>
                               </div>
                             </TableCell>
                           </TableRow>
@@ -275,30 +310,52 @@ export default function PatientOperations() {
                           invoices
                             .slice()
                             .sort(
-                              (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+                              (a, b) =>
+                                new Date(b.date).getTime() -
+                                new Date(a.date).getTime(),
                             )
                             .map((invoice, idx) => (
-                              <TableRow key={`inv-${invoice.id}-${idx}`} className="hover:bg-muted/50">
+                              <TableRow
+                                key={`inv-${invoice.id}-${idx}`}
+                                className="hover:bg-muted/50"
+                              >
                                 <TableCell>
-                                  <div className="font-medium">#{invoice.id.toString().padStart(4, "0")}</div>
+                                  <div className="font-medium">
+                                    #{invoice.id.toString().padStart(4, "0")}
+                                  </div>
                                   <div className="text-xs text-muted-foreground">
-                                    {invoice.notes ? invoice.notes : "Aucune note"}
+                                    {invoice.notes
+                                      ? invoice.notes
+                                      : "Aucune note"}
                                   </div>
                                 </TableCell>
-                                <TableCell>{formatDate(invoice.date)}</TableCell>
+                                <TableCell>
+                                  {formatDate(invoice.date)}
+                                </TableCell>
                                 <TableCell className="font-mono font-semibold">
                                   {formatPrice(invoice.prix_total)}
                                 </TableCell>
                                 <TableCell>
-                                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(invoice.statut as FactureStatut)}`}>
+                                  <span
+                                    className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(invoice.statut as FactureStatut)}`}
+                                  >
                                     {invoice.statut}
                                   </span>
                                 </TableCell>
-                                <TableCell>{invoice.Cree_par}</TableCell>
+                                <TableCell>
+                                  {getUserName(invoice.Cree_par)}
+                                </TableCell>
                                 <TableCell className="text-right">
-                                  <Button size="sm" variant="ghost" className="h-8 w-8 p-0"
-                                    onClick={() => { setSelectedInvoice(invoice); setIsDetailsOpen(true); }}
-                                    title="Voir détails">
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    className="h-8 w-8 p-0"
+                                    onClick={() => {
+                                      setSelectedInvoice(invoice);
+                                      setIsDetailsOpen(true);
+                                    }}
+                                    title="Voir détails"
+                                  >
                                     <Eye className="h-4 w-4" />
                                   </Button>
                                 </TableCell>
@@ -309,7 +366,9 @@ export default function PatientOperations() {
                             <TableCell colSpan={6} className="text-center py-8">
                               <div className="flex flex-col items-center gap-2">
                                 <Receipt className="h-8 w-8 text-muted-foreground" />
-                                <p className="text-muted-foreground">Aucune facture trouvée</p>
+                                <p className="text-muted-foreground">
+                                  Aucune facture trouvée
+                                </p>
                               </div>
                             </TableCell>
                           </TableRow>
@@ -345,9 +404,14 @@ export default function PatientOperations() {
                       <TableBody>
                         {payments.length > 0 ? (
                           payments.map((payment, idx) => (
-                            <TableRow key={`pay-${payment.id}-${idx}`} className="hover:bg-muted/50">
+                            <TableRow
+                              key={`pay-${payment.id}-${idx}`}
+                              className="hover:bg-muted/50"
+                            >
                               <TableCell>
-                                <div className="font-medium">#{payment.id.toString().padStart(4, "0")}</div>
+                                <div className="font-medium">
+                                  #{payment.id.toString().padStart(4, "0")}
+                                </div>
                                 <div className="text-xs text-muted-foreground">
                                   {formatDateTime(payment.date)}
                                 </div>
@@ -360,9 +424,13 @@ export default function PatientOperations() {
                                 </div>
                               </TableCell>
                               <TableCell className="font-mono font-semibold text-green-600">
-                                {CurrencyService.formatCurrency(payment.montant_totale)}
+                                {CurrencyService.formatCurrency(
+                                  payment.montant_totale,
+                                )}
                               </TableCell>
-                              <TableCell>{payment.Cree_par}</TableCell>
+                              <TableCell>
+                                {getUserName(payment.Cree_par)}
+                              </TableCell>
                             </TableRow>
                           ))
                         ) : (
@@ -370,7 +438,9 @@ export default function PatientOperations() {
                             <TableCell colSpan={5} className="text-center py-8">
                               <div className="flex flex-col items-center gap-2">
                                 <DollarSign className="h-8 w-8 text-muted-foreground" />
-                                <p className="text-muted-foreground">Aucun paiement trouvé</p>
+                                <p className="text-muted-foreground">
+                                  Aucun paiement trouvé
+                                </p>
                               </div>
                             </TableCell>
                           </TableRow>
@@ -408,7 +478,8 @@ export default function PatientOperations() {
                     <div className="grid grid-cols-1 gap-2 text-sm">
                       <div className="flex items-center gap-2">
                         <Calendar className="h-4 w-4 text-muted-foreground" />
-                        Né(e): {formatDate(patient.date_naissance)} ({calculateAge(patient.date_naissance)} ans)
+                        Né(e): {formatDate(patient.date_naissance)} (
+                        {calculateAge(patient.date_naissance)} ans)
                       </div>
                       <div className="flex items-center gap-2">
                         <FileText className="h-4 w-4 text-muted-foreground" />
@@ -417,7 +488,9 @@ export default function PatientOperations() {
                     </div>
                   </div>
                 ) : (
-                  <div className="text-sm text-muted-foreground">Patient non trouvé</div>
+                  <div className="text-sm text-muted-foreground">
+                    Patient non trouvé
+                  </div>
                 )}
               </CardContent>
             </Card>
@@ -431,18 +504,26 @@ export default function PatientOperations() {
                   <div>
                     <div className="text-muted-foreground">Total facturé</div>
                     <div className="text-lg font-semibold">
-                      {summary ? CurrencyService.formatForDisplay(summary.totalInvoiced) : "-"}
+                      {summary
+                        ? CurrencyService.formatForDisplay(
+                            summary.totalInvoiced,
+                          )
+                        : "-"}
                     </div>
                   </div>
                   <div>
                     <div className="text-muted-foreground">Total payé</div>
                     <div className="text-lg font-semibold">
-                      {summary ? CurrencyService.formatForDisplay(summary.totalPaid) : "-"}
+                      {summary
+                        ? CurrencyService.formatForDisplay(summary.totalPaid)
+                        : "-"}
                     </div>
                   </div>
                   <div>
                     <div className="text-muted-foreground">Dernière visite</div>
-                    <div className="font-medium">{summary ? formatDate(summary.lastVisit || "") : "-"}</div>
+                    <div className="font-medium">
+                      {summary ? formatDate(summary.lastVisit || "") : "-"}
+                    </div>
                   </div>
                 </div>
               </CardContent>

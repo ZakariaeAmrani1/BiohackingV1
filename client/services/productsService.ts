@@ -30,17 +30,16 @@ export class ProductsService {
     mockProducts = [];
     const result = await api.get(`bien?type=PRODUIT`);
     const data = result.data;
-    data.map((product) => {
-      mockProducts.push({
-        id: product.id,
-        Nom: product.Nom,
-        prix: product.prix,
-        stock: product.stock,
-        Cree_par: product.Cree_par,
-        created_at: product.created_at,
-      });
-    });
-    return [...mockProducts];
+
+    mockProducts = data.map((product) => ({
+      id: product.id,
+      Nom: product.Nom,
+      prix: product.prix,
+      stock: product.stock,
+      Cree_par: product.Cree_par,
+      created_at: product.created_at,
+    }));
+    return mockProducts;
   }
 
   // Get product by ID

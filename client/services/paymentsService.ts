@@ -40,7 +40,7 @@ export class PaymentsService {
     // Import invoices service to get invoice data
     const { InvoicesService } = await import("./invoicesService");
     const invoices = await InvoicesService.getAll();
-
+    console.log(mockPayments);
     return mockPayments
       .map((payment) => {
         const invoice = invoices.find((inv) => inv.id === payment.id_facture);
@@ -244,7 +244,6 @@ export const formatDateTime = (dateString: string) => {
 export const generatePaymentsFromPaidInvoices = async () => {
   const { InvoicesService, FactureStatut } = await import("./invoicesService");
   const invoices = await InvoicesService.getAll();
-
   // Clear existing mock payments
   mockPayments = [];
 

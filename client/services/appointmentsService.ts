@@ -60,7 +60,7 @@ export class AppointmentsService {
       patient_nom: `${appointment.client.prenom} ${appointment.client.nom}`,
       client_id: appointment.client.id,
       email: appointment.client.email,
-      Cabinet: appointment.Cabinet ?? "Biohacking",
+      Cabinet: appointment.cabinet,
     }));
     return mockAppointments;
   }
@@ -82,18 +82,16 @@ export class AppointmentsService {
     }
 
     const date = new Date(data.date_rendez_vous);
-
-    await api.post(`rendez-vous`, {
+    const response = await api.post(`rendez-vous`, {
       CIN: client.CIN,
       sujet: data.sujet,
       date_rendez_vous: date.toISOString(),
       status: data.status,
+      cabinet: data.Cabinet,
       Cree_par: currentUser.CIN,
-      // Cabinet not sent if backend doesn't support it
     });
-
     const newAppointment: RendezVous = {
-      id: Math.max(0, Math.max(0, ...mockAppointments.map((apt) => apt.id))) + 1,
+      id: response.data.id,
       CIN: client.CIN,
       patient_nom: `${client.prenom} ${client.nom}`,
       sujet: data.sujet,
@@ -147,6 +145,7 @@ export class AppointmentsService {
       sujet: data.sujet,
       date_rendez_vous: date.toISOString(),
       status: data.status,
+      cabinet: data.Cabinet,
       Cree_par: currentUser.CIN,
       // Cabinet not sent if backend doesn't support it
     });

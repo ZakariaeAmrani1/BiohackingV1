@@ -42,15 +42,14 @@ export class DocumentTemplatesService {
     mockTemplates = [];
     const result = await api.get(`document-templates`);
     const data = result.data;
-    data.map((template) => {
-      mockTemplates.push({
-        id: template.id,
-        name: template.name,
-        sections_json: template.sections_json,
-        Cree_par: template.Cree_par,
-        created_at: template.created_at,
-      });
-    });
+
+    mockTemplates = data.map((template) => ({
+      id: template.id,
+      name: template.name,
+      sections_json: template.sections_json,
+      Cree_par: template.Cree_par,
+      created_at: template.created_at,
+    }));
     return mockTemplates;
   }
 

@@ -13,6 +13,7 @@ export interface Facture {
   tva_rate: number;
   statut: FactureStatut;
   notes: string;
+  date_paiement?: string;
   Cree_par: string;
   created_at: string;
 }
@@ -75,30 +76,30 @@ export class InvoicesService {
     mockFactureBiens = [];
     const result = await api.get(`facture`);
     const data = result.data;
-    data.map((facture) => {
-      mockFactures.push({
-        id: facture.id,
-        CIN: facture.CIN,
-        date: facture.date,
-        prix_ht: facture.date,
-        tva_amount: facture.date,
-        tva_rate: 20,
-        prix_total: facture.prix_total,
-        statut:
-          facture.statut === "Brouillon"
-            ? FactureStatut.BROUILLON
-            : facture.statut === "Envoyée"
-              ? FactureStatut.ENVOYEE
-              : facture.statut === "Payée"
-                ? FactureStatut.PAYEE
-                : facture.statut === "Annulée"
-                  ? FactureStatut.ANNULEE
-                  : FactureStatut.EN_RETARD,
-        notes: facture.notes,
-        Cree_par: facture.Cree_par,
-        created_at: facture.created_at,
-      });
-    });
+
+    mockFactures = data.map((facture) => ({
+      id: facture.id,
+      CIN: facture.CIN,
+      date: facture.date,
+      prix_ht: facture.date,
+      tva_amount: facture.date,
+      tva_rate: 20,
+      prix_total: facture.prix_total,
+      statut:
+        facture.statut === "Brouillon"
+          ? FactureStatut.BROUILLON
+          : facture.statut === "Envoyée"
+            ? FactureStatut.ENVOYEE
+            : facture.statut === "Payée"
+              ? FactureStatut.PAYEE
+              : facture.statut === "Annulée"
+                ? FactureStatut.ANNULEE
+                : FactureStatut.EN_RETARD,
+      notes: facture.notes,
+      date_paiement: facture.date_paiement,
+      Cree_par: facture.Cree_par,
+      created_at: facture.created_at,
+    }));
 
     const result1 = await api.get(`facture-bien`);
     const data1 = result1.data;
@@ -114,7 +115,8 @@ export class InvoicesService {
         prix_unitaire: facture.bien.prix,
       });
     });
-    return [...mockFactures];
+
+    return mockFactures;
   }
 
   static async getAllWithDetails(): Promise<FactureWithDetails[]> {

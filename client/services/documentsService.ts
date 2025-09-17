@@ -27,17 +27,16 @@ export class DocumentsService {
     mockDocuments = [];
     const result = await api.get(`document`);
     const data = result.data;
-    data.map((document) => {
-      mockDocuments.push({
-        id: document.id,
-        template_id: document.template_id,
-        CIN: document.CIN,
-        data_json: document.data_json,
-        Cree_par: document.Cree_par,
-        created_at: document.created_at,
-      });
-    });
-    return [...mockDocuments];
+
+    mockDocuments = data.map((document) => ({
+      id: document.id,
+      template_id: document.template_id,
+      CIN: document.CIN,
+      data_json: document.data_json,
+      Cree_par: document.Cree_par,
+      created_at: document.created_at,
+    }));
+    return mockDocuments;
   }
 
   // Get documents by patient CIN
