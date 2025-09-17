@@ -15,6 +15,7 @@ export interface RendezVous {
   patient_nom?: string; // Additional field for display
   email?: string;
   client_id?: number; // Reference to client table
+  Cabinet?: string;
 }
 
 // Create/Update form data interface
@@ -25,6 +26,7 @@ export interface AppointmentFormData {
   date_rendez_vous: string;
   Cree_par: string;
   status: "programmé" | "confirmé" | "terminé" | "annulé";
+  Cabinet: string;
 }
 
 // Helper function to get dates relative to today
@@ -58,6 +60,7 @@ export class AppointmentsService {
       patient_nom: `${appointment.client.prenom} ${appointment.client.nom}`,
       client_id: appointment.client.id,
       email: appointment.client.email,
+      Cabinet: appointment.Cabinet ?? "Biohacking",
     }));
     return mockAppointments;
   }
@@ -86,10 +89,11 @@ export class AppointmentsService {
       date_rendez_vous: date.toISOString(),
       status: data.status,
       Cree_par: currentUser.CIN,
+      // Cabinet not sent if backend doesn't support it
     });
 
     const newAppointment: RendezVous = {
-      id: Math.max(...mockAppointments.map((apt) => apt.id)) + 1,
+      id: Math.max(0, Math.max(0, ...mockAppointments.map((apt) => apt.id))) + 1,
       CIN: client.CIN,
       patient_nom: `${client.prenom} ${client.nom}`,
       sujet: data.sujet,
@@ -98,6 +102,7 @@ export class AppointmentsService {
       status: data.status,
       client_id: data.client_id,
       created_at: new Date().toISOString(),
+      Cabinet: data.Cabinet,
     };
 
     mockAppointments.push(newAppointment);
@@ -143,6 +148,7 @@ export class AppointmentsService {
       date_rendez_vous: date.toISOString(),
       status: data.status,
       Cree_par: currentUser.CIN,
+      // Cabinet not sent if backend doesn't support it
     });
 
     const updatedAppointment: RendezVous = {
@@ -154,6 +160,7 @@ export class AppointmentsService {
       Cree_par: data.Cree_par,
       status: data.status,
       client_id: data.client_id,
+      Cabinet: data.Cabinet,
     };
 
     mockAppointments[index] = updatedAppointment;
@@ -276,6 +283,10 @@ export const validateAppointmentData = (
 
   if (!data.Cree_par.trim()) {
     errors.push("Le créateur est obligatoire");
+  }
+
+  if (!data.Cabinet || !data.Cabinet.trim()) {
+    errors.push("Le cabinet est obligatoire");
   }
 
   return errors;

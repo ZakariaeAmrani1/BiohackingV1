@@ -52,13 +52,12 @@ import {
   SoinsService,
   Soin,
   SoinFormData,
-  SoinType,
   getAvailableDoctors,
   formatPrice,
-  getSoinTypes,
   getSoinTypeColor,
   getRevenueStatistics,
 } from "@/services/soinsService";
+import { OptionsService } from "@/services/optionsService";
 import { Utilisateur } from "@/services/clientsService";
 import { UserService } from "@/services/userService";
 
@@ -79,6 +78,7 @@ export default function Soins() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedSoin, setSelectedSoin] = useState<Soin | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [soinTypes, setSoinTypes] = useState<string[]>([]);
 
   const { toast } = useToast();
 
@@ -88,6 +88,7 @@ export default function Soins() {
   // Load soins on component mount
   useEffect(() => {
     loadSoins();
+    OptionsService.getSoinTypes().then(setSoinTypes).catch(() => setSoinTypes([]));
   }, []);
 
   useEffect(() => {
@@ -420,7 +421,7 @@ export default function Soins() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="tous">Tous les types</SelectItem>
-                  {getSoinTypes().map((type) => (
+                  {soinTypes.map((type) => (
                     <SelectItem key={type} value={type}>
                       {type}
                     </SelectItem>

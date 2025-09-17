@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Stethoscope, AlertTriangle, User, Euro, Tag } from "lucide-react";
+import { Stethoscope, AlertTriangle, User, Euro, Tag, Building2 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -19,17 +19,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import {
-  SoinFormData,
-  Soin,
-  SoinType,
-  validateSoinData,
-  getAvailableDoctors,
-  getSoinTypes,
-  createEmptySoin,
-} from "@/services/soinsService";
+import { SoinFormData, Soin, validateSoinData, getAvailableDoctors, createEmptySoin } from "@/services/soinsService";
 import { Utilisateur } from "@/services/clientsService";
 import { AuthService } from "@/services/authService";
+import { OptionsService } from "@/services/optionsService";
 
 interface SoinFormModalProps {
   isOpen: boolean;
@@ -51,10 +44,14 @@ export default function SoinFormModal({
   const [formData, setFormData] = useState<SoinFormData>(createEmptySoin());
   const [errors, setErrors] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [soinTypes, setSoinTypes] = useState<string[]>([]);
 
   const isEditMode = !!soin;
   const availableDoctors = getAvailableDoctors();
-  const soinTypes = getSoinTypes();
+
+  useEffect(() => {
+    OptionsService.getSoinTypes().then(setSoinTypes).catch(() => setSoinTypes([]));
+  }, []);
 
   // Initialize form data when soin changes
   useEffect(() => {
@@ -65,6 +62,7 @@ export default function SoinFormModal({
         Type: soin.Type,
         prix: soin.prix,
         Cree_par: soin.Cree_par || user.CIN,
+        Cabinet: soin.Cabinet || "Biohacking",
       });
     } else {
       setFormData(createEmptySoin(user.CIN));
@@ -158,9 +156,7 @@ export default function SoinFormModal({
               </Label>
               <Select
                 value={formData.Type}
-                onValueChange={(value) =>
-                  handleInputChange("Type", value as SoinType)
-                }
+                onValueChange={(value) => handleInputChange("Type", value)}
                 disabled={isSubmitting}
               >
                 <SelectTrigger>
@@ -194,6 +190,27 @@ export default function SoinFormModal({
                 disabled={isSubmitting}
               />
             </div>
+          </div>
+
+          {/* Cabinet */}
+          <div className="space-y-2">
+            <Label htmlFor="cabinet" className="flex items-center gap-2">
+              <Building2 className="h-4 w-4" />
+              Cabinet
+            </Label>
+            <Select
+              value={formData.Cabinet}
+              onValueChange={(value) => handleInputChange("Cabinet", value)}
+              disabled={isSubmitting}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Sélectionnez le cabinet" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Biohacking">Biohacking</SelectItem>
+                <SelectItem value="Nassens">Nassens</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Creator */}

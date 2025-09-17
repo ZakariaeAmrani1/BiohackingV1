@@ -2,6 +2,7 @@ import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import { handleDemo } from "./routes/demo";
+import { getOptions, updateOptions } from "./routes/options";
 
 export function createServer() {
   const app = express();
@@ -18,6 +19,10 @@ export function createServer() {
   });
 
   app.get("/api/demo", handleDemo);
+
+  // Options management routes
+  app.get("/api/options", getOptions);
+  app.put("/api/options", updateOptions);
 
   return app;
 }

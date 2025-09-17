@@ -18,6 +18,7 @@ import {
   LogOut,
   PanelLeftClose,
   PanelLeft,
+  TrendingUp,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { UserService } from "@/services/userService";
@@ -34,6 +35,7 @@ const navigation = [
   { name: "Tableau de Bord", href: "/", icon: Home },
   { name: "Rendez-vous", href: "/appointments", icon: Calendar },
   { name: "Patients", href: "/patients", icon: Users },
+  { name: "Documents", href: "/documents", icon: FileText },
   { name: "Types de Documents", href: "/document-types", icon: FolderOpen },
   {
     name: "Biens",
@@ -46,6 +48,7 @@ const navigation = [
   },
   { name: "Factures", href: "/invoices", icon: Receipt },
   { name: "Paiements", href: "/payments", icon: DollarSign },
+  { name: "Rapports", href: "/reports", icon: TrendingUp },
   { name: "Paramètres", href: "/settings", icon: Settings },
 ];
 

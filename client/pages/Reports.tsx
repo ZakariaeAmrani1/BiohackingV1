@@ -1,12 +1,416 @@
-import { FileText } from "lucide-react";
-import PlaceholderPage from "@/components/PlaceholderPage";
+import { useEffect, useMemo, useState } from "react";
+import DashboardLayout from "@/components/dashboard/DashboardLayout";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { CurrencyService } from "@/services/currencyService";
+import { ClientsService, Client } from "@/services/clientsService";
+import { AnalyticsService, AnalyticsData, AnalyticsFilters, ClientSummary } from "@/services/analyticsService";
+import { Calendar, Users, Receipt, TrendingUp, UserSearch, BadgeDollarSign, Briefcase } from "lucide-react";
+
+const ALL_VALUE = "__all__";
+const toISODate = (d: Date) => new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+const formatDate = (d?: string | null) => (d ? new Date(d).toLocaleDateString("fr-FR") : "-");
 
 export default function Reports() {
+  const [loading, setLoading] = useState(true);
+  const [clients, setClients] = useState<Client[]>([]);
+  const [raw, setRaw] = useState<AnalyticsData | null>(null);
+  const [filters, setFilters] = useState<AnalyticsFilters>(() => {
+    const end = new Date();
+    const start = new Date();
+    start.setDate(end.getDate() - 30);
+    return { startDate: start.toISOString(), endDate: end.toISOString() };
+  });
+  const [selectedClientCIN, setSelectedClientCIN] = useState<string>("");
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      setLoading(true);
+      const [clientList, data] = await Promise.all([
+        ClientsService.getAll(),
+        AnalyticsService.loadAll(),
+      ]);
+      if (!mounted) return;
+      setClients(clientList);
+      setRaw(data);
+      setLoading(false);
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const filtered = useMemo(() => {
+    if (!raw) return null;
+    return AnalyticsService.filterData(raw, filters);
+  }, [raw, filters]);
+
+  const kpis = useMemo(() => {
+    if (!filtered) return null;
+    return AnalyticsService.computeKPIs(filtered);
+  }, [filtered]);
+
+  const clientSummary: ClientSummary | null = useMemo(() => {
+    if (!filtered || !selectedClientCIN) return null;
+    return AnalyticsService.computeClientSummary(filtered, selectedClientCIN);
+  }, [filtered, selectedClientCIN]);
+
+  const topServices = useMemo(() => (filtered ? AnalyticsService.topServices(filtered, 10) : []), [filtered]);
+  const topProducts = useMemo(() => (filtered ? AnalyticsService.topProducts(filtered, 10) : []), [filtered]);
+  const employeeProduction = useMemo(() => (filtered ? AnalyticsService.employeeProduction(filtered) : []), [filtered]);
+
+  const employeeOptions = useMemo(() => {
+    const set = new Set<string>();
+    if (raw) {
+      raw.invoices.forEach((f) => set.add(f.Cree_par));
+      raw.appointments.forEach((a) => set.add(a.Cree_par));
+    }
+    return Array.from(set);
+  }, [raw]);
+
+  const handleDateChange = (key: "startDate" | "endDate", value: string) => {
+    const iso = new Date(value + "T00:00:00").toISOString();
+    setFilters((prev) => ({ ...prev, [key]: key === "endDate" ? new Date(new Date(iso).getTime() + 24 * 60 * 60 * 1000 - 1).toISOString() : iso }));
+  };
+
+  const resetFilters = () => {
+    const end = new Date();
+    const start = new Date();
+    start.setDate(end.getDate() - 30);
+    setFilters({ startDate: start.toISOString(), endDate: end.toISOString(), clientCIN: undefined, employeeCIN: undefined });
+    setSelectedClientCIN("");
+  };
+
   return (
-    <PlaceholderPage
-      title="Rapports"
-      description="Générer des rapports complets sur les patients, traitements et performances de la clinique."
-      icon={FileText}
-    />
+    <DashboardLayout>
+      <div className="p-6 space-y-6">
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-semibold">Rapports et Analytique</h1>
+        </div>
+
+        {/* Filters */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Filtres avancés</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+              <div className="space-y-2 md:col-span-1">
+                <Label>Période - Début</Label>
+                <Input
+                  type="date"
+                  value={filters.startDate ? toISODate(new Date(filters.startDate)) : ""}
+                  onChange={(e) => handleDateChange("startDate", e.target.value)}
+                />
+              </div>
+              <div className="space-y-2 md:col-span-1">
+                <Label>Période - Fin</Label>
+                <Input
+                  type="date"
+                  value={filters.endDate ? toISODate(new Date(filters.endDate)) : ""}
+                  onChange={(e) => handleDateChange("endDate", e.target.value)}
+                />
+              </div>
+              <div className="space-y-2 md:col-span-1">
+                <Label>Employé</Label>
+                <Select
+                  value={filters.employeeCIN ?? ALL_VALUE}
+                  onValueChange={(v) => setFilters((prev) => ({ ...prev, employeeCIN: v === ALL_VALUE ? undefined : v }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Tous" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={ALL_VALUE}>Tous</SelectItem>
+                    {employeeOptions.map((e) => (
+                      <SelectItem key={e} value={e}>
+                        {e}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2 md:col-span-1">
+                <Label>Patient</Label>
+                <Select
+                  value={filters.clientCIN ?? ALL_VALUE}
+                  onValueChange={(v) => setFilters((prev) => ({ ...prev, clientCIN: v === ALL_VALUE ? undefined : v }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Tous" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={ALL_VALUE}>Tous</SelectItem>
+                    {clients.map((c) => (
+                      <SelectItem key={c.CIN} value={c.CIN}>
+                        {c.prenom} {c.nom} • {c.CIN}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2 md:col-span-1 flex items-end">
+                <Button variant="outline" className="w-full" onClick={resetFilters}>
+                  Réinitialiser
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* KPIs */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <Card>
+            <CardHeader className="pb-2"><CardTitle className="flex items-center gap-2 text-base"><Users className="h-4 w-4" /> Clients</CardTitle></CardHeader>
+            <CardContent>
+              <div className="text-3xl font-semibold">{loading || !kpis ? "-" : kpis.periodClientsCount}</div>
+              <div className="text-sm text-muted-foreground">Clients uniques dans la période</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2"><CardTitle className="flex items-center gap-2 text-base"><Calendar className="h-4 w-4" /> Rendez-vous</CardTitle></CardHeader>
+            <CardContent>
+              <div className="text-3xl font-semibold">{loading || !kpis ? "-" : kpis.periodAppointmentsCount}</div>
+              <div className="text-sm text-muted-foreground">Nombre de visites</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2"><CardTitle className="flex items-center gap-2 text-base"><TrendingUp className="h-4 w-4" /> Chiffre d'affaires</CardTitle></CardHeader>
+            <CardContent>
+              <div className="text-3xl font-semibold">{loading || !kpis ? "-" : CurrencyService.formatForDisplay(kpis.periodRevenueTotal)}</div>
+              <div className="text-sm text-muted-foreground">Total facturé</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2"><CardTitle className="flex items-center gap-2 text-base"><Receipt className="h-4 w-4" /> Payé</CardTitle></CardHeader>
+            <CardContent>
+              <div className="text-3xl font-semibold">{loading || !kpis ? "-" : CurrencyService.formatForDisplay(kpis.periodPaidRevenueTotal)}</div>
+              <div className="text-sm text-muted-foreground">Total encaissé</div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Client details */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2"><UserSearch className="h-5 w-5" /> Détails par patient</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+              <div className="space-y-2 md:col-span-2">
+                <Label>Sélectionner un patient</Label>
+                <Select value={selectedClientCIN} onValueChange={setSelectedClientCIN}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Choisir un patient" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {clients.map((c) => (
+                      <SelectItem key={c.CIN} value={c.CIN}>
+                        {c.prenom} {c.nom} • {c.CIN}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {clientSummary ? (
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  <Card>
+                    <CardHeader className="pb-2"><CardTitle className="text-base">Visites</CardTitle></CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-semibold">{clientSummary.visitsCount}</div>
+                      <div className="text-sm text-muted-foreground">Dernière: {formatDate(clientSummary.lastVisit)}</div>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardHeader className="pb-2"><CardTitle className="text-base">Total facturé</CardTitle></CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-semibold">{CurrencyService.formatForDisplay(clientSummary.totalInvoiced)}</div>
+                      <div className="text-sm text-muted-foreground">Payé: {CurrencyService.formatForDisplay(clientSummary.totalPaid)}</div>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardHeader className="pb-2"><CardTitle className="text-base">Dernier paiement</CardTitle></CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-semibold">{formatDate(clientSummary.lastPayment)}</div>
+                      <div className="text-sm text-muted-foreground">—</div>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <h3 className="text-sm font-medium mb-2">Services consommés</h3>
+                    <div className="border border-border rounded-md overflow-hidden">
+                      <table className="w-full text-sm">
+                        <thead className="bg-muted">
+                          <tr>
+                            <th className="text-left p-2">Service</th>
+                            <th className="text-right p-2">Qté</th>
+                            <th className="text-right p-2">Revenu</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {clientSummary.services.map((s) => (
+                            <tr key={s.name} className="border-t border-border">
+                              <td className="p-2">{s.name}</td>
+                              <td className="p-2 text-right">{s.quantity}</td>
+                              <td className="p-2 text-right">{CurrencyService.formatForDisplay(s.revenue)}</td>
+                            </tr>
+                          ))}
+                          {clientSummary.services.length === 0 && (
+                            <tr>
+                              <td colSpan={3} className="p-3 text-center text-muted-foreground">Aucun service</td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-medium mb-2">Produits achetés</h3>
+                    <div className="border border-border rounded-md overflow-hidden">
+                      <table className="w-full text-sm">
+                        <thead className="bg-muted">
+                          <tr>
+                            <th className="text-left p-2">Produit</th>
+                            <th className="text-right p-2">Qté</th>
+                            <th className="text-right p-2">Revenu</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {clientSummary.products.map((p) => (
+                            <tr key={p.name} className="border-t border-border">
+                              <td className="p-2">{p.name}</td>
+                              <td className="p-2 text-right">{p.quantity}</td>
+                              <td className="p-2 text-right">{CurrencyService.formatForDisplay(p.revenue)}</td>
+                            </tr>
+                          ))}
+                          {clientSummary.products.length === 0 && (
+                            <tr>
+                              <td colSpan={3} className="p-3 text-center text-muted-foreground">Aucun produit</td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="text-sm text-muted-foreground">Sélectionnez un patient pour voir les détails.</div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Top services/products & Employee production */}
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+          <Card className="xl:col-span-1">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2"><Briefcase className="h-5 w-5" /> Services les plus demandés</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="border border-border rounded-md overflow-hidden">
+                <table className="w-full text-sm">
+                  <thead className="bg-muted">
+                    <tr>
+                      <th className="text-left p-2">Service</th>
+                      <th className="text-right p-2">Qté</th>
+                      <th className="text-right p-2">Revenu</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {topServices.map((s) => (
+                      <tr key={s.name} className="border-t border-border">
+                        <td className="p-2">{s.name}</td>
+                        <td className="p-2 text-right">{s.quantity}</td>
+                        <td className="p-2 text-right">{CurrencyService.formatForDisplay(s.revenue)}</td>
+                      </tr>
+                    ))}
+                    {topServices.length === 0 && (
+                      <tr>
+                        <td colSpan={3} className="p-3 text-center text-muted-foreground">Aucune donnée</td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="xl:col-span-1">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2"><BadgeDollarSign className="h-5 w-5" /> Produits les plus vendus</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="border border-border rounded-md overflow-hidden">
+                <table className="w-full text-sm">
+                  <thead className="bg-muted">
+                    <tr>
+                      <th className="text-left p-2">Produit</th>
+                      <th className="text-right p-2">Qté</th>
+                      <th className="text-right p-2">Revenu</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {topProducts.map((p) => (
+                      <tr key={p.name} className="border-t border-border">
+                        <td className="p-2">{p.name}</td>
+                        <td className="p-2 text-right">{p.quantity}</td>
+                        <td className="p-2 text-right">{CurrencyService.formatForDisplay(p.revenue)}</td>
+                      </tr>
+                    ))}
+                    {topProducts.length === 0 && (
+                      <tr>
+                        <td colSpan={3} className="p-3 text-center text-muted-foreground">Aucune donnée</td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="xl:col-span-1">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2"><TrendingUp className="h-5 w-5" /> Production des employés</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="border border-border rounded-md overflow-hidden">
+                <table className="w-full text-sm">
+                  <thead className="bg-muted">
+                    <tr>
+                      <th className="text-left p-2">Employé</th>
+                      <th className="text-right p-2">Factures</th>
+                      <th className="text-right p-2">Revenu</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {employeeProduction.map((e) => (
+                      <tr key={e.employee} className="border-t border-border">
+                        <td className="p-2">{e.employee}</td>
+                        <td className="p-2 text-right">{e.invoicesCount}</td>
+                        <td className="p-2 text-right">{CurrencyService.formatForDisplay(e.revenue)}</td>
+                      </tr>
+                    ))}
+                    {employeeProduction.length === 0 && (
+                      <tr>
+                        <td colSpan={3} className="p-3 text-center text-muted-foreground">Aucune donnée</td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </DashboardLayout>
   );
 }

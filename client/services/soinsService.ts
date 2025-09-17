@@ -4,30 +4,21 @@ import { AuthService } from "./authService";
 export interface Soin {
   id: number;
   Nom: string;
-  Type: SoinType;
+  Type: string;
   prix: number;
   Cree_par: string;
   created_at: string;
+  Cabinet?: string;
 }
 
 export interface SoinFormData {
   Nom: string;
-  Type: SoinType;
+  Type: string;
   prix: number;
   Cree_par: string;
+  Cabinet: string;
 }
 
-// Enum for soin types
-export enum SoinType {
-  CONSULTATION = "Consultation",
-  DIAGNOSTIC = "Diagnostic",
-  PREVENTIF = "Préventif",
-  THERAPEUTIQUE = "Thérapeutique",
-  CHIRURGIE = "Chirurgie",
-  REEDUCATION = "Rééducation",
-  URGENCE = "Urgence",
-  SUIVI = "Suivi",
-}
 
 // Mock data storage
 let mockSoins: Soin[] = [];
@@ -46,6 +37,7 @@ export class SoinsService {
         prix: service.prix,
         Cree_par: service.Cree_par,
         created_at: service.created_at,
+        Cabinet: service.Cabinet ?? "Biohacking",
       });
     });
     return [...mockSoins];
@@ -67,10 +59,11 @@ export class SoinsService {
       prix: data.prix,
       stock: 1,
       Cree_par: currentUser.CIN,
+      // Cabinet intentionally not sent if backend doesn't support it
     });
 
     const newSoin: Soin = {
-      id: Math.max(...mockSoins.map((soin) => soin.id)) + 1,
+      id: Math.max(0, Math.max(0, ...mockSoins.map((soin) => soin.id))) + 1,
       ...data,
       created_at: new Date().toISOString(),
     };
@@ -100,6 +93,7 @@ export class SoinsService {
       prix: data.prix,
       stock: 1,
       Cree_par: currentUser.CIN,
+      // Cabinet intentionally not sent if backend doesn't support it
     });
 
     const index = mockSoins.findIndex((soin) => soin.id === id);
@@ -137,7 +131,7 @@ export class SoinsService {
   }
 
   // Get soins by type
-  static async getByType(type: SoinType): Promise<Soin[]> {
+  static async getByType(type: string): Promise<Soin[]> {
     return mockSoins.filter((soin) => soin.Type === type);
   }
 
@@ -176,6 +170,10 @@ export const validateSoinData = (data: SoinFormData): string[] => {
     errors.push("Le créateur est obligatoire");
   }
 
+  if (!data.Cabinet || !data.Cabinet.trim()) {
+    errors.push("Le cabinet est obligatoire");
+  }
+
   return errors;
 };
 
@@ -184,31 +182,25 @@ export const getAvailableDoctors = (): string[] => {
   return ["Dr. Smith", "Dr. Martin", "Dr. Dubois", "Dr. Laurent"];
 };
 
-export const getSoinTypes = (): SoinType[] => {
-  return Object.values(SoinType);
-};
 
-export const getSoinTypeLabel = (type: SoinType): string => {
-  return type;
-};
 
-export const getSoinTypeColor = (type: SoinType): string => {
+export const getSoinTypeColor = (type: string): string => {
   switch (type) {
-    case SoinType.CONSULTATION:
+    case "Consultation":
       return "bg-blue-100 text-blue-800";
-    case SoinType.DIAGNOSTIC:
+    case "Diagnostic":
       return "bg-purple-100 text-purple-800";
-    case SoinType.PREVENTIF:
+    case "Préventif":
       return "bg-green-100 text-green-800";
-    case SoinType.THERAPEUTIQUE:
+    case "Thérapeutique":
       return "bg-orange-100 text-orange-800";
-    case SoinType.CHIRURGIE:
+    case "Chirurgie":
       return "bg-red-100 text-red-800";
-    case SoinType.REEDUCATION:
+    case "Rééducation":
       return "bg-indigo-100 text-indigo-800";
-    case SoinType.URGENCE:
+    case "Urgence":
       return "bg-yellow-100 text-yellow-800";
-    case SoinType.SUIVI:
+    case "Suivi":
       return "bg-gray-100 text-gray-800";
     default:
       return "bg-gray-100 text-gray-800";
@@ -225,9 +217,10 @@ export const formatPrice = (price: number): string => {
 export const createEmptySoin = (CIN?: string): SoinFormData => {
   return {
     Nom: "",
-    Type: SoinType.CONSULTATION,
+    Type: "Consultation",
     prix: 0,
     Cree_par: CIN || "",
+    Cabinet: "Biohacking",
   };
 };
 
@@ -238,7 +231,8 @@ export const getStatisticsByType = (soins: Soin[]) => {
     { count: number; totalRevenue: number; avgPrice: number }
   > = {};
 
-  Object.values(SoinType).forEach((type) => {
+  const uniqueTypes = Array.from(new Set(soins.map((s) => s.Type)));
+  uniqueTypes.forEach((type) => {
     const soinsOfType = soins.filter((soin) => soin.Type === type);
     const totalRevenue = soinsOfType.reduce((sum, soin) => sum + soin.prix, 0);
 

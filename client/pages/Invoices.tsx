@@ -65,6 +65,10 @@ import {
 } from "@/services/invoicesService";
 import { Utilisateur } from "@/services/clientsService";
 import { UserService } from "@/services/userService";
+import { EntrepriseService } from "@/services/entrepriseService";
+import { AppSettingsService } from "@/services/appSettingsService";
+import { CurrencyService } from "@/services/currencyService";
+import { buildCompanyHeaderHtml, buildCompanyFooterHtml, wrapPdfHtmlDocument } from "@/services/pdfTemplate";
 
 export default function Invoices() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -405,7 +409,7 @@ export default function Invoices() {
       }
 
       // Generate PDF content
-      const pdfContent = generateInvoicePDF(invoiceWithDetails);
+      const pdfContent = await generateInvoicePDF(invoiceWithDetails);
 
       printWindow.document.write(pdfContent);
       printWindow.document.close();
@@ -430,7 +434,7 @@ export default function Invoices() {
   };
 
   // Generate PDF HTML content
-  const generateInvoicePDF = (invoice: FactureWithDetails): string => {
+  const generateInvoicePDF = async (invoice: FactureWithDetails): Promise<string> => {
     const formatDateForPDF = (dateString: string) => {
       return new Date(dateString).toLocaleDateString("fr-FR", {
         day: "2-digit",
@@ -439,11 +443,10 @@ export default function Invoices() {
       });
     };
 
+    await AppSettingsService.getSettings();
+
     const formatPriceForPDF = (price: number): string => {
-      return new Intl.NumberFormat("fr-FR", {
-        style: "currency",
-        currency: "EUR",
-      }).format(price);
+      return CurrencyService.formatCurrency(price, true);
     };
 
     const calculateTotals = (items: any[]) => {
@@ -458,388 +461,91 @@ export default function Invoices() {
     };
 
     const totals = calculateTotals(invoice.items);
+    const entreprise = await EntrepriseService.getEntreprise().catch(() => null);
 
-    return `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <meta charset="UTF-8">
-          <title>Facture #${invoice.id.toString().padStart(4, "0")}</title>
-          <style>
-            * {
-              margin: 0;
-              padding: 0;
-              box-sizing: border-box;
-            }
+    const headerHtml = buildCompanyHeaderHtml(entreprise, {
+      title: "FACTURE",
+      subtitle: `#${invoice.id.toString().padStart(4, "0")}`,
+    });
 
-            body {
-              font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-              font-size: 12px;
-              line-height: 1.4;
-              color: #333;
-              background: white;
-              padding: 20px;
-            }
-
-            .invoice-container {
-              max-width: 800px;
-              margin: 0 auto;
-              background: white;
-            }
-
-            .invoice-header {
-              border-bottom: 3px solid #2563eb;
-              padding-bottom: 20px;
-              margin-bottom: 30px;
-            }
-
-            .company-info {
-              text-align: right;
-              margin-bottom: 20px;
-            }
-
-            .company-name {
-              font-size: 24px;
-              font-weight: bold;
-              color: #2563eb;
-              margin-bottom: 5px;
-            }
-
-            .company-details {
-              color: #666;
-              font-size: 11px;
-            }
-
-            .invoice-title {
-              font-size: 28px;
-              font-weight: bold;
-              color: #2563eb;
-              margin-bottom: 10px;
-            }
-
-            .invoice-number {
-              font-size: 16px;
-              color: #666;
-            }
-
-            .invoice-info {
-              display: grid;
-              grid-template-columns: 1fr 1fr;
-              gap: 40px;
-              margin-bottom: 30px;
-            }
-
-            .bill-to, .invoice-details {
-              background: #f8fafc;
-              padding: 20px;
-              border-radius: 8px;
-            }
-
-            .section-title {
-              font-weight: bold;
-              font-size: 14px;
-              color: #2563eb;
-              margin-bottom: 10px;
-              border-bottom: 1px solid #e2e8f0;
-              padding-bottom: 5px;
-            }
-
-            .info-row {
-              display: flex;
-              justify-content: space-between;
-              margin-bottom: 5px;
-            }
-
-            .info-label {
-              color: #666;
-              font-weight: 500;
-            }
-
-            .info-value {
-              font-weight: 600;
-            }
-
-            .items-table {
-              width: 100%;
-              border-collapse: collapse;
-              margin-bottom: 30px;
-              border: 1px solid #e2e8f0;
-            }
-
-            .items-table th {
-              background: #2563eb;
-              color: white;
-              font-weight: 600;
-              padding: 12px 8px;
-              text-align: left;
-              font-size: 11px;
-              text-transform: uppercase;
-            }
-
-            .items-table td {
-              padding: 12px 8px;
-              border-bottom: 1px solid #e2e8f0;
-              vertical-align: top;
-            }
-
-            .items-table tbody tr:nth-child(even) {
-              background: #f8fafc;
-            }
-
-            .items-table tbody tr:hover {
-              background: #f1f5f9;
-            }
-
-            .item-name {
-              font-weight: 600;
-              color: #2563eb;
-            }
-
-            .item-type {
-              font-size: 10px;
-              color: #666;
-              font-style: italic;
-            }
-
-            .amount {
-              font-family: 'Courier New', monospace;
-              text-align: right;
-              font-weight: 600;
-            }
-
-            .totals-section {
-              margin-top: 20px;
-              border-top: 2px solid #e2e8f0;
-              padding-top: 20px;
-            }
-
-            .totals-table {
-              width: 100%;
-              max-width: 400px;
-              margin-left: auto;
-            }
-
-            .totals-table td {
-              padding: 8px 12px;
-              border-bottom: 1px solid #e2e8f0;
-            }
-
-            .totals-table .label {
-              text-align: left;
-              font-weight: 500;
-              color: #666;
-            }
-
-            .totals-table .amount {
-              text-align: right;
-              font-family: 'Courier New', monospace;
-              font-weight: 600;
-              min-width: 120px;
-            }
-
-            .total-final {
-              background: #f0f9ff;
-              border-top: 2px solid #2563eb;
-              font-size: 16px;
-              font-weight: bold;
-              color: #2563eb;
-            }
-
-            .notes-section {
-              margin-top: 30px;
-              padding: 20px;
-              background: #f8fafc;
-              border-radius: 8px;
-              border-left: 4px solid #2563eb;
-            }
-
-            .notes-title {
-              font-weight: bold;
-              color: #2563eb;
-              margin-bottom: 10px;
-            }
-
-            .footer {
-              margin-top: 40px;
-              text-align: center;
-              color: #666;
-              font-size: 10px;
-              border-top: 1px solid #e2e8f0;
-              padding-top: 20px;
-            }
-
-            .status-badge {
-              display: inline-block;
-              padding: 4px 12px;
-              border-radius: 20px;
-              font-size: 11px;
-              font-weight: 600;
-              text-transform: uppercase;
-            }
-
-            .status-payee {
-              background: #dcfce7;
-              color: #16a34a;
-            }
-
-            .status-envoyee {
-              background: #dbeafe;
-              color: #2563eb;
-            }
-
-            .status-brouillon {
-              background: #f3f4f6;
-              color: #374151;
-            }
-
-            .status-annulee {
-              background: #fee2e2;
-              color: #dc2626;
-            }
-
-            .status-en-retard {
-              background: #fed7aa;
-              color: #ea580c;
-            }
-
-            @media print {
-              body {
-                padding: 0;
-                background: white;
-              }
-
-              .invoice-container {
-                box-shadow: none;
-              }
-            }
-          </style>
-        </head>
-        <body>
-          <div class="invoice-container">
-            <!-- Header -->
-            <div class="invoice-header">
-              <div class="company-info">
-                <div class="company-name">Clinique Médicale</div>
-                <div class="company-details">
-                  123 Rue de la Santé<br>
-                  75001 Paris, France<br>
-                  Tél: +33 1 23 45 67 89<br>
-                  Email: contact@clinique.fr
-                </div>
-              </div>
-
-              <div class="invoice-title">FACTURE</div>
-              <div class="invoice-number">#${invoice.id.toString().padStart(4, "0")}</div>
-            </div>
-
-            <!-- Invoice Info -->
-            <div class="invoice-info">
-              <div class="bill-to">
-                <div class="section-title">Facturé à</div>
-                <div class="info-row">
-                  <span class="info-label">Patient:</span>
-                  <span class="info-value">${invoice.CIN}</span>
-                </div>
-                ${
-                  invoice.patient_name
-                    ? `
-                <div class="info-row">
-                  <span class="info-label">Nom:</span>
-                  <span class="info-value">${invoice.patient_name}</span>
-                </div>
-                `
-                    : ""
-                }
-              </div>
-
-              <div class="invoice-details">
-                <div class="section-title">Détails de la facture</div>
-                <div class="info-row">
-                  <span class="info-label">Date:</span>
-                  <span class="info-value">${formatDateForPDF(invoice.date)}</span>
-                </div>
-                <div class="info-row">
-                  <span class="info-label">Créé par:</span>
-                  <span class="info-value">${getUserName(invoice.Cree_par)}</span>
-                </div>
-                <div class="info-row">
-                  <span class="info-label">Statut:</span>
-                  <span class="status-badge status-${invoice.statut.toLowerCase().replace(" ", "-")}">${invoice.statut}</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Items Table -->
-            <table class="items-table">
-              <thead>
-                <tr>
-                  <th style="width: 40%">Description</th>
-                  <th style="width: 15%">Type</th>
-                  <th style="width: 10%">Qté</th>
-                  <th style="width: 15%">Prix unit.</th>
-                  <th style="width: 20%">Total</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${invoice.items
-                  .map(
-                    (item) => `
-                  <tr>
-                    <td>
-                      <div class="item-name">${item.nom_bien}</div>
-                    </td>
-                    <td>
-                      <span class="item-type">${item.type_bien === "produit" ? "Produit" : "Soin"}</span>
-                    </td>
-                    <td class="amount">${item.quantite}</td>
-                    <td class="amount">${formatPriceForPDF(item.prix_unitaire)}</td>
-                    <td class="amount">${formatPriceForPDF(item.prix_unitaire * item.quantite)}</td>
-                  </tr>
-                `,
-                  )
-                  .join("")}
-              </tbody>
-            </table>
-
-            <!-- Totals -->
-            <div class="totals-section">
-              <table class="totals-table">
-                <tr>
-                  <td class="label">Sous-total (HT):</td>
-                  <td class="amount">${formatPriceForPDF(totals.prix_ht)}</td>
-                </tr>
-                <tr>
-                  <td class="label">TVA (${totals.tva_rate}%):</td>
-                  <td class="amount">${formatPriceForPDF(totals.tva_amount)}</td>
-                </tr>
-                <tr class="total-final">
-                  <td class="label">TOTAL TTC:</td>
-                  <td class="amount">${formatPriceForPDF(totals.prix_total)}</td>
-                </tr>
-              </table>
-            </div>
-
+    const bodyHtml = `
+      <div class="pdf-section">
+        <div class="pdf-grid pdf-grid-2">
+          <div class="pdf-card">
+            <div class="pdf-section-title">Facturé à</div>
+            <div class="pdf-row"><span class="pdf-label">Patient:</span><span class="pdf-value">${invoice.CIN}</span></div>
             ${
-              invoice.notes
-                ? `
-            <!-- Notes -->
-            <div class="notes-section">
-              <div class="notes-title">Notes</div>
-              <div>${invoice.notes}</div>
-            </div>
-            `
+              invoice.patient_name
+                ? `<div class="pdf-row"><span class="pdf-label">Nom:</span><span class="pdf-value">${invoice.patient_name}</span></div>`
                 : ""
             }
-
-            <!-- Footer -->
-            <div class="footer">
-              <p>Merci pour votre confiance</p>
-              <p>Cette facture a été générée le ${new Date().toLocaleDateString("fr-FR")}</p>
-            </div>
           </div>
-        </body>
-      </html>
+          <div class="pdf-card">
+            <div class="pdf-section-title">Détails de la facture</div>
+            <div class="pdf-row"><span class="pdf-label">Date:</span><span class="pdf-value">${formatDateForPDF(invoice.date)}</span></div>
+            <div class="pdf-row"><span class="pdf-label">Créé par:</span><span class="pdf-value">${getUserName(invoice.Cree_par)}</span></div>
+            <div class="pdf-row"><span class="pdf-label">Statut:</span><span class="pdf-value">${invoice.statut}</span></div>
+          </div>
+        </div>
+      </div>
+
+      <table class="pdf-table">
+        <thead>
+          <tr>
+            <th style="width:40%">Description</th>
+            <th style="width:15%">Type</th>
+            <th style="width:10%">Qté</th>
+            <th style="width:15%">Prix unit.</th>
+            <th style="width:20%">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${invoice.items
+            .map(
+              (item) => `
+            <tr>
+              <td><div class="pdf-value">${item.nom_bien}</div></td>
+              <td><span class="pdf-subtitle">${item.type_bien === "produit" ? "Produit" : "Soin"}</span></td>
+              <td class="pdf-amount">${item.quantite}</td>
+              <td class="pdf-amount">${formatPriceForPDF(item.prix_unitaire)}</td>
+              <td class="pdf-amount">${formatPriceForPDF(item.prix_unitaire * item.quantite)}</td>
+            </tr>
+          `,
+            )
+            .join("")}
+        </tbody>
+      </table>
+
+      <div class="pdf-totals">
+        <table class="pdf-totals-table">
+          <tr>
+            <td class="pdf-totals-label">Sous-total (HT):</td>
+            <td class="pdf-amount">${formatPriceForPDF(totals.prix_ht)}</td>
+          </tr>
+          <tr>
+            <td class="pdf-totals-label">TVA (${totals.tva_rate}%):</td>
+            <td class="pdf-amount">${formatPriceForPDF(totals.tva_amount)}</td>
+          </tr>
+          <tr class="pdf-totals-final">
+            <td class="pdf-totals-label">TOTAL TTC:</td>
+            <td class="pdf-amount">${formatPriceForPDF(totals.prix_total)}</td>
+          </tr>
+        </table>
+      </div>
+
+      ${
+        invoice.notes
+          ? `<div class="pdf-note"><div class="pdf-section-title" style="border:0;padding:0;margin:0 0 6px 0">Notes</div><div>${invoice.notes}</div></div>`
+          : ""
+      }
     `;
+
+    const footerHtml = buildCompanyFooterHtml(entreprise);
+
+    return wrapPdfHtmlDocument(
+      `Facture #${invoice.id.toString().padStart(4, "0")}`,
+      `${headerHtml}${bodyHtml}${footerHtml}`,
+    );
   };
 
   // Get statistics
@@ -1133,7 +839,7 @@ export default function Invoices() {
                               <Receipt className="h-8 w-8 text-muted-foreground" />
                               <p className="text-muted-foreground">
                                 Aucune facture trouvée avec les critères
-                                sélectionnés
+                                s��lectionnés
                               </p>
                             </div>
                           </TableCell>

@@ -21,6 +21,7 @@ import {
   HardDrive,
   DollarSign,
   Building2,
+  List,
 } from "lucide-react";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -57,6 +58,7 @@ import {
   UserService,
 } from "@/services/userService";
 import { AppSettings, AppSettingsService } from "@/services/appSettingsService";
+import { OptionsService, OptionLists } from "@/services/optionsService";
 import {
   Entreprise,
   EntrepriseFormData,
@@ -128,11 +130,21 @@ export default function Settings() {
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
   const [importData, setImportData] = useState("");
 
+  // Options (types) state
+  const [options, setOptions] = useState<OptionLists>({ appointmentTypes: [], soinTypes: [] });
+  const [isSavingOptions, setIsSavingOptions] = useState(false);
+
   // Load data on component mount
   useEffect(() => {
     loadUserProfile();
     loadAppSettings();
     loadEntrepriseData();
+  }, []);
+
+  useEffect(() => {
+    OptionsService.getAll()
+      .then(setOptions)
+      .catch(() => setOptions({ appointmentTypes: [], soinTypes: [] }));
   }, []);
 
   const loadUserProfile = async () => {
@@ -485,7 +497,7 @@ export default function Settings() {
           </div>
         ) : (
           <Tabs defaultValue="profile" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-5">
+            <TabsList className="grid w-full grid-cols-6">
               <TabsTrigger value="profile" className="gap-2">
                 <User className="h-4 w-4" />
                 Profil
@@ -505,6 +517,10 @@ export default function Settings() {
               <TabsTrigger value="advanced" className="gap-2">
                 <SettingsIcon className="h-4 w-4" />
                 Avancé
+              </TabsTrigger>
+              <TabsTrigger value="options" className="gap-2">
+                <List className="h-4 w-4" />
+                Options
               </TabsTrigger>
             </TabsList>
 
@@ -1200,6 +1216,125 @@ export default function Settings() {
                         handleNotificationChange("email", checked)
                       }
                     />
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Options Tab */}
+            <TabsContent value="options" className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <List className="h-5 w-5" />
+                    Options des listes
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="grid md:grid-cols-2 gap-6">
+                    {/* Appointment Types */}
+                    <div className="space-y-3">
+                      <Label className="text-base font-medium">Types de rendez-vous</Label>
+                      <div className="space-y-2">
+                        {options.appointmentTypes.map((type, idx) => (
+                          <div key={idx} className="flex gap-2">
+                            <Input
+                              value={type}
+                              onChange={(e) => {
+                                const next = [...options.appointmentTypes];
+                                next[idx] = e.target.value;
+                                setOptions({ ...options, appointmentTypes: next });
+                              }}
+                            />
+                            <Button
+                              variant="outline"
+                              onClick={() => {
+                                const next = options.appointmentTypes.filter((_, i) => i !== idx);
+                                setOptions({ ...options, appointmentTypes: next });
+                              }}
+                            >
+                              Supprimer
+                            </Button>
+                          </div>
+                        ))}
+                        <div className="flex gap-2">
+                          <Input
+                            placeholder="Ajouter un type..."
+                            value={""}
+                            onChange={() => {}}
+                            className="hidden"
+                          />
+                          <Button
+                            variant="outline"
+                            onClick={() => setOptions({ ...options, appointmentTypes: [...options.appointmentTypes, ""] })}
+                          >
+                            Ajouter
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Soin Types */}
+                    <div className="space-y-3">
+                      <Label className="text-base font-medium">Types de soin</Label>
+                      <div className="space-y-2">
+                        {options.soinTypes.map((type, idx) => (
+                          <div key={idx} className="flex gap-2">
+                            <Input
+                              value={type}
+                              onChange={(e) => {
+                                const next = [...options.soinTypes];
+                                next[idx] = e.target.value;
+                                setOptions({ ...options, soinTypes: next });
+                              }}
+                            />
+                            <Button
+                              variant="outline"
+                              onClick={() => {
+                                const next = options.soinTypes.filter((_, i) => i !== idx);
+                                setOptions({ ...options, soinTypes: next });
+                              }}
+                            >
+                              Supprimer
+                            </Button>
+                          </div>
+                        ))}
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            onClick={() => setOptions({ ...options, soinTypes: [...options.soinTypes, ""] })}
+                          >
+                            Ajouter
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-4">
+                    <Button
+                      onClick={async () => {
+                        try {
+                          setIsSavingOptions(true);
+                          const cleaned = {
+                            appointmentTypes: options.appointmentTypes.filter((v) => v.trim().length > 0),
+                            soinTypes: options.soinTypes.filter((v) => v.trim().length > 0),
+                          };
+                          const updated = await OptionsService.update(cleaned);
+                          setOptions(updated);
+                          toast({ title: "Options sauvegardées", description: "Les listes ont été mises à jour" });
+                        } catch (e) {
+                          toast({ title: "Erreur", description: "Impossible de sauvegarder les options", variant: "destructive" });
+                        } finally {
+                          setIsSavingOptions(false);
+                        }
+                      }}
+                      disabled={isSavingOptions}
+                      className="gap-2"
+                    >
+                      <Save className="h-4 w-4" />
+                      {isSavingOptions ? "Sauvegarde..." : "Sauvegarder"}
+                    </Button>
                   </div>
                 </CardContent>
               </Card>

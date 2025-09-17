@@ -8,6 +8,7 @@ import {
   User,
   Users,
   UserPlus,
+  Building2,
 } from "lucide-react";
 import TimeSlotPicker from "./TimeSlotPicker";
 import {
@@ -51,7 +52,6 @@ import {
   RendezVous,
   validateAppointmentData,
   getAvailableDoctors,
-  getAppointmentTypes,
 } from "@/services/appointmentsService";
 import {
   ClientsService,
@@ -62,6 +62,7 @@ import {
   Utilisateur,
 } from "@/services/clientsService";
 import { AuthService } from "@/services/authService";
+import { OptionsService } from "@/services/optionsService";
 
 interface AppointmentFormModalProps {
   isOpen: boolean;
@@ -87,6 +88,7 @@ export default function AppointmentFormModal({
     date_rendez_vous: "",
     Cree_par: "",
     status: "programmé",
+    Cabinet: "Biohacking",
   });
 
   const [errors, setErrors] = useState<string[]>([]);
@@ -107,12 +109,15 @@ export default function AppointmentFormModal({
 
   const isEditMode = !!appointment;
   const availableDoctors = getAvailableDoctors();
-  const appointmentTypes = getAppointmentTypes();
+  const [appointmentTypes, setAppointmentTypes] = useState<string[]>([]);
 
-  // Load clients when modal opens
+  // Load clients and options when modal opens
   useEffect(() => {
     if (isOpen) {
       loadClients();
+      OptionsService.getAppointmentTypes()
+        .then(setAppointmentTypes)
+        .catch(() => setAppointmentTypes([]));
     }
   }, [isOpen]);
 
@@ -132,6 +137,7 @@ export default function AppointmentFormModal({
         date_rendez_vous: dateTime,
         Cree_par: appointment.Cree_par || "",
         status: appointment.status || "programmé",
+        Cabinet: appointment.Cabinet || "Biohacking",
       });
 
       // Find and set the selected client if we have a client_id
@@ -147,6 +153,7 @@ export default function AppointmentFormModal({
         date_rendez_vous: "",
         Cree_par: user.CIN,
         status: "programmé",
+        Cabinet: "Biohacking",
       });
       setSelectedClient(null);
       setIsNewPatientMode(false);
@@ -612,6 +619,27 @@ export default function AppointmentFormModal({
               excludeAppointmentId={appointment?.id}
               disabled={isSubmitting}
             />
+          </div>
+
+          {/* Cabinet */}
+          <div className="space-y-2">
+            <Label htmlFor="cabinet" className="flex items-center gap-2">
+              <Building2 className="h-4 w-4" />
+              Cabinet
+            </Label>
+            <Select
+              value={formData.Cabinet}
+              onValueChange={(value) => handleInputChange("Cabinet", value)}
+              disabled={isSubmitting}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Sélectionnez le cabinet" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Biohacking">Biohacking</SelectItem>
+                <SelectItem value="Nassens">Nassens</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Created By */}

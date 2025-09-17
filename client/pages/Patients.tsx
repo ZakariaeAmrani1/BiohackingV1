@@ -16,6 +16,8 @@ import {
   Heart,
   FileText,
   User,
+  History,
+  RotateCcw,
 } from "lucide-react";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -58,6 +60,12 @@ import {
 } from "@/services/clientsService";
 import { UserService } from "@/services/userService";
 import { DocumentsService } from "@/services/documentsService";
+import { AppointmentsService, RendezVous } from "@/services/appointmentsService";
+import { Calendar as DatePicker } from "@/components/ui/calendar";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+import { DateRange } from "react-day-picker";
+import { Calendar as CalendarIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export default function Patients() {
   const navigate = useNavigate();
@@ -66,6 +74,30 @@ export default function Patients() {
   const [creatorFilter, setCreatorFilter] = useState<string>("tous");
   const [ageFilter, setAgeFilter] = useState<string>("tous");
   const [viewMode, setViewMode] = useState<"table" | "cards">("table");
+
+  // Advanced filters state
+  const [appointments, setAppointments] = useState<RendezVous[]>([]);
+  const [visitPeriod, setVisitPeriod] = useState<string>("tous");
+  const [customVisitRange, setCustomVisitRange] = useState<DateRange | undefined>();
+  const [lastVisitMode, setLastVisitMode] = useState<string>("toutes");
+  const [lastVisitDate, setLastVisitDate] = useState<Date | undefined>(undefined);
+  const [openVisitRange, setOpenVisitRange] = useState(false);
+  const [openLastVisitPicker, setOpenLastVisitPicker] = useState(false);
+  const [advancedOpen, setAdvancedOpen] = useState(false);
+
+  const handleResetFilters = () => {
+    setSearchTerm("");
+    setBloodGroupFilter("tous");
+    setCreatorFilter("tous");
+    setAgeFilter("tous");
+    setVisitPeriod("tous");
+    setCustomVisitRange(undefined);
+    setLastVisitMode("toutes");
+    setLastVisitDate(undefined);
+    setOpenVisitRange(false);
+    setOpenLastVisitPicker(false);
+    setAdvancedOpen(false);
+  };
 
   // Data state
   const [clients, setClients] = useState<Client[]>([]);
@@ -98,6 +130,10 @@ export default function Patients() {
 
   useEffect(() => {
     loadDocuments();
+  }, []);
+
+  useEffect(() => {
+    loadAppointments();
   }, []);
 
   // Add escape key handler to force close modals if stuck
@@ -146,6 +182,22 @@ export default function Patients() {
     }
   };
 
+  const loadAppointments = async () => {
+    try {
+      setIsLoading(true);
+      const data = await AppointmentsService.getAll();
+      setAppointments(data);
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: "Impossible de charger les rendez-vous",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const loadUsers = async () => {
     try {
       setIsLoading(true);
@@ -166,6 +218,41 @@ export default function Patients() {
     const user = users.find((user) => user.CIN === CIN);
     if (user && user.nom) return user.nom;
     return CIN;
+  };
+
+  const visitsByCIN = useMemo(() => {
+    const map = new Map<string, number[]>();
+    appointments.forEach((a) => {
+      const ts = new Date(a.date_rendez_vous).getTime();
+      const prev = map.get(a.CIN) || [];
+      prev.push(ts);
+      map.set(a.CIN, prev);
+    });
+    return map;
+  }, [appointments]);
+
+  const lastVisitByCIN = useMemo(() => {
+    const map = new Map<string, number>();
+    visitsByCIN.forEach((arr, cin) => {
+      const m = Math.max(...arr);
+      if (Number.isFinite(m)) map.set(cin, m);
+    });
+    return map;
+  }, [visitsByCIN]);
+
+  const getPeriodRange = (period: string): { start?: Date; end?: Date } => {
+    const now = new Date();
+    const end = new Date(now);
+    switch (period) {
+      case "mois":
+        return { start: new Date(now.getFullYear(), now.getMonth(), 1), end };
+      case "deux_mois":
+        return { start: new Date(now.getFullYear(), now.getMonth() - 1, 1), end };
+      case "annee":
+        return { start: new Date(now.getFullYear(), 0, 1), end };
+      default:
+        return {};
+    }
   };
 
   // Filter and search logic
@@ -201,9 +288,64 @@ export default function Patients() {
         }
       }
 
-      return matchesSearch && matchesBloodGroup && matchesCreator && matchesAge;
+      let matchesVisitPeriod = true;
+      const applyPeriod =
+        visitPeriod !== "tous" || (customVisitRange && customVisitRange.from && customVisitRange.to);
+      if (applyPeriod) {
+        const range =
+          visitPeriod === "personnalise"
+            ? { start: customVisitRange?.from, end: customVisitRange?.to }
+            : getPeriodRange(visitPeriod);
+        const list = visitsByCIN.get(client.CIN) || [];
+        const startTs = range.start ? new Date(range.start).getTime() : undefined;
+        const endTs = range.end ? new Date(range.end).getTime() : undefined;
+        matchesVisitPeriod = list.some(
+          (ts) => (startTs === undefined || ts >= startTs) && (endTs === undefined || ts <= endTs),
+        );
+      }
+
+      let matchesLastVisit = true;
+      if (lastVisitMode !== "toutes" && lastVisitDate) {
+        const lastTs = lastVisitByCIN.get(client.CIN);
+        if (!lastTs) {
+          matchesLastVisit = false;
+        } else {
+          const cmp = new Date(
+            lastVisitDate.getFullYear(),
+            lastVisitDate.getMonth(),
+            lastVisitDate.getDate(),
+          ).getTime();
+          const d = new Date(lastTs);
+          const lastOnly = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+          if (lastVisitMode === "avant") matchesLastVisit = lastOnly < cmp;
+          if (lastVisitMode === "apres") matchesLastVisit = lastOnly > cmp;
+          if (lastVisitMode === "le") matchesLastVisit = lastOnly === cmp;
+        }
+      }
+
+      return (
+        matchesSearch &&
+        matchesBloodGroup &&
+        matchesCreator &&
+        matchesAge &&
+        matchesVisitPeriod &&
+        matchesLastVisit
+      );
     });
-  }, [searchTerm, bloodGroupFilter, creatorFilter, ageFilter, clients]);
+  }, [
+    searchTerm,
+    bloodGroupFilter,
+    creatorFilter,
+    ageFilter,
+    clients,
+    appointments,
+    visitPeriod,
+    customVisitRange,
+    lastVisitMode,
+    lastVisitDate,
+    visitsByCIN,
+    lastVisitByCIN,
+  ]);
 
   // CRUD Operations
   const handleCreateClient = async (data: ClientFormData) => {
@@ -313,6 +455,10 @@ export default function Patients() {
     navigate(`/patients/${client.CIN}/documents`);
   };
 
+  const navigateToOperations = (client: Client) => {
+    navigate(`/patients/${client.CIN}/operations`);
+  };
+
   // Force close all modals - can be used as emergency escape
   const forceCloseAllModals = () => {
     setIsFormModalOpen(false);
@@ -386,11 +532,15 @@ export default function Patients() {
 
         {/* Search and Filters */}
         <Card>
-          <CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-lg">Rechercher et Filtrer</CardTitle>
+            <Button variant="ghost" size="sm" className="h-8 gap-2" onClick={handleResetFilters}>
+              <RotateCcw className="h-4 w-4" />
+              Réinitialiser
+            </Button>
           </CardHeader>
           <CardContent>
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5 items-start">
               {/* Search */}
               <div className="relative lg:col-span-2">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -447,6 +597,131 @@ export default function Patients() {
                   <SelectItem value="senior">Seniors (&gt; 65 ans)</SelectItem>
                 </SelectContent>
               </Select>
+
+              {/* Toggle Advanced */}
+              <Button
+                variant="outline"
+                className="w-full justify-between"
+                onClick={() => setAdvancedOpen((v) => !v)}
+              >
+                Filtres avancés
+                <ChevronDown className={cn("h-4 w-4 transition-transform", {
+                  "rotate-180": advancedOpen,
+                })} />
+              </Button>
+
+              {advancedOpen && (
+                <div className="lg:col-span-5 md:col-span-2 col-span-1 grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+                  {/* Visites - période */}
+                  <Select value={visitPeriod} onValueChange={(v) => {
+                    setVisitPeriod(v);
+                    if (v === "personnalise") {
+                      setOpenVisitRange(true);
+                    } else {
+                      setOpenVisitRange(false);
+                      setCustomVisitRange(undefined);
+                    }
+                  }}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Visites" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="tous">Toutes les visites</SelectItem>
+                      <SelectItem value="mois">Ce mois</SelectItem>
+                      <SelectItem value="deux_mois">2 derniers mois</SelectItem>
+                      <SelectItem value="annee">Cette année</SelectItem>
+                      <SelectItem value="personnalise">Personnalisé</SelectItem>
+                    </SelectContent>
+                  </Select>
+
+                  {/* Période personnalisée */}
+                  {visitPeriod === "personnalise" && (
+                    <Popover open={openVisitRange} onOpenChange={setOpenVisitRange}>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className="w-full justify-start gap-2"
+                          onClick={() => {
+                            if (visitPeriod !== "personnalise") setVisitPeriod("personnalise");
+                            setOpenVisitRange(true);
+                          }}
+                        >
+                          <CalendarIcon className="h-4 w-4 text-muted-foreground" />
+                          {customVisitRange?.from && customVisitRange?.to
+                            ? `${formatDate(customVisitRange.from.toISOString())} - ${formatDate(
+                                customVisitRange.to.toISOString(),
+                              )}`
+                            : "Sélectionner la période"}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <DatePicker
+                          mode="range"
+                          selected={customVisitRange}
+                          onSelect={(range) => {
+                            setCustomVisitRange(range);
+                            if (range?.from && range?.to) setOpenVisitRange(false);
+                          }}
+                          numberOfMonths={2}
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  )}
+
+                  {/* Dernière visite */}
+                  <Select value={lastVisitMode} onValueChange={(v) => {
+                    setLastVisitMode(v);
+                    if (v === "toutes") {
+                      setLastVisitDate(undefined);
+                      setOpenLastVisitPicker(false);
+                    } else {
+                      setOpenLastVisitPicker(true);
+                    }
+                  }}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Dernière visite" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="toutes">Toutes</SelectItem>
+                      <SelectItem value="le">Le...</SelectItem>
+                      <SelectItem value="avant">Avant le...</SelectItem>
+                      <SelectItem value="apres">Après le...</SelectItem>
+                    </SelectContent>
+                  </Select>
+
+                  {/* Date de dernière visite */}
+                  {lastVisitMode !== "toutes" && (
+                    <Popover open={openLastVisitPicker} onOpenChange={setOpenLastVisitPicker}>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className="w-full justify-start gap-2"
+                          onClick={() => {
+                            if (lastVisitMode === "toutes") setLastVisitMode("le");
+                            setOpenLastVisitPicker(true);
+                          }}
+                        >
+                          <CalendarIcon className="h-4 w-4 text-muted-foreground" />
+                          {lastVisitDate
+                            ? `${formatDate(lastVisitDate.toISOString())}`
+                            : "Choisir une date"}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <DatePicker
+                          mode="single"
+                          selected={lastVisitDate}
+                          onSelect={(d) => {
+                            setLastVisitDate(d);
+                            if (d) setOpenLastVisitPicker(false);
+                          }}
+                          numberOfMonths={1}
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  )}
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -568,6 +843,13 @@ export default function Patients() {
                                   </DropdownMenuItem>
                                   <DropdownMenuItem
                                     className="gap-2"
+                                    onClick={() => navigateToOperations(client)}
+                                  >
+                                    <History className="h-4 w-4" />
+                                    Voir les opérations
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem
+                                    className="gap-2"
                                     onClick={() => openEditModal(client)}
                                   >
                                     <Edit className="h-4 w-4" />
@@ -685,6 +967,13 @@ export default function Patients() {
                               >
                                 <FileText className="h-4 w-4" />
                                 Voir les documents
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                className="gap-2"
+                                onClick={() => navigateToOperations(client)}
+                              >
+                                <History className="h-4 w-4" />
+                                Voir les opérations
                               </DropdownMenuItem>
                               <DropdownMenuItem
                                 className="gap-2"

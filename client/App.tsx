@@ -12,6 +12,8 @@ import Index from "./pages/Index";
 import Appointments from "./pages/Appointments";
 import Patients from "./pages/Patients";
 import PatientDocuments from "./pages/PatientDocuments";
+import PatientOperations from "./pages/PatientOperations";
+import Documents from "./pages/Documents";
 import Treatments from "./pages/Treatments";
 import Products from "./pages/Products";
 import Soins from "./pages/Soins";
@@ -87,6 +89,22 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <PatientDocuments />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/patients/:cin/operations"
+        element={
+          <ProtectedRoute>
+            <PatientOperations />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/documents"
+        element={
+          <ProtectedRoute>
+            <Documents />
           </ProtectedRoute>
         }
       />
