@@ -29,6 +29,10 @@ import { useToast } from "@/components/ui/use-toast";
 import DocumentFormModal from "@/components/documents/DocumentFormModal";
 import DocumentDetailsModal from "@/components/documents/DocumentDetailsModal";
 import DeleteDocumentModal from "@/components/documents/DeleteDocumentModal";
+import NewDocumentTypeModal from "@/components/documents/NewDocumentTypeModal";
+import ScannedDocumentFormModal from "@/components/scannedDocuments/ScannedDocumentFormModal";
+import ScannedDocumentViewerModal from "@/components/scannedDocuments/ScannedDocumentViewerModal";
+import DeleteScannedDocumentModal from "@/components/scannedDocuments/DeleteScannedDocumentModal";
 import {
   DocumentsService,
   Document,
@@ -40,6 +44,11 @@ import {
   DocumentTemplatesService,
   DocumentTemplate,
 } from "@/services/documentTemplatesService";
+import {
+  ScannedDocumentsService,
+  ScannedDocument,
+  ScannedDocumentFormData,
+} from "@/services/scannedDocumentsService";
 import {
   ClientsService,
   Client,
@@ -80,11 +89,20 @@ export default function Documents() {
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
+
+  // Scanned documents state
+  const [scannedDocs, setScannedDocs] = useState<ScannedDocument[]>([]);
+  const [isScanFormOpen, setIsScanFormOpen] = useState(false);
+  const [isScanViewerOpen, setIsScanViewerOpen] = useState(false);
+  const [isScanDeleteOpen, setIsScanDeleteOpen] = useState(false);
+  const [selectedScan, setSelectedScan] = useState<ScannedDocument | null>(null);
+
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isTypePickerOpen, setIsTypePickerOpen] = useState(false);
 
   const { toast } = useToast();
 
-  const creators = Array.from(new Set(documents.map((d) => d.Cree_par)));
+  const creators = Array.from(new Set([...documents.map((d) => d.Cree_par), ...scannedDocs.map((s) => s.Cree_par)]));
 
   useEffect(() => {
     loadAll();
@@ -93,13 +111,15 @@ export default function Documents() {
   const loadAll = async () => {
     try {
       setIsLoading(true);
-      const [docs, temps, cls, usrs] = await Promise.all([
+      const [docs, scans, temps, cls, usrs] = await Promise.all([
         DocumentsService.getAll(),
+        ScannedDocumentsService.getAll(),
         DocumentTemplatesService.getAll(),
         ClientsService.getAll(),
         UserService.getCurrentAllUsers(),
       ]);
       setDocuments(docs);
+      setScannedDocs(scans);
       setTemplates(temps);
       setClients(cls);
       setUsers(usrs);
@@ -123,30 +143,51 @@ export default function Documents() {
 
   const getClientByCIN = (cin: string) => clients.find((c) => c.CIN === cin) || null;
 
-  const filteredDocuments = useMemo(() => {
-    return documents.filter((doc) => {
-      const template = templates.find((t) => t.id === doc.template_id);
-      const templateName = template?.name || "";
-      const creatorName = getUserName(doc.Cree_par) || "";
-      const client = getClientByCIN(doc.CIN);
-      const patientText = client ? `${client.prenom} ${client.nom} ${client.CIN}` : doc.CIN;
+  type UnifiedItem = { kind: "structured" | "scanned"; createdAt: string; doc?: Document; scan?: ScannedDocument };
 
-      const matchesSearch =
-        templateName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        creatorName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        patientText.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        JSON.stringify(doc.data_json).toLowerCase().includes(searchTerm.toLowerCase());
+  const filteredItems = useMemo(() => {
+    const structured: UnifiedItem[] = documents.map((d) => ({ kind: "structured", createdAt: d.created_at, doc: d }));
+    const scanned: UnifiedItem[] = scannedDocs.map((s) => ({ kind: "scanned", createdAt: s.createdAt, scan: s }));
+    const combined = [...structured, ...scanned];
 
-      const matchesTemplate = templateFilter === "tous" || doc.template_id.toString() === templateFilter;
-      const matchesCreator = creatorFilter === "tous" || doc.Cree_par === creatorFilter;
+    const q = searchTerm.toLowerCase();
 
-      return matchesSearch && matchesTemplate && matchesCreator;
+    const byFilters = combined.filter((item) => {
+      if (item.kind === "structured" && item.doc) {
+        const t = templates.find((tt) => tt.id === item.doc!.template_id);
+        const templateName = t?.name || "";
+        const creatorName = getUserName(item.doc!.Cree_par) || "";
+        const client = getClientByCIN(item.doc!.CIN);
+        const patientText = client ? `${client.prenom} ${client.nom} ${client.CIN}` : item.doc!.CIN;
+        const matchesSearch = templateName.toLowerCase().includes(q) || creatorName.toLowerCase().includes(q) || patientText.toLowerCase().includes(q) || JSON.stringify(item.doc!.data_json).toLowerCase().includes(q);
+        const matchesTemplate = templateFilter === "tous" || item.doc!.template_id.toString() === templateFilter;
+        const matchesCreator = creatorFilter === "tous" || item.doc!.Cree_par === creatorFilter;
+        return matchesSearch && matchesTemplate && matchesCreator;
+      }
+      if (item.kind === "scanned" && item.scan) {
+        const s = item.scan;
+        const creatorName = getUserName(s.Cree_par) || "";
+        const client = getClientByCIN(s.CIN);
+        const patientText = client ? `${client.prenom} ${client.nom} ${client.CIN}` : s.CIN;
+        const matchesSearch = s.title.toLowerCase().includes(q) || (s.description || "").toLowerCase().includes(q) || s.filename.toLowerCase().includes(q) || creatorName.toLowerCase().includes(q) || patientText.toLowerCase().includes(q);
+        const matchesTemplate = templateFilter === "tous" || templateFilter === "scanned";
+        const matchesCreator = creatorFilter === "tous" || s.Cree_par === creatorFilter;
+        return matchesSearch && matchesTemplate && matchesCreator;
+      }
+      return false;
     });
-  }, [documents, templates, searchTerm, templateFilter, creatorFilter]);
 
-  const openCreateModal = () => {
+    return byFilters.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }, [documents, scannedDocs, templates, searchTerm, templateFilter, creatorFilter]);
+
+  const openCreateStructured = () => {
     setSelectedDocument(null);
     setIsFormModalOpen(true);
+  };
+
+  const openCreateScanned = () => {
+    setSelectedScan(null);
+    setIsScanFormOpen(true);
   };
 
   const openEditModal = (document: Document) => {
@@ -154,6 +195,14 @@ export default function Documents() {
     setTimeout(() => {
       setSelectedDocument(document);
       setIsFormModalOpen(true);
+    }, 100);
+  };
+
+  const openEditScan = (scan: ScannedDocument) => {
+    closeModals();
+    setTimeout(() => {
+      setSelectedScan(scan);
+      setIsScanFormOpen(true);
     }, 100);
   };
 
@@ -165,6 +214,14 @@ export default function Documents() {
     }, 100);
   };
 
+  const openScanViewer = (scan: ScannedDocument) => {
+    closeModals();
+    setTimeout(() => {
+      setSelectedScan(scan);
+      setIsScanViewerOpen(true);
+    }, 100);
+  };
+
   const openDeleteModal = (document: Document) => {
     closeModals();
     setTimeout(() => {
@@ -173,12 +230,24 @@ export default function Documents() {
     }, 100);
   };
 
+  const openDeleteScan = (scan: ScannedDocument) => {
+    closeModals();
+    setTimeout(() => {
+      setSelectedScan(scan);
+      setIsScanDeleteOpen(true);
+    }, 100);
+  };
+
   const closeModals = () => {
     setTimeout(() => {
       setIsFormModalOpen(false);
       setIsDetailsModalOpen(false);
       setIsDeleteModalOpen(false);
+      setIsScanFormOpen(false);
+      setIsScanViewerOpen(false);
+      setIsScanDeleteOpen(false);
       setSelectedDocument(null);
+      setSelectedScan(null);
     }, 0);
   };
 
@@ -212,6 +281,22 @@ export default function Documents() {
     }
   };
 
+  const handleCreateScanned = async (data: ScannedDocumentFormData) => {
+    try {
+      setIsSubmitting(true);
+      await ScannedDocumentsService.create(data);
+      await loadAll();
+      setIsScanFormOpen(false);
+      setSelectedScan(null);
+      toast({ title: "Succès", description: "Le document scanné a été créé avec succès" });
+    } catch {
+      toast({ title: "Erreur", description: "Impossible de créer le document scanné", variant: "destructive" });
+      throw new Error("Create scanned failed");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const handleUpdateDocument = async (data: DocumentFormData) => {
     if (!selectedDocument) return;
     try {
@@ -228,6 +313,23 @@ export default function Documents() {
     }
   };
 
+  const handleUpdateScanned = async (data: ScannedDocumentFormData) => {
+    if (!selectedScan) return;
+    try {
+      setIsSubmitting(true);
+      await ScannedDocumentsService.update(selectedScan.id, data);
+      await loadAll();
+      setIsScanFormOpen(false);
+      setSelectedScan(null);
+      toast({ title: "Succès", description: "Le document scanné a été modifié avec succès" });
+    } catch {
+      toast({ title: "Erreur", description: "Impossible de modifier le document scanné", variant: "destructive" });
+      throw new Error("Update scanned failed");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const handleDeleteDocument = async () => {
     if (!selectedDocument) return;
     try {
@@ -239,6 +341,23 @@ export default function Documents() {
     } catch {
       toast({ title: "Erreur", description: "Impossible de supprimer le document", variant: "destructive" });
       throw new Error("Delete failed");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDeleteScanned = async () => {
+    if (!selectedScan) return;
+    try {
+      setIsSubmitting(true);
+      await ScannedDocumentsService.delete(selectedScan.id);
+      await loadAll();
+      setIsScanDeleteOpen(false);
+      setSelectedScan(null);
+      toast({ title: "Succès", description: "Le document scanné a été supprimé avec succès" });
+    } catch {
+      toast({ title: "Erreur", description: "Impossible de supprimer le document scanné", variant: "destructive" });
+      throw new Error("Delete scanned failed");
     } finally {
       setIsSubmitting(false);
     }
@@ -333,7 +452,7 @@ export default function Documents() {
               <h1 className="text-3xl font-bold tracking-tight">Documents</h1>
               <p className="text-muted-foreground">Tous les documents de tous les patients</p>
             </div>
-            <Button className="gap-2" onClick={openCreateModal}>
+            <Button className="gap-2" onClick={() => setIsTypePickerOpen(true)}>
               <Plus className="h-4 w-4" />
               Nouveau Document
             </Button>
@@ -357,16 +476,17 @@ export default function Documents() {
 
                 <Select value={templateFilter} onValueChange={setTemplateFilter}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Type de document" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="tous">Tous les types</SelectItem>
-                    {templates.map((template) => (
-                      <SelectItem key={template.id} value={template.id.toString()}>
-                        {template.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
+                  <SelectValue placeholder="Type de document" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="tous">Tous les types</SelectItem>
+                  <SelectItem value="scanned">Documents scannés</SelectItem>
+                  {templates.map((template) => (
+                    <SelectItem key={template.id} value={template.id.toString()}>
+                      {template.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
                 </Select>
 
                 <Select value={creatorFilter} onValueChange={setCreatorFilter}>
@@ -388,7 +508,7 @@ export default function Documents() {
 
           <div className="flex items-center justify-between">
             <p className="text-sm text-muted-foreground">
-              {isLoading ? "Chargement..." : `${filteredDocuments.length} document(s) trouvé(s)`}
+              {isLoading ? "Chargement..." : `${filteredItems.length} document(s) trouvé(s)`}
             </p>
             <div className="flex rounded-lg border border-border p-1">
               <Button
@@ -428,40 +548,196 @@ export default function Documents() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {filteredDocuments.length > 0 ? (
-                        filteredDocuments.map((document) => {
-                          const client = getClientByCIN(document.CIN);
-                          return (
-                            <TableRow key={document.id} className="hover:bg-muted/50">
-                              <TableCell>
-                                <div className="flex items-center gap-2">
-                                  <FileText className="h-4 w-4 text-primary" />
-                                  <div>
-                                    <div className="font-medium">{getTemplateName(document.template_id)}</div>
-                                    <div className="text-sm text-muted-foreground">ID: {document.id}</div>
-                                  </div>
-                                </div>
-                              </TableCell>
-                              <TableCell>
-                                {client ? (
+                      {filteredItems.length > 0 ? (
+                        filteredItems.map((item, idx) => {
+                          if (item.kind === "structured" && item.doc) {
+                            const document = item.doc;
+                            const client = getClientByCIN(document.CIN);
+                            return (
+                              <TableRow key={`doc-${document.id}`} className="hover:bg-muted/50">
+                                <TableCell>
                                   <div className="flex items-center gap-2">
-                                    <User className="h-4 w-4 text-muted-foreground" />
-                                    <span>{client.prenom} {client.nom}</span>
+                                    <FileText className="h-4 w-4 text-primary" />
+                                    <div>
+                                      <div className="font-medium">{getTemplateName(document.template_id)}</div>
+                                      <div className="text-sm text-muted-foreground">ID: {document.id}</div>
+                                    </div>
                                   </div>
+                                </TableCell>
+                                <TableCell>
+                                  {client ? (
+                                    <div className="flex items-center gap-2">
+                                      <User className="h-4 w-4 text-muted-foreground" />
+                                      <span>{client.prenom} {client.nom}</span>
+                                    </div>
+                                  ) : (
+                                    <span className="font-mono">{document.CIN}</span>
+                                  )}
+                                </TableCell>
+                                <TableCell>
+                                  <span className="font-mono">{client ? client.CIN : document.CIN}</span>
+                                </TableCell>
+                                <TableCell>{getUserName(document.Cree_par)}</TableCell>
+                                <TableCell>{formatDate(document.created_at)}</TableCell>
+                                <TableCell className="text-right">
+                                  <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                      <Button variant="ghost" className="h-8 w-8 p-0">
+                                        <ChevronDown className="h-4 w-4" />
+                                      </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end">
+                                      <DropdownMenuItem className="gap-2" onClick={() => openDetailsModal(document)}>
+                                        <Eye className="h-4 w-4" />
+                                        Voir détails
+                                      </DropdownMenuItem>
+                                      <DropdownMenuItem className="gap-2" onClick={() => generatePDF(document)}>
+                                        <Download className="h-4 w-4" />
+                                        Télécharger PDF
+                                      </DropdownMenuItem>
+                                      <DropdownMenuItem className="gap-2" onClick={() => openEditModal(document)}>
+                                        <Edit className="h-4 w-4" />
+                                        Modifier
+                                      </DropdownMenuItem>
+                                      <DropdownMenuItem className="gap-2 text-red-600" onClick={() => openDeleteModal(document)}>
+                                        <Trash2 className="h-4 w-4" />
+                                        Supprimer
+                                      </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                  </DropdownMenu>
+                                </TableCell>
+                              </TableRow>
+                            );
+                          }
+
+                          if (item.kind === "scanned" && item.scan) {
+                            const scan = item.scan;
+                            const client = getClientByCIN(scan.CIN);
+                            return (
+                              <TableRow key={`scan-${scan.id}`} className="bg-amber-50 dark:bg-amber-900/20">
+                                <TableCell>
+                                  <div className="flex items-center gap-2">
+                                    <FileText className="h-4 w-4 text-primary" />
+                                    <div>
+                                      <div className="font-medium">Document scanné</div>
+                                      <div className="text-sm text-muted-foreground">{scan.title} • ID: {scan.id}</div>
+                                    </div>
+                                  </div>
+                                </TableCell>
+                                <TableCell>
+                                  {client ? (
+                                    <div className="flex items-center gap-2">
+                                      <User className="h-4 w-4 text-muted-foreground" />
+                                      <span>{client.prenom} {client.nom}</span>
+                                    </div>
+                                  ) : (
+                                    <span className="font-mono">{scan.CIN}</span>
+                                  )}
+                                </TableCell>
+                                <TableCell>
+                                  <span className="font-mono">{client ? client.CIN : scan.CIN}</span>
+                                </TableCell>
+                                <TableCell>{getUserName(scan.Cree_par)}</TableCell>
+                                <TableCell>{formatDate(scan.createdAt)}</TableCell>
+                                <TableCell className="text-right">
+                                  <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                      <Button variant="ghost" className="h-8 w-8 p-0">
+                                        <ChevronDown className="h-4 w-4" />
+                                      </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end">
+                                      <DropdownMenuItem className="gap-2" onClick={() => openScanViewer(scan)}>
+                                        <Eye className="h-4 w-4" />
+                                        Voir (PDF)
+                                      </DropdownMenuItem>
+                                      {scan.file_url && (
+                                        <DropdownMenuItem className="gap-2" onClick={() => window.open(scan.file_url!, "_blank") }>
+                                          <Download className="h-4 w-4" />
+                                          Télécharger PDF
+                                        </DropdownMenuItem>
+                                      )}
+                                      <DropdownMenuItem className="gap-2" onClick={() => openEditScan(scan)}>
+                                        <Edit className="h-4 w-4" />
+                                        Modifier
+                                      </DropdownMenuItem>
+                                      <DropdownMenuItem className="gap-2 text-red-600" onClick={() => openDeleteScan(scan)}>
+                                        <Trash2 className="h-4 w-4" />
+                                        Supprimer
+                                      </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                  </DropdownMenu>
+                                </TableCell>
+                              </TableRow>
+                            );
+                          }
+                          return null;
+                        })
+                      ) : (
+                        <TableRow>
+                          <TableCell colSpan={6} className="text-center py-8">
+                            <div className="flex flex-col items-center gap-2">
+                              <FileText className="h-8 w-8 text-muted-foreground" />
+                              <p className="text-muted-foreground">Aucun document trouvé</p>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="space-y-6">
+              {filteredItems.length > 0 ? (
+                <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-2">
+                  {filteredItems.map((item) => {
+                    if (item.kind === "structured" && item.doc) {
+                      const document = item.doc;
+                      const client = getClientByCIN(document.CIN);
+                      return (
+                        <Card key={`doc-card-${document.id}`} className="hover:shadow-md transition-shadow">
+                          <CardHeader className="pb-3">
+                            <div className="flex items-start justify-between">
+                              <div className="space-y-1">
+                                <CardTitle className="text-lg flex items-center gap-2">
+                                  <FileText className="h-5 w-5 text-primary" />
+                                  {getTemplateName(document.template_id)}
+                                </CardTitle>
+                                <p className="text-sm text-muted-foreground">ID: {document.id}</p>
+                              </div>
+                            </div>
+                          </CardHeader>
+                          <CardContent className="space-y-4">
+                            <div className="space-y-2">
+                              <div className="flex items-center gap-2 text-sm">
+                                <User className="h-4 w-4 text-muted-foreground" />
+                                <span className="font-medium">Patient:</span>
+                                {client ? (
+                                  <span>{client.prenom} {client.nom} ({client.CIN})</span>
                                 ) : (
                                   <span className="font-mono">{document.CIN}</span>
                                 )}
-                              </TableCell>
-                              <TableCell>
-                                <span className="font-mono">{client ? client.CIN : document.CIN}</span>
-                              </TableCell>
-                              <TableCell>{getUserName(document.Cree_par)}</TableCell>
-                              <TableCell>{formatDate(document.created_at)}</TableCell>
-                              <TableCell className="text-right">
+                              </div>
+                              <div className="flex items-center gap-2 text-sm">
+                                <User className="h-4 w-4 text-muted-foreground" />
+                                <span className="font-medium">Créé par:</span>
+                                <span>{getUserName(document.Cree_par)}</span>
+                              </div>
+                              <div className="flex items-center gap-2 text-sm">
+                                <Clock className="h-4 w-4 text-muted-foreground" />
+                                <span className="font-medium">Créé le:</span>
+                                <span>{formatDate(document.created_at)}</span>
+                              </div>
+                            </div>
+
+                            <div className="border-t pt-3">
+                              <div className="flex items-center justify-end">
                                 <DropdownMenu>
                                   <DropdownMenuTrigger asChild>
-                                    <Button variant="ghost" className="h-8 w-8 p-0">
-                                      <ChevronDown className="h-4 w-4" />
+                                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                      <Settings className="h-4 w-4" />
                                     </Button>
                                   </DropdownMenuTrigger>
                                   <DropdownMenuContent align="end">
@@ -483,99 +759,88 @@ export default function Documents() {
                                     </DropdownMenuItem>
                                   </DropdownMenuContent>
                                 </DropdownMenu>
-                              </TableCell>
-                            </TableRow>
-                          );
-                        })
-                      ) : (
-                        <TableRow>
-                          <TableCell colSpan={6} className="text-center py-8">
-                            <div className="flex flex-col items-center gap-2">
-                              <FileText className="h-8 w-8 text-muted-foreground" />
-                              <p className="text-muted-foreground">Aucun document trouvé</p>
+                              </div>
                             </div>
-                          </TableCell>
-                        </TableRow>
-                      )}
-                    </TableBody>
-                  </Table>
-                </div>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="space-y-6">
-              {filteredDocuments.length > 0 ? (
-                <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-2">
-                  {filteredDocuments.map((document) => {
-                    const client = getClientByCIN(document.CIN);
-                    return (
-                      <Card key={document.id} className="hover:shadow-md transition-shadow">
-                        <CardHeader className="pb-3">
-                          <div className="flex items-start justify-between">
-                            <div className="space-y-1">
-                              <CardTitle className="text-lg flex items-center gap-2">
-                                <FileText className="h-5 w-5 text-primary" />
-                                {getTemplateName(document.template_id)}
-                              </CardTitle>
-                              <p className="text-sm text-muted-foreground">ID: {document.id}</p>
-                            </div>
-                          </div>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                          <div className="space-y-2">
-                            <div className="flex items-center gap-2 text-sm">
-                              <User className="h-4 w-4 text-muted-foreground" />
-                              <span className="font-medium">Patient:</span>
-                              {client ? (
-                                <span>{client.prenom} {client.nom} ({client.CIN})</span>
-                              ) : (
-                                <span className="font-mono">{document.CIN}</span>
-                              )}
-                            </div>
-                            <div className="flex items-center gap-2 text-sm">
-                              <User className="h-4 w-4 text-muted-foreground" />
-                              <span className="font-medium">Créé par:</span>
-                              <span>{getUserName(document.Cree_par)}</span>
-                            </div>
-                            <div className="flex items-center gap-2 text-sm">
-                              <Clock className="h-4 w-4 text-muted-foreground" />
-                              <span className="font-medium">Créé le:</span>
-                              <span>{formatDate(document.created_at)}</span>
-                            </div>
-                          </div>
+                          </CardContent>
+                        </Card>
+                      );
+                    }
 
-                          <div className="border-t pt-3">
-                            <div className="flex items-center justify-end">
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                                    <Settings className="h-4 w-4" />
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                  <DropdownMenuItem className="gap-2" onClick={() => openDetailsModal(document)}>
-                                    <Eye className="h-4 w-4" />
-                                    Voir détails
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem className="gap-2" onClick={() => generatePDF(document)}>
-                                    <Download className="h-4 w-4" />
-                                    Télécharger PDF
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem className="gap-2" onClick={() => openEditModal(document)}>
-                                    <Edit className="h-4 w-4" />
-                                    Modifier
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem className="gap-2 text-red-600" onClick={() => openDeleteModal(document)}>
-                                    <Trash2 className="h-4 w-4" />
-                                    Supprimer
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
+                    if (item.kind === "scanned" && item.scan) {
+                      const scan = item.scan;
+                      const client = getClientByCIN(scan.CIN);
+                      return (
+                        <Card key={`scan-card-${scan.id}`} className="hover:shadow-md transition-shadow border-amber-200">
+                          <CardHeader className="pb-3">
+                            <div className="flex items-start justify-between">
+                              <div className="space-y-1">
+                                <CardTitle className="text-lg flex items-center gap-2">
+                                  <FileText className="h-5 w-5 text-primary" />
+                                  Document scanné — {scan.title}
+                                </CardTitle>
+                                <p className="text-sm text-muted-foreground">ID: {scan.id} • Fichier: {scan.filename}</p>
+                              </div>
                             </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    );
+                          </CardHeader>
+                          <CardContent className="space-y-4">
+                            <div className="space-y-2">
+                              <div className="flex items-center gap-2 text-sm">
+                                <User className="h-4 w-4 text-muted-foreground" />
+                                <span className="font-medium">Patient:</span>
+                                {client ? (
+                                  <span>{client.prenom} {client.nom} ({client.CIN})</span>
+                                ) : (
+                                  <span className="font-mono">{scan.CIN}</span>
+                                )}
+                              </div>
+                              <div className="flex items-center gap-2 text-sm">
+                                <User className="h-4 w-4 text-muted-foreground" />
+                                <span className="font-medium">Créé par:</span>
+                                <span>{getUserName(scan.Cree_par)}</span>
+                              </div>
+                              <div className="flex items-center gap-2 text-sm">
+                                <Clock className="h-4 w-4 text-muted-foreground" />
+                                <span className="font-medium">Créé le:</span>
+                                <span>{formatDate(scan.createdAt)}</span>
+                              </div>
+                            </div>
+
+                            <div className="border-t pt-3">
+                              <div className="flex items-center justify-end">
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                      <Settings className="h-4 w-4" />
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end">
+                                    <DropdownMenuItem className="gap-2" onClick={() => openScanViewer(scan)}>
+                                      <Eye className="h-4 w-4" />
+                                      Voir (PDF)
+                                    </DropdownMenuItem>
+                                    {scan.file_url && (
+                                      <DropdownMenuItem className="gap-2" onClick={() => window.open(scan.file_url!, "_blank")}>
+                                        <Download className="h-4 w-4" />
+                                        Télécharger PDF
+                                      </DropdownMenuItem>
+                                    )}
+                                    <DropdownMenuItem className="gap-2" onClick={() => openEditScan(scan)}>
+                                      <Edit className="h-4 w-4" />
+                                      Modifier
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem className="gap-2 text-red-600" onClick={() => openDeleteScan(scan)}>
+                                      <Trash2 className="h-4 w-4" />
+                                      Supprimer
+                                    </DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      );
+                    }
+                    return null;
                   })}
                 </div>
               ) : (
@@ -606,6 +871,15 @@ export default function Documents() {
           users={users}
         />
 
+        <ScannedDocumentFormModal
+          isOpen={isScanFormOpen}
+          onClose={() => { setIsScanFormOpen(false); setSelectedScan(null); }}
+          onSubmit={selectedScan ? handleUpdateScanned : handleCreateScanned}
+          document={selectedScan}
+          users={users}
+          isLoading={isSubmitting}
+        />
+
         <DocumentDetailsModal
           isOpen={isDetailsModalOpen}
           onClose={closeDetailsModal}
@@ -616,12 +890,39 @@ export default function Documents() {
           users={users}
         />
 
+        <NewDocumentTypeModal
+          isOpen={isTypePickerOpen}
+          onClose={() => setIsTypePickerOpen(false)}
+          onChoose={(type) => {
+            setIsTypePickerOpen(false);
+            if (type === "normal") {
+              openCreateStructured();
+            } else {
+              openCreateScanned();
+            }
+          }}
+        />
+
+        <ScannedDocumentViewerModal
+          isOpen={isScanViewerOpen}
+          onClose={() => { setIsScanViewerOpen(false); setSelectedScan(null); }}
+          document={selectedScan}
+        />
+
         <DeleteDocumentModal
           isOpen={isDeleteModalOpen}
           onClose={closeDeleteModal}
           onConfirm={handleDeleteDocument}
           document={selectedDocument}
           template={selectedDocument ? templates.find((t) => t.id === selectedDocument.template_id) || null : null}
+          isLoading={isSubmitting}
+        />
+
+        <DeleteScannedDocumentModal
+          isOpen={isScanDeleteOpen}
+          onClose={() => { setIsScanDeleteOpen(false); setSelectedScan(null); }}
+          onConfirm={handleDeleteScanned}
+          document={selectedScan}
           isLoading={isSubmitting}
         />
       </div>
