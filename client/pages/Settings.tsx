@@ -278,6 +278,7 @@ export default function Settings() {
         description: "Les informations ont été sauvegardées avec succès",
       });
     } catch (error) {
+      console.log(error);
       toast({
         title: "Erreur",
         description:
