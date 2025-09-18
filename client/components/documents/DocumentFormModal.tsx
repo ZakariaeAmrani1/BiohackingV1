@@ -144,11 +144,14 @@ export default function DocumentFormModal({
         template_id: document.template_id,
         CIN: document.CIN,
         data_json: document.data_json,
-        Cree_par: document.Cree_par,
+        Cree_par: user.CIN,
       });
 
       const template = templates.find((t) => t.id === document.template_id);
       setSelectedTemplate(template || null);
+
+      const client = clients.find((client) => client.CIN === document.CIN);
+      setSelectedClient(client);
     } else if (patient) {
       setFormData({
         template_id: 0,
@@ -172,7 +175,7 @@ export default function DocumentFormModal({
     setFormData((prev) => ({
       ...prev,
       template_id: numericId,
-      data_json: {}, // Reset data when template changes
+      data_json: {},
     }));
 
     if (errors.length > 0) {

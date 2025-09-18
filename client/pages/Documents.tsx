@@ -49,14 +49,14 @@ import {
   ScannedDocument,
   ScannedDocumentFormData,
 } from "@/services/scannedDocumentsService";
-import {
-  ClientsService,
-  Client,
-  Utilisateur,
-} from "@/services/clientsService";
+import { ClientsService, Client, Utilisateur } from "@/services/clientsService";
 import { UserService } from "@/services/userService";
 import { EntrepriseService } from "@/services/entrepriseService";
-import { buildCompanyHeaderHtml, buildCompanyFooterHtml, wrapPdfHtmlDocument } from "@/services/pdfTemplate";
+import {
+  buildCompanyHeaderHtml,
+  buildCompanyFooterHtml,
+  wrapPdfHtmlDocument,
+} from "@/services/pdfTemplate";
 import {
   FileText,
   Search,
@@ -88,21 +88,30 @@ export default function Documents() {
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
+  const [selectedDocument, setSelectedDocument] = useState<Document | null>(
+    null,
+  );
 
   // Scanned documents state
   const [scannedDocs, setScannedDocs] = useState<ScannedDocument[]>([]);
   const [isScanFormOpen, setIsScanFormOpen] = useState(false);
   const [isScanViewerOpen, setIsScanViewerOpen] = useState(false);
   const [isScanDeleteOpen, setIsScanDeleteOpen] = useState(false);
-  const [selectedScan, setSelectedScan] = useState<ScannedDocument | null>(null);
+  const [selectedScan, setSelectedScan] = useState<ScannedDocument | null>(
+    null,
+  );
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isTypePickerOpen, setIsTypePickerOpen] = useState(false);
 
   const { toast } = useToast();
 
-  const creators = Array.from(new Set([...documents.map((d) => d.Cree_par), ...scannedDocs.map((s) => s.Cree_par)]));
+  const creators = Array.from(
+    new Set([
+      ...documents.map((d) => d.Cree_par),
+      ...scannedDocs.map((s) => s.Cree_par),
+    ]),
+  );
 
   useEffect(() => {
     loadAll();
@@ -124,7 +133,11 @@ export default function Documents() {
       setClients(cls);
       setUsers(usrs);
     } catch (error) {
-      toast({ title: "Erreur", description: "Impossible de charger les documents", variant: "destructive" });
+      toast({
+        title: "Erreur",
+        description: "Impossible de charger les documents",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -133,7 +146,6 @@ export default function Documents() {
   const getUserName = (CIN: string) => {
     const user = users.find((u) => u.CIN === CIN);
     return user?.nom || CIN;
-    
   };
 
   const getTemplateName = (templateId: number) => {
@@ -141,13 +153,27 @@ export default function Documents() {
     return t?.name || "Modèle inconnu";
   };
 
-  const getClientByCIN = (cin: string) => clients.find((c) => c.CIN === cin) || null;
+  const getClientByCIN = (cin: string) =>
+    clients.find((c) => c.CIN === cin) || null;
 
-  type UnifiedItem = { kind: "structured" | "scanned"; createdAt: string; doc?: Document; scan?: ScannedDocument };
+  type UnifiedItem = {
+    kind: "structured" | "scanned";
+    createdAt: string;
+    doc?: Document;
+    scan?: ScannedDocument;
+  };
 
   const filteredItems = useMemo(() => {
-    const structured: UnifiedItem[] = documents.map((d) => ({ kind: "structured", createdAt: d.created_at, doc: d }));
-    const scanned: UnifiedItem[] = scannedDocs.map((s) => ({ kind: "scanned", createdAt: s.createdAt, scan: s }));
+    const structured: UnifiedItem[] = documents.map((d) => ({
+      kind: "structured",
+      createdAt: d.created_at,
+      doc: d,
+    }));
+    const scanned: UnifiedItem[] = scannedDocs.map((s) => ({
+      kind: "scanned",
+      createdAt: s.createdAt,
+      scan: s,
+    }));
     const combined = [...structured, ...scanned];
 
     const q = searchTerm.toLowerCase();
@@ -158,27 +184,55 @@ export default function Documents() {
         const templateName = t?.name || "";
         const creatorName = getUserName(item.doc!.Cree_par) || "";
         const client = getClientByCIN(item.doc!.CIN);
-        const patientText = client ? `${client.prenom} ${client.nom} ${client.CIN}` : item.doc!.CIN;
-        const matchesSearch = templateName.toLowerCase().includes(q) || creatorName.toLowerCase().includes(q) || patientText.toLowerCase().includes(q) || JSON.stringify(item.doc!.data_json).toLowerCase().includes(q);
-        const matchesTemplate = templateFilter === "tous" || item.doc!.template_id.toString() === templateFilter;
-        const matchesCreator = creatorFilter === "tous" || item.doc!.Cree_par === creatorFilter;
+        const patientText = client
+          ? `${client.prenom} ${client.nom} ${client.CIN}`
+          : item.doc!.CIN;
+        const matchesSearch =
+          templateName.toLowerCase().includes(q) ||
+          creatorName.toLowerCase().includes(q) ||
+          patientText.toLowerCase().includes(q) ||
+          JSON.stringify(item.doc!.data_json).toLowerCase().includes(q);
+        const matchesTemplate =
+          templateFilter === "tous" ||
+          item.doc!.template_id.toString() === templateFilter;
+        const matchesCreator =
+          creatorFilter === "tous" || item.doc!.Cree_par === creatorFilter;
         return matchesSearch && matchesTemplate && matchesCreator;
       }
       if (item.kind === "scanned" && item.scan) {
         const s = item.scan;
         const creatorName = getUserName(s.Cree_par) || "";
         const client = getClientByCIN(s.CIN);
-        const patientText = client ? `${client.prenom} ${client.nom} ${client.CIN}` : s.CIN;
-        const matchesSearch = s.title.toLowerCase().includes(q) || (s.description || "").toLowerCase().includes(q) || s.filename.toLowerCase().includes(q) || creatorName.toLowerCase().includes(q) || patientText.toLowerCase().includes(q);
-        const matchesTemplate = templateFilter === "tous" || templateFilter === "scanned";
-        const matchesCreator = creatorFilter === "tous" || s.Cree_par === creatorFilter;
+        const patientText = client
+          ? `${client.prenom} ${client.nom} ${client.CIN}`
+          : s.CIN;
+        const matchesSearch =
+          s.title.toLowerCase().includes(q) ||
+          (s.description || "").toLowerCase().includes(q) ||
+          s.filename.toLowerCase().includes(q) ||
+          creatorName.toLowerCase().includes(q) ||
+          patientText.toLowerCase().includes(q);
+        const matchesTemplate =
+          templateFilter === "tous" || templateFilter === "scanned";
+        const matchesCreator =
+          creatorFilter === "tous" || s.Cree_par === creatorFilter;
         return matchesSearch && matchesTemplate && matchesCreator;
       }
       return false;
     });
 
-    return byFilters.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-  }, [documents, scannedDocs, templates, searchTerm, templateFilter, creatorFilter]);
+    return byFilters.sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    );
+  }, [
+    documents,
+    scannedDocs,
+    templates,
+    searchTerm,
+    templateFilter,
+    creatorFilter,
+  ]);
 
   const openCreateStructured = () => {
     setSelectedDocument(null);
@@ -272,9 +326,16 @@ export default function Documents() {
       await DocumentsService.create(data);
       await loadAll();
       closeFormModal();
-      toast({ title: "Succès", description: "Le document a été créé avec succès" });
+      toast({
+        title: "Succès",
+        description: "Le document a été créé avec succès",
+      });
     } catch {
-      toast({ title: "Erreur", description: "Impossible de créer le document", variant: "destructive" });
+      toast({
+        title: "Erreur",
+        description: "Impossible de créer le document",
+        variant: "destructive",
+      });
       throw new Error("Create failed");
     } finally {
       setIsSubmitting(false);
@@ -288,9 +349,16 @@ export default function Documents() {
       await loadAll();
       setIsScanFormOpen(false);
       setSelectedScan(null);
-      toast({ title: "Succès", description: "Le document scanné a été créé avec succès" });
+      toast({
+        title: "Succès",
+        description: "Le document scanné a été créé avec succès",
+      });
     } catch {
-      toast({ title: "Erreur", description: "Impossible de créer le document scanné", variant: "destructive" });
+      toast({
+        title: "Erreur",
+        description: "Impossible de créer le document scanné",
+        variant: "destructive",
+      });
       throw new Error("Create scanned failed");
     } finally {
       setIsSubmitting(false);
@@ -301,12 +369,21 @@ export default function Documents() {
     if (!selectedDocument) return;
     try {
       setIsSubmitting(true);
+      console.log(data);
       await DocumentsService.update(selectedDocument.id, data);
       await loadAll();
       closeFormModal();
-      toast({ title: "Succès", description: "Le document a été modifié avec succès" });
-    } catch {
-      toast({ title: "Erreur", description: "Impossible de modifier le document", variant: "destructive" });
+      toast({
+        title: "Succès",
+        description: "Le document a été modifié avec succès",
+      });
+    } catch (error) {
+      console.log(error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de modifier le document",
+        variant: "destructive",
+      });
       throw new Error("Update failed");
     } finally {
       setIsSubmitting(false);
@@ -321,9 +398,16 @@ export default function Documents() {
       await loadAll();
       setIsScanFormOpen(false);
       setSelectedScan(null);
-      toast({ title: "Succès", description: "Le document scanné a été modifié avec succès" });
+      toast({
+        title: "Succès",
+        description: "Le document scanné a été modifié avec succès",
+      });
     } catch {
-      toast({ title: "Erreur", description: "Impossible de modifier le document scanné", variant: "destructive" });
+      toast({
+        title: "Erreur",
+        description: "Impossible de modifier le document scanné",
+        variant: "destructive",
+      });
       throw new Error("Update scanned failed");
     } finally {
       setIsSubmitting(false);
@@ -337,9 +421,16 @@ export default function Documents() {
       await DocumentsService.delete(selectedDocument.id);
       await loadAll();
       closeDeleteModal();
-      toast({ title: "Succès", description: "Le document a été supprimé avec succès" });
+      toast({
+        title: "Succès",
+        description: "Le document a été supprimé avec succès",
+      });
     } catch {
-      toast({ title: "Erreur", description: "Impossible de supprimer le document", variant: "destructive" });
+      toast({
+        title: "Erreur",
+        description: "Impossible de supprimer le document",
+        variant: "destructive",
+      });
       throw new Error("Delete failed");
     } finally {
       setIsSubmitting(false);
@@ -354,9 +445,16 @@ export default function Documents() {
       await loadAll();
       setIsScanDeleteOpen(false);
       setSelectedScan(null);
-      toast({ title: "Succès", description: "Le document scanné a été supprimé avec succès" });
+      toast({
+        title: "Succès",
+        description: "Le document scanné a été supprimé avec succès",
+      });
     } catch {
-      toast({ title: "Erreur", description: "Impossible de supprimer le document scanné", variant: "destructive" });
+      toast({
+        title: "Erreur",
+        description: "Impossible de supprimer le document scanné",
+        variant: "destructive",
+      });
       throw new Error("Delete scanned failed");
     } finally {
       setIsSubmitting(false);
@@ -365,20 +463,32 @@ export default function Documents() {
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" });
+    return date.toLocaleDateString("fr-FR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
   };
 
   const generatePDF = async (document: Document) => {
     const template = templates.find((t) => t.id === document.template_id);
-    const patient = getClientByCIN(document.CIN) || (await ClientsService.getByCIN(document.CIN));
+    const patient =
+      getClientByCIN(document.CIN) ||
+      (await ClientsService.getByCIN(document.CIN));
 
     const printWindow = window.open("", "_blank");
     if (!printWindow) {
-      toast({ title: "Erreur", description: "Impossible d'ouvrir la fenêtre d'impression", variant: "destructive" });
+      toast({
+        title: "Erreur",
+        description: "Impossible d'ouvrir la fenêtre d'impression",
+        variant: "destructive",
+      });
       return;
     }
 
-    const entreprise = await EntrepriseService.getEntreprise().catch(() => null);
+    const entreprise = await EntrepriseService.getEntreprise().catch(
+      () => null,
+    );
 
     const headerHtml = buildCompanyHeaderHtml(entreprise, {
       title: template?.name || "Document Médical",
@@ -401,7 +511,11 @@ export default function Documents() {
             const fieldsHtml = section.fields
               .map((field, fIdx) => {
                 const key = computeFieldKey(document.template_id, sIdx, fIdx);
-                const value = getFieldValue(document.data_json, key, field.name);
+                const value = getFieldValue(
+                  document.data_json,
+                  key,
+                  field.name,
+                );
                 let displayValue: any = value;
                 if (value === null || value === undefined || value === "") {
                   displayValue = "Non renseigné";
@@ -440,7 +554,10 @@ export default function Documents() {
       }, 1000);
     };
 
-    toast({ title: "PDF généré", description: "Le document a été ouvert pour impression/sauvegarde en PDF" });
+    toast({
+      title: "PDF généré",
+      description: "Le document a été ouvert pour impression/sauvegarde en PDF",
+    });
   };
 
   return (
@@ -450,7 +567,9 @@ export default function Documents() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold tracking-tight">Documents</h1>
-              <p className="text-muted-foreground">Tous les documents de tous les patients</p>
+              <p className="text-muted-foreground">
+                Tous les documents de tous les patients
+              </p>
             </div>
             <Button className="gap-2" onClick={() => setIsTypePickerOpen(true)}>
               <Plus className="h-4 w-4" />
@@ -474,19 +593,25 @@ export default function Documents() {
                   />
                 </div>
 
-                <Select value={templateFilter} onValueChange={setTemplateFilter}>
+                <Select
+                  value={templateFilter}
+                  onValueChange={setTemplateFilter}
+                >
                   <SelectTrigger>
-                  <SelectValue placeholder="Type de document" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="tous">Tous les types</SelectItem>
-                  <SelectItem value="scanned">Documents scannés</SelectItem>
-                  {templates.map((template) => (
-                    <SelectItem key={template.id} value={template.id.toString()}>
-                      {template.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
+                    <SelectValue placeholder="Type de document" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="tous">Tous les types</SelectItem>
+                    <SelectItem value="scanned">Documents scannés</SelectItem>
+                    {templates.map((template) => (
+                      <SelectItem
+                        key={template.id}
+                        value={template.id.toString()}
+                      >
+                        {template.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
                 </Select>
 
                 <Select value={creatorFilter} onValueChange={setCreatorFilter}>
@@ -508,7 +633,9 @@ export default function Documents() {
 
           <div className="flex items-center justify-between">
             <p className="text-sm text-muted-foreground">
-              {isLoading ? "Chargement..." : `${filteredItems.length} document(s) trouvé(s)`}
+              {isLoading
+                ? "Chargement..."
+                : `${filteredItems.length} document(s) trouvé(s)`}
             </p>
             <div className="flex rounded-lg border border-border p-1">
               <Button
@@ -554,13 +681,20 @@ export default function Documents() {
                             const document = item.doc;
                             const client = getClientByCIN(document.CIN);
                             return (
-                              <TableRow key={`doc-${document.id}`} className="hover:bg-muted/50">
+                              <TableRow
+                                key={`doc-${document.id}`}
+                                className="hover:bg-muted/50"
+                              >
                                 <TableCell>
                                   <div className="flex items-center gap-2">
                                     <FileText className="h-4 w-4 text-primary" />
                                     <div>
-                                      <div className="font-medium">{getTemplateName(document.template_id)}</div>
-                                      <div className="text-sm text-muted-foreground">ID: {document.id}</div>
+                                      <div className="font-medium">
+                                        {getTemplateName(document.template_id)}
+                                      </div>
+                                      <div className="text-sm text-muted-foreground">
+                                        ID: {document.id}
+                                      </div>
                                     </div>
                                   </div>
                                 </TableCell>
@@ -568,38 +702,67 @@ export default function Documents() {
                                   {client ? (
                                     <div className="flex items-center gap-2">
                                       <User className="h-4 w-4 text-muted-foreground" />
-                                      <span>{client.prenom} {client.nom}</span>
+                                      <span>
+                                        {client.prenom} {client.nom}
+                                      </span>
                                     </div>
                                   ) : (
-                                    <span className="font-mono">{document.CIN}</span>
+                                    <span className="font-mono">
+                                      {document.CIN}
+                                    </span>
                                   )}
                                 </TableCell>
                                 <TableCell>
-                                  <span className="font-mono">{client ? client.CIN : document.CIN}</span>
+                                  <span className="font-mono">
+                                    {client ? client.CIN : document.CIN}
+                                  </span>
                                 </TableCell>
-                                <TableCell>{getUserName(document.Cree_par)}</TableCell>
-                                <TableCell>{formatDate(document.created_at)}</TableCell>
+                                <TableCell>
+                                  {getUserName(document.Cree_par)}
+                                </TableCell>
+                                <TableCell>
+                                  {formatDate(document.created_at)}
+                                </TableCell>
                                 <TableCell className="text-right">
                                   <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
-                                      <Button variant="ghost" className="h-8 w-8 p-0">
+                                      <Button
+                                        variant="ghost"
+                                        className="h-8 w-8 p-0"
+                                      >
                                         <ChevronDown className="h-4 w-4" />
                                       </Button>
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent align="end">
-                                      <DropdownMenuItem className="gap-2" onClick={() => openDetailsModal(document)}>
+                                      <DropdownMenuItem
+                                        className="gap-2"
+                                        onClick={() =>
+                                          openDetailsModal(document)
+                                        }
+                                      >
                                         <Eye className="h-4 w-4" />
                                         Voir détails
                                       </DropdownMenuItem>
-                                      <DropdownMenuItem className="gap-2" onClick={() => generatePDF(document)}>
+                                      <DropdownMenuItem
+                                        className="gap-2"
+                                        onClick={() => generatePDF(document)}
+                                      >
                                         <Download className="h-4 w-4" />
                                         Télécharger PDF
                                       </DropdownMenuItem>
-                                      <DropdownMenuItem className="gap-2" onClick={() => openEditModal(document)}>
+                                      <DropdownMenuItem
+                                        className="gap-2"
+                                        onClick={() => openEditModal(document)}
+                                      >
                                         <Edit className="h-4 w-4" />
                                         Modifier
                                       </DropdownMenuItem>
-                                      <DropdownMenuItem className="gap-2 text-red-600" onClick={() => openDeleteModal(document)}>
+                                      <DropdownMenuItem
+                                        className="gap-2 text-red-600"
+                                        onClick={() =>
+                                          openDeleteModal(document)
+                                        }
+                                      >
                                         <Trash2 className="h-4 w-4" />
                                         Supprimer
                                       </DropdownMenuItem>
@@ -614,13 +777,20 @@ export default function Documents() {
                             const scan = item.scan;
                             const client = getClientByCIN(scan.CIN);
                             return (
-                              <TableRow key={`scan-${scan.id}`} className="bg-amber-50 dark:bg-amber-900/20">
+                              <TableRow
+                                key={`scan-${scan.id}`}
+                                className="bg-amber-50 dark:bg-amber-900/20"
+                              >
                                 <TableCell>
                                   <div className="flex items-center gap-2">
                                     <FileText className="h-4 w-4 text-primary" />
                                     <div>
-                                      <div className="font-medium">Document scanné</div>
-                                      <div className="text-sm text-muted-foreground">{scan.title} • ID: {scan.id}</div>
+                                      <div className="font-medium">
+                                        Document scanné
+                                      </div>
+                                      <div className="text-sm text-muted-foreground">
+                                        {scan.title} • ID: {scan.id}
+                                      </div>
                                     </div>
                                   </div>
                                 </TableCell>
@@ -628,40 +798,70 @@ export default function Documents() {
                                   {client ? (
                                     <div className="flex items-center gap-2">
                                       <User className="h-4 w-4 text-muted-foreground" />
-                                      <span>{client.prenom} {client.nom}</span>
+                                      <span>
+                                        {client.prenom} {client.nom}
+                                      </span>
                                     </div>
                                   ) : (
-                                    <span className="font-mono">{scan.CIN}</span>
+                                    <span className="font-mono">
+                                      {scan.CIN}
+                                    </span>
                                   )}
                                 </TableCell>
                                 <TableCell>
-                                  <span className="font-mono">{client ? client.CIN : scan.CIN}</span>
+                                  <span className="font-mono">
+                                    {client ? client.CIN : scan.CIN}
+                                  </span>
                                 </TableCell>
-                                <TableCell>{getUserName(scan.Cree_par)}</TableCell>
-                                <TableCell>{formatDate(scan.createdAt)}</TableCell>
+                                <TableCell>
+                                  {getUserName(scan.Cree_par)}
+                                </TableCell>
+                                <TableCell>
+                                  {formatDate(scan.createdAt)}
+                                </TableCell>
                                 <TableCell className="text-right">
                                   <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
-                                      <Button variant="ghost" className="h-8 w-8 p-0">
+                                      <Button
+                                        variant="ghost"
+                                        className="h-8 w-8 p-0"
+                                      >
                                         <ChevronDown className="h-4 w-4" />
                                       </Button>
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent align="end">
-                                      <DropdownMenuItem className="gap-2" onClick={() => openScanViewer(scan)}>
+                                      <DropdownMenuItem
+                                        className="gap-2"
+                                        onClick={() => openScanViewer(scan)}
+                                      >
                                         <Eye className="h-4 w-4" />
                                         Voir (PDF)
                                       </DropdownMenuItem>
                                       {scan.file_url && (
-                                        <DropdownMenuItem className="gap-2" onClick={() => window.open(scan.file_url!, "_blank") }>
+                                        <DropdownMenuItem
+                                          className="gap-2"
+                                          onClick={() =>
+                                            window.open(
+                                              scan.file_url!,
+                                              "_blank",
+                                            )
+                                          }
+                                        >
                                           <Download className="h-4 w-4" />
                                           Télécharger PDF
                                         </DropdownMenuItem>
                                       )}
-                                      <DropdownMenuItem className="gap-2" onClick={() => openEditScan(scan)}>
+                                      <DropdownMenuItem
+                                        className="gap-2"
+                                        onClick={() => openEditScan(scan)}
+                                      >
                                         <Edit className="h-4 w-4" />
                                         Modifier
                                       </DropdownMenuItem>
-                                      <DropdownMenuItem className="gap-2 text-red-600" onClick={() => openDeleteScan(scan)}>
+                                      <DropdownMenuItem
+                                        className="gap-2 text-red-600"
+                                        onClick={() => openDeleteScan(scan)}
+                                      >
                                         <Trash2 className="h-4 w-4" />
                                         Supprimer
                                       </DropdownMenuItem>
@@ -678,7 +878,9 @@ export default function Documents() {
                           <TableCell colSpan={6} className="text-center py-8">
                             <div className="flex flex-col items-center gap-2">
                               <FileText className="h-8 w-8 text-muted-foreground" />
-                              <p className="text-muted-foreground">Aucun document trouvé</p>
+                              <p className="text-muted-foreground">
+                                Aucun document trouvé
+                              </p>
                             </div>
                           </TableCell>
                         </TableRow>
@@ -697,7 +899,10 @@ export default function Documents() {
                       const document = item.doc;
                       const client = getClientByCIN(document.CIN);
                       return (
-                        <Card key={`doc-card-${document.id}`} className="hover:shadow-md transition-shadow">
+                        <Card
+                          key={`doc-card-${document.id}`}
+                          className="hover:shadow-md transition-shadow"
+                        >
                           <CardHeader className="pb-3">
                             <div className="flex items-start justify-between">
                               <div className="space-y-1">
@@ -705,7 +910,9 @@ export default function Documents() {
                                   <FileText className="h-5 w-5 text-primary" />
                                   {getTemplateName(document.template_id)}
                                 </CardTitle>
-                                <p className="text-sm text-muted-foreground">ID: {document.id}</p>
+                                <p className="text-sm text-muted-foreground">
+                                  ID: {document.id}
+                                </p>
                               </div>
                             </div>
                           </CardHeader>
@@ -715,9 +922,13 @@ export default function Documents() {
                                 <User className="h-4 w-4 text-muted-foreground" />
                                 <span className="font-medium">Patient:</span>
                                 {client ? (
-                                  <span>{client.prenom} {client.nom} ({client.CIN})</span>
+                                  <span>
+                                    {client.prenom} {client.nom} ({client.CIN})
+                                  </span>
                                 ) : (
-                                  <span className="font-mono">{document.CIN}</span>
+                                  <span className="font-mono">
+                                    {document.CIN}
+                                  </span>
                                 )}
                               </div>
                               <div className="flex items-center gap-2 text-sm">
@@ -736,24 +947,40 @@ export default function Documents() {
                               <div className="flex items-center justify-end">
                                 <DropdownMenu>
                                   <DropdownMenuTrigger asChild>
-                                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      className="h-8 w-8 p-0"
+                                    >
                                       <Settings className="h-4 w-4" />
                                     </Button>
                                   </DropdownMenuTrigger>
                                   <DropdownMenuContent align="end">
-                                    <DropdownMenuItem className="gap-2" onClick={() => openDetailsModal(document)}>
+                                    <DropdownMenuItem
+                                      className="gap-2"
+                                      onClick={() => openDetailsModal(document)}
+                                    >
                                       <Eye className="h-4 w-4" />
                                       Voir détails
                                     </DropdownMenuItem>
-                                    <DropdownMenuItem className="gap-2" onClick={() => generatePDF(document)}>
+                                    <DropdownMenuItem
+                                      className="gap-2"
+                                      onClick={() => generatePDF(document)}
+                                    >
                                       <Download className="h-4 w-4" />
                                       Télécharger PDF
                                     </DropdownMenuItem>
-                                    <DropdownMenuItem className="gap-2" onClick={() => openEditModal(document)}>
+                                    <DropdownMenuItem
+                                      className="gap-2"
+                                      onClick={() => openEditModal(document)}
+                                    >
                                       <Edit className="h-4 w-4" />
                                       Modifier
                                     </DropdownMenuItem>
-                                    <DropdownMenuItem className="gap-2 text-red-600" onClick={() => openDeleteModal(document)}>
+                                    <DropdownMenuItem
+                                      className="gap-2 text-red-600"
+                                      onClick={() => openDeleteModal(document)}
+                                    >
                                       <Trash2 className="h-4 w-4" />
                                       Supprimer
                                     </DropdownMenuItem>
@@ -770,7 +997,10 @@ export default function Documents() {
                       const scan = item.scan;
                       const client = getClientByCIN(scan.CIN);
                       return (
-                        <Card key={`scan-card-${scan.id}`} className="hover:shadow-md transition-shadow border-amber-200">
+                        <Card
+                          key={`scan-card-${scan.id}`}
+                          className="hover:shadow-md transition-shadow border-amber-200"
+                        >
                           <CardHeader className="pb-3">
                             <div className="flex items-start justify-between">
                               <div className="space-y-1">
@@ -778,7 +1008,9 @@ export default function Documents() {
                                   <FileText className="h-5 w-5 text-primary" />
                                   Document scanné — {scan.title}
                                 </CardTitle>
-                                <p className="text-sm text-muted-foreground">ID: {scan.id} • Fichier: {scan.filename}</p>
+                                <p className="text-sm text-muted-foreground">
+                                  ID: {scan.id} • Fichier: {scan.filename}
+                                </p>
                               </div>
                             </div>
                           </CardHeader>
@@ -788,7 +1020,9 @@ export default function Documents() {
                                 <User className="h-4 w-4 text-muted-foreground" />
                                 <span className="font-medium">Patient:</span>
                                 {client ? (
-                                  <span>{client.prenom} {client.nom} ({client.CIN})</span>
+                                  <span>
+                                    {client.prenom} {client.nom} ({client.CIN})
+                                  </span>
                                 ) : (
                                   <span className="font-mono">{scan.CIN}</span>
                                 )}
@@ -809,26 +1043,44 @@ export default function Documents() {
                               <div className="flex items-center justify-end">
                                 <DropdownMenu>
                                   <DropdownMenuTrigger asChild>
-                                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      className="h-8 w-8 p-0"
+                                    >
                                       <Settings className="h-4 w-4" />
                                     </Button>
                                   </DropdownMenuTrigger>
                                   <DropdownMenuContent align="end">
-                                    <DropdownMenuItem className="gap-2" onClick={() => openScanViewer(scan)}>
+                                    <DropdownMenuItem
+                                      className="gap-2"
+                                      onClick={() => openScanViewer(scan)}
+                                    >
                                       <Eye className="h-4 w-4" />
                                       Voir (PDF)
                                     </DropdownMenuItem>
                                     {scan.file_url && (
-                                      <DropdownMenuItem className="gap-2" onClick={() => window.open(scan.file_url!, "_blank")}>
+                                      <DropdownMenuItem
+                                        className="gap-2"
+                                        onClick={() =>
+                                          window.open(scan.file_url!, "_blank")
+                                        }
+                                      >
                                         <Download className="h-4 w-4" />
                                         Télécharger PDF
                                       </DropdownMenuItem>
                                     )}
-                                    <DropdownMenuItem className="gap-2" onClick={() => openEditScan(scan)}>
+                                    <DropdownMenuItem
+                                      className="gap-2"
+                                      onClick={() => openEditScan(scan)}
+                                    >
                                       <Edit className="h-4 w-4" />
                                       Modifier
                                     </DropdownMenuItem>
-                                    <DropdownMenuItem className="gap-2 text-red-600" onClick={() => openDeleteScan(scan)}>
+                                    <DropdownMenuItem
+                                      className="gap-2 text-red-600"
+                                      onClick={() => openDeleteScan(scan)}
+                                    >
                                       <Trash2 className="h-4 w-4" />
                                       Supprimer
                                     </DropdownMenuItem>
@@ -849,8 +1101,12 @@ export default function Documents() {
                     <div className="flex flex-col items-center gap-4">
                       <FileText className="h-12 w-12 text-muted-foreground" />
                       <div>
-                        <h3 className="text-lg font-medium">Aucun document trouvé</h3>
-                        <p className="text-muted-foreground">Essayez d'ajuster les filtres ou la recherche</p>
+                        <h3 className="text-lg font-medium">
+                          Aucun document trouvé
+                        </h3>
+                        <p className="text-muted-foreground">
+                          Essayez d'ajuster les filtres ou la recherche
+                        </p>
                       </div>
                     </div>
                   </CardContent>
@@ -863,7 +1119,9 @@ export default function Documents() {
         <DocumentFormModal
           isOpen={isFormModalOpen}
           onClose={closeFormModal}
-          onSubmit={selectedDocument ? handleUpdateDocument : handleCreateDocument}
+          onSubmit={
+            selectedDocument ? handleUpdateDocument : handleCreateDocument
+          }
           document={selectedDocument}
           patient={null}
           templates={templates}
@@ -873,7 +1131,10 @@ export default function Documents() {
 
         <ScannedDocumentFormModal
           isOpen={isScanFormOpen}
-          onClose={() => { setIsScanFormOpen(false); setSelectedScan(null); }}
+          onClose={() => {
+            setIsScanFormOpen(false);
+            setSelectedScan(null);
+          }}
           onSubmit={selectedScan ? handleUpdateScanned : handleCreateScanned}
           document={selectedScan}
           users={users}
@@ -884,7 +1145,12 @@ export default function Documents() {
           isOpen={isDetailsModalOpen}
           onClose={closeDetailsModal}
           document={selectedDocument}
-          template={selectedDocument ? templates.find((t) => t.id === selectedDocument.template_id) || null : null}
+          template={
+            selectedDocument
+              ? templates.find((t) => t.id === selectedDocument.template_id) ||
+                null
+              : null
+          }
           onEdit={openEditModal}
           onDelete={openDeleteModal}
           users={users}
@@ -905,7 +1171,10 @@ export default function Documents() {
 
         <ScannedDocumentViewerModal
           isOpen={isScanViewerOpen}
-          onClose={() => { setIsScanViewerOpen(false); setSelectedScan(null); }}
+          onClose={() => {
+            setIsScanViewerOpen(false);
+            setSelectedScan(null);
+          }}
           document={selectedScan}
         />
 
@@ -914,13 +1183,21 @@ export default function Documents() {
           onClose={closeDeleteModal}
           onConfirm={handleDeleteDocument}
           document={selectedDocument}
-          template={selectedDocument ? templates.find((t) => t.id === selectedDocument.template_id) || null : null}
+          template={
+            selectedDocument
+              ? templates.find((t) => t.id === selectedDocument.template_id) ||
+                null
+              : null
+          }
           isLoading={isSubmitting}
         />
 
         <DeleteScannedDocumentModal
           isOpen={isScanDeleteOpen}
-          onClose={() => { setIsScanDeleteOpen(false); setSelectedScan(null); }}
+          onClose={() => {
+            setIsScanDeleteOpen(false);
+            setSelectedScan(null);
+          }}
           onConfirm={handleDeleteScanned}
           document={selectedScan}
           isLoading={isSubmitting}

@@ -280,13 +280,15 @@ export class InvoicesService {
       statut: data.statut,
       notes: data.notes,
       Cree_par: data.Cree_par,
-      date_paiement: data.date_paiement,
-      methode_paiement: data.methode_paiement,
-      cheque_numero: data.cheque_numero,
-      cheque_banque: data.cheque_banque,
-      cheque_date_tirage: new Date(data.cheque_date_tirage)
-        .toISOString()
-        .slice(0, 16),
+      date_paiement: data.date_paiement
+        ? new Date(data.date_paiement).toISOString()
+        : null,
+      methode_paiement: data.methode_paiement ? data.methode_paiement : null,
+      cheque_numero: data.cheque_numero ? data.cheque_numero : null,
+      cheque_banque: data.cheque_banque ? data.cheque_banque : null,
+      cheque_date_tirage: data.cheque_date_tirage
+        ? new Date(data.cheque_date_tirage).toISOString().slice(0, 10)
+        : null,
     };
 
     mockFactures[index] = updatedFacture;

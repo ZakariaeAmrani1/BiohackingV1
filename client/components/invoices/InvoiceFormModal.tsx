@@ -280,9 +280,9 @@ export default function InvoiceFormModal({
       await onSubmit(formData);
     } catch (error) {
       setErrors(
-        error.response.data.message || [
-          "Une erreur s'est produite lors de l'enregistrement",
-        ],
+        error.response?.data.message !== null
+          ? error.response.data.message
+          : ["Une erreur s'est produite lors de l'enregistrement"],
       );
     } finally {
       setIsSubmitting(false);
