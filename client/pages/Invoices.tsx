@@ -1,5 +1,13 @@
 import { useState, useMemo, useEffect } from "react";
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import {
   Receipt,
   Search,
   Plus,
@@ -25,6 +33,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -68,7 +77,11 @@ import { UserService } from "@/services/userService";
 import { EntrepriseService } from "@/services/entrepriseService";
 import { AppSettingsService } from "@/services/appSettingsService";
 import { CurrencyService } from "@/services/currencyService";
-import { buildCompanyHeaderHtml, buildCompanyFooterHtml, wrapPdfHtmlDocument } from "@/services/pdfTemplate";
+import {
+  buildCompanyHeaderHtml,
+  buildCompanyFooterHtml,
+  wrapPdfHtmlDocument,
+} from "@/services/pdfTemplate";
 
 export default function Invoices() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -90,6 +103,141 @@ export default function Invoices() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { toast } = useToast();
+
+  // Mark-as-paid modal state
+  const [isMarkPaidOpen, setIsMarkPaidOpen] = useState(false);
+  const [markPaidInvoiceId, setMarkPaidInvoiceId] = useState<number | null>(
+    null,
+  );
+  const [markPaidDate, setMarkPaidDate] = useState<string>(
+    new Date().toISOString().slice(0, 16),
+  );
+  const [markPaidMethod, setMarkPaidMethod] = useState<string>("");
+  const [markPaidChequeNumero, setMarkPaidChequeNumero] = useState<string>("");
+  const [markPaidChequeBanque, setMarkPaidChequeBanque] = useState<string>("");
+  const [markPaidChequeDateTirage, setMarkPaidChequeDateTirage] =
+    useState<string>("");
+
+  const openMarkPaidModal = (invoiceId: number) => {
+    const inv = invoices.find((i) => i.id === invoiceId);
+    setMarkPaidInvoiceId(invoiceId);
+    setMarkPaidDate(
+      inv && inv.date_paiement
+        ? new Date(inv.date_paiement).toISOString().slice(0, 16)
+        : new Date().toISOString().slice(0, 16),
+    );
+    setMarkPaidMethod(inv?.methode_paiement || "");
+    setMarkPaidChequeNumero(inv?.cheque_numero || "");
+    setMarkPaidChequeBanque(inv?.cheque_banque || "");
+    setMarkPaidChequeDateTirage(
+      inv?.cheque_date_tirage ? inv.cheque_date_tirage : "",
+    );
+    setIsMarkPaidOpen(true);
+  };
+
+  // When method changes, clear cheque fields if not cheque
+  useEffect(() => {
+    if (markPaidMethod !== "Par chéque") {
+      setMarkPaidChequeNumero("");
+      setMarkPaidChequeBanque("");
+      setMarkPaidChequeDateTirage("");
+    }
+  }, [markPaidMethod]);
+
+  const isMarkPaidSubmittable = () => {
+    if (!markPaidDate) return false;
+    if (markPaidMethod === "Par chéque") {
+      if (
+        !markPaidChequeNumero ||
+        !markPaidChequeBanque ||
+        !markPaidChequeDateTirage
+      )
+        return false;
+    }
+    return true;
+  };
+
+  const closeMarkPaidModal = () => {
+    setIsMarkPaidOpen(false);
+    setMarkPaidInvoiceId(null);
+    setMarkPaidMethod("");
+    setMarkPaidChequeNumero("");
+    setMarkPaidChequeBanque("");
+    setMarkPaidChequeDateTirage("");
+
+    // Cleanup any leftover dialog overlay/content nodes that might block interactions
+    setTimeout(() => {
+      try {
+        document
+          .querySelectorAll("[data-custom-dialog-overlay]")
+          .forEach((el) => el.remove());
+        document
+          .querySelectorAll("[data-custom-dialog-content]")
+          .forEach((el) => el.remove());
+        // Ensure body pointer events restored
+        document.body.style.pointerEvents = "auto";
+      } catch (e) {
+        // ignore
+      }
+    }, 50);
+  };
+
+  const handleConfirmMarkPaid = async () => {
+    if (!markPaidInvoiceId) return;
+    if (!markPaidDate) {
+      toast({
+        title: "Erreur",
+        description: "La date et l'heure de paiement sont requises",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (markPaidMethod === "Par chéque") {
+      if (
+        !markPaidChequeNumero ||
+        !markPaidChequeBanque ||
+        !markPaidChequeDateTirage
+      ) {
+        toast({
+          title: "Erreur",
+          description: "Informations de chèque incomplètes",
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+
+    try {
+      setIsSubmitting(true);
+      await InvoicesService.updateStatus(
+        markPaidInvoiceId,
+        FactureStatut.PAYEE,
+        markPaidDate,
+        markPaidMethod || undefined,
+        markPaidChequeNumero || undefined,
+        markPaidChequeBanque || undefined,
+        markPaidChequeDateTirage || undefined,
+      );
+      await loadInvoices();
+      closeMarkPaidModal();
+      toast({
+        title: "Succès",
+        description: "La facture a été marquée comme payée",
+      });
+    } catch (error) {
+      console.log(error);
+      toast({
+        title: "Erreur",
+        description:
+          error.response.data.message ||
+          "Impossible de marquer la facture comme payée",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   // Get unique creators for filter dropdown
   const creators = Array.from(
@@ -190,7 +338,8 @@ export default function Invoices() {
     } catch (error) {
       toast({
         title: "Erreur",
-        description: "Impossible de créer la facture",
+        description:
+          error.response.data.message || "Impossible de créer la facture",
         variant: "destructive",
       });
       throw error;
@@ -434,7 +583,9 @@ export default function Invoices() {
   };
 
   // Generate PDF HTML content
-  const generateInvoicePDF = async (invoice: FactureWithDetails): Promise<string> => {
+  const generateInvoicePDF = async (
+    invoice: FactureWithDetails,
+  ): Promise<string> => {
     const formatDateForPDF = (dateString: string) => {
       return new Date(dateString).toLocaleDateString("fr-FR", {
         day: "2-digit",
@@ -461,7 +612,9 @@ export default function Invoices() {
     };
 
     const totals = calculateTotals(invoice.items);
-    const entreprise = await EntrepriseService.getEntreprise().catch(() => null);
+    const entreprise = await EntrepriseService.getEntreprise().catch(
+      () => null,
+    );
 
     const headerHtml = buildCompanyHeaderHtml(entreprise, {
       title: "FACTURE",
@@ -810,10 +963,7 @@ export default function Invoices() {
                                     <DropdownMenuItem
                                       className="gap-2"
                                       onClick={() =>
-                                        handleUpdateStatus(
-                                          invoice.id,
-                                          FactureStatut.PAYEE,
-                                        )
+                                        openMarkPaidModal(invoice.id)
                                       }
                                     >
                                       <CheckCircle className="h-4 w-4" />
@@ -839,7 +989,7 @@ export default function Invoices() {
                               <Receipt className="h-8 w-8 text-muted-foreground" />
                               <p className="text-muted-foreground">
                                 Aucune facture trouvée avec les critères
-                                s��lectionnés
+                                sélectionnés
                               </p>
                             </div>
                           </TableCell>
@@ -958,12 +1108,7 @@ export default function Invoices() {
                               {invoice.statut !== FactureStatut.PAYEE && (
                                 <DropdownMenuItem
                                   className="gap-2"
-                                  onClick={() =>
-                                    handleUpdateStatus(
-                                      invoice.id,
-                                      FactureStatut.PAYEE,
-                                    )
-                                  }
+                                  onClick={() => openMarkPaidModal(invoice.id)}
                                 >
                                   <CheckCircle className="h-4 w-4" />
                                   Marquer payée
@@ -1030,6 +1175,119 @@ export default function Invoices() {
           invoice={selectedInvoice}
           isLoading={isSubmitting}
         />
+
+        {isMarkPaidOpen && (
+          <Dialog
+            open={isMarkPaidOpen}
+            onOpenChange={(open) => {
+              if (!open) closeMarkPaidModal();
+            }}
+          >
+            <DialogContent className="sm:max-w-[420px]">
+              <DialogHeader>
+                <DialogTitle>Marquer comme payée</DialogTitle>
+                <DialogDescription>
+                  Choisissez la date de paiement
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">
+                    Date de paiement
+                  </label>
+                  <Input
+                    type="datetime-local"
+                    value={markPaidDate}
+                    onChange={(e) => setMarkPaidDate(e.target.value)}
+                    disabled={isSubmitting}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">
+                    Méthode de paiement
+                  </label>
+                  <Select
+                    value={markPaidMethod}
+                    onValueChange={(v) => setMarkPaidMethod(v)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Sélectionnez la méthode" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="En Espece">En Espece</SelectItem>
+                      <SelectItem value="Paiment Bancaire">
+                        Paiment Bancaire
+                      </SelectItem>
+                      <SelectItem value="Par chéque">Par chéque</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {markPaidMethod === "Par chéque" && (
+                  <div className="grid grid-cols-1 gap-3">
+                    <div className="space-y-2">
+                      <Label htmlFor="mark_cheque_numero">
+                        Numéro de chèque
+                      </Label>
+                      <Input
+                        id="mark_cheque_numero"
+                        value={markPaidChequeNumero}
+                        onChange={(e) =>
+                          setMarkPaidChequeNumero(e.target.value)
+                        }
+                        disabled={isSubmitting}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="mark_cheque_banque">
+                        Nom de la banque
+                      </Label>
+                      <Input
+                        id="mark_cheque_banque"
+                        value={markPaidChequeBanque}
+                        onChange={(e) =>
+                          setMarkPaidChequeBanque(e.target.value)
+                        }
+                        disabled={isSubmitting}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="mark_cheque_date">Date de tirage</Label>
+                      <Input
+                        id="mark_cheque_date"
+                        type="date"
+                        value={markPaidChequeDateTirage}
+                        onChange={(e) =>
+                          setMarkPaidChequeDateTirage(e.target.value)
+                        }
+                        disabled={isSubmitting}
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <DialogFooter className="gap-2">
+                <Button
+                  variant="outline"
+                  onClick={closeMarkPaidModal}
+                  disabled={isSubmitting}
+                >
+                  Annuler
+                </Button>
+                <Button
+                  onClick={handleConfirmMarkPaid}
+                  disabled={isSubmitting || !isMarkPaidSubmittable()}
+                  className="min-w-[120px]"
+                >
+                  Confirmer
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        )}
       </div>
     </DashboardLayout>
   );

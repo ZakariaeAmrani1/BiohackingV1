@@ -63,6 +63,57 @@ export default function Reports() {
   const topProducts = useMemo(() => (filtered ? AnalyticsService.topProducts(filtered, 10) : []), [filtered]);
   const employeeProduction = useMemo(() => (filtered ? AnalyticsService.employeeProduction(filtered) : []), [filtered]);
 
+  const clientsInPeriod = useMemo(() => {
+    if (!filtered) return [] as {
+      CIN: string;
+      prenom: string;
+      nom: string;
+      numero_telephone: string;
+      visitsCount: number;
+      lastVisit?: string | null;
+    }[];
+
+    const map = new Map<string, { CIN: string; prenom: string; nom: string; numero_telephone: string; visitsCount: number; lastVisit?: string | null }>();
+
+    filtered.appointments.forEach((a) => {
+      const existing = map.get(a.CIN);
+      if (existing) {
+        existing.visitsCount += 1;
+        if (!existing.lastVisit || new Date(a.date_rendez_vous).getTime() > new Date(existing.lastVisit).getTime()) {
+          existing.lastVisit = a.date_rendez_vous;
+        }
+        map.set(a.CIN, existing);
+      } else {
+        const client = clients.find((c) => c.CIN === a.CIN);
+        map.set(a.CIN, {
+          CIN: a.CIN,
+          prenom: client?.prenom || "",
+          nom: client?.nom || "",
+          numero_telephone: client?.numero_telephone || "",
+          visitsCount: 1,
+          lastVisit: a.date_rendez_vous,
+        });
+      }
+    });
+
+    // Include clients who had invoices but no appointments in the period
+    filtered.invoices.forEach((f) => {
+      if (!map.has(f.CIN)) {
+        const client = clients.find((c) => c.CIN === f.CIN);
+        map.set(f.CIN, {
+          CIN: f.CIN,
+          prenom: client?.prenom || "",
+          nom: client?.nom || "",
+          numero_telephone: client?.numero_telephone || "",
+          visitsCount: 0,
+          lastVisit: null,
+        });
+      }
+    });
+
+    return Array.from(map.values());
+  }, [filtered, clients]);
+
   const employeeOptions = useMemo(() => {
     const set = new Set<string>();
     if (raw) {
@@ -193,6 +244,103 @@ export default function Reports() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Lists: Clients & Appointments in period */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base"><Users className="h-4 w-4" /> Clients dans la période</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="overflow-auto border border-border rounded-md">
+                <table className="w-full text-sm">
+                  <thead className="bg-muted">
+                    <tr>
+                      <th className="text-left p-2">Client</th>
+                      <th className="text-left p-2">CIN</th>
+                      <th className="text-left p-2">Téléphone</th>
+                      <th className="text-right p-2">Visites</th>
+                      <th className="text-right p-2">Dernière visite</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {loading || !filtered ? (
+                      <tr>
+                        <td colSpan={5} className="p-3 text-center">-</td>
+                      </tr>
+                    ) : clientsInPeriod.length === 0 ? (
+                      <tr>
+                        <td colSpan={5} className="p-3 text-center text-muted-foreground">Aucun client</td>
+                      </tr>
+                    ) : (
+                      clientsInPeriod.map((c) => (
+                        <tr key={c.CIN} className="border-t border-border">
+                          <td className="p-2">{c.prenom} {c.nom}</td>
+                          <td className="p-2">{c.CIN}</td>
+                          <td className="p-2">{c.numero_telephone}</td>
+                          <td className="p-2 text-right">{c.visitsCount}</td>
+                          <td className="p-2 text-right">{formatDate(c.lastVisit)}</td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base"><Calendar className="h-4 w-4" /> Rendez-vous dans la période</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="overflow-auto border border-border rounded-md">
+                <table className="w-full text-sm">
+                  <thead className="bg-muted">
+                    <tr>
+                      <th className="text-left p-2">Date</th>
+                      <th className="text-left p-2">Heure</th>
+                      <th className="text-left p-2">Patient</th>
+                      <th className="text-left p-2">Sujet</th>
+                      <th className="text-left p-2">Statut</th>
+                      <th className="text-left p-2">Praticien</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {loading || !filtered ? (
+                      <tr>
+                        <td colSpan={6} className="p-3 text-center">-</td>
+                      </tr>
+                    ) : filtered.appointments.length === 0 ? (
+                      <tr>
+                        <td colSpan={6} className="p-3 text-center text-muted-foreground">Aucun rendez-vous</td>
+                      </tr>
+                    ) : (
+                      filtered.appointments.map((a) => {
+                        const dt = new Date(a.date_rendez_vous);
+                        const dateStr = dt.toLocaleDateString("fr-FR");
+                        const timeStr = dt.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit", hour12: false });
+                        const client = clients.find((c) => c.CIN === a.CIN);
+                        const patientName = a.patient_nom || (client ? `${client.prenom} ${client.nom}` : a.CIN);
+                        return (
+                          <tr key={a.id} className="border-t border-border">
+                            <td className="p-2">{dateStr}</td>
+                            <td className="p-2">{timeStr}</td>
+                            <td className="p-2">{patientName}</td>
+                            <td className="p-2">{a.sujet}</td>
+                            <td className="p-2">{a.status}</td>
+                            <td className="p-2">{a.Cree_par}</td>
+                          </tr>
+                        );
+                      })
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
 
         {/* Client details */}
         <Card>

@@ -131,7 +131,10 @@ export default function Settings() {
   const [importData, setImportData] = useState("");
 
   // Options (types) state
-  const [options, setOptions] = useState<OptionLists>({ appointmentTypes: [], soinTypes: [] });
+  const [options, setOptions] = useState<OptionLists>({
+    appointmentTypes: [],
+    soinTypes: [],
+  });
   const [isSavingOptions, setIsSavingOptions] = useState(false);
 
   // Load data on component mount
@@ -1234,7 +1237,9 @@ export default function Settings() {
                   <div className="grid md:grid-cols-2 gap-6">
                     {/* Appointment Types */}
                     <div className="space-y-3">
-                      <Label className="text-base font-medium">Types de rendez-vous</Label>
+                      <Label className="text-base font-medium">
+                        Types de rendez-vous
+                      </Label>
                       <div className="space-y-2">
                         {options.appointmentTypes.map((type, idx) => (
                           <div key={idx} className="flex gap-2">
@@ -1243,14 +1248,22 @@ export default function Settings() {
                               onChange={(e) => {
                                 const next = [...options.appointmentTypes];
                                 next[idx] = e.target.value;
-                                setOptions({ ...options, appointmentTypes: next });
+                                setOptions({
+                                  ...options,
+                                  appointmentTypes: next,
+                                });
                               }}
                             />
                             <Button
                               variant="outline"
                               onClick={() => {
-                                const next = options.appointmentTypes.filter((_, i) => i !== idx);
-                                setOptions({ ...options, appointmentTypes: next });
+                                const next = options.appointmentTypes.filter(
+                                  (_, i) => i !== idx,
+                                );
+                                setOptions({
+                                  ...options,
+                                  appointmentTypes: next,
+                                });
                               }}
                             >
                               Supprimer
@@ -1266,7 +1279,15 @@ export default function Settings() {
                           />
                           <Button
                             variant="outline"
-                            onClick={() => setOptions({ ...options, appointmentTypes: [...options.appointmentTypes, ""] })}
+                            onClick={() =>
+                              setOptions({
+                                ...options,
+                                appointmentTypes: [
+                                  ...options.appointmentTypes,
+                                  "",
+                                ],
+                              })
+                            }
                           >
                             Ajouter
                           </Button>
@@ -1276,7 +1297,9 @@ export default function Settings() {
 
                     {/* Soin Types */}
                     <div className="space-y-3">
-                      <Label className="text-base font-medium">Types de soin</Label>
+                      <Label className="text-base font-medium">
+                        Types de soin
+                      </Label>
                       <div className="space-y-2">
                         {options.soinTypes.map((type, idx) => (
                           <div key={idx} className="flex gap-2">
@@ -1291,7 +1314,9 @@ export default function Settings() {
                             <Button
                               variant="outline"
                               onClick={() => {
-                                const next = options.soinTypes.filter((_, i) => i !== idx);
+                                const next = options.soinTypes.filter(
+                                  (_, i) => i !== idx,
+                                );
                                 setOptions({ ...options, soinTypes: next });
                               }}
                             >
@@ -1302,7 +1327,12 @@ export default function Settings() {
                         <div className="flex gap-2">
                           <Button
                             variant="outline"
-                            onClick={() => setOptions({ ...options, soinTypes: [...options.soinTypes, ""] })}
+                            onClick={() =>
+                              setOptions({
+                                ...options,
+                                soinTypes: [...options.soinTypes, ""],
+                              })
+                            }
                           >
                             Ajouter
                           </Button>
@@ -1317,14 +1347,26 @@ export default function Settings() {
                         try {
                           setIsSavingOptions(true);
                           const cleaned = {
-                            appointmentTypes: options.appointmentTypes.filter((v) => v.trim().length > 0),
-                            soinTypes: options.soinTypes.filter((v) => v.trim().length > 0),
+                            appointmentTypes: options.appointmentTypes.filter(
+                              (v) => v.trim().length > 0,
+                            ),
+                            soinTypes: options.soinTypes.filter(
+                              (v) => v.trim().length > 0,
+                            ),
                           };
                           const updated = await OptionsService.update(cleaned);
                           setOptions(updated);
-                          toast({ title: "Options sauvegardées", description: "Les listes ont été mises à jour" });
+                          toast({
+                            title: "Options sauvegardées",
+                            description: "Les listes ont été mises à jour",
+                          });
                         } catch (e) {
-                          toast({ title: "Erreur", description: "Impossible de sauvegarder les options", variant: "destructive" });
+                          toast({
+                            title: "Erreur",
+                            description:
+                              "Impossible de sauvegarder les options",
+                            variant: "destructive",
+                          });
                         } finally {
                           setIsSavingOptions(false);
                         }
@@ -1518,7 +1560,7 @@ export default function Settings() {
                 onClick={handleResetSettings}
                 disabled={isLoading}
               >
-                {isLoading ? "R��initialisation..." : "Réinitialiser"}
+                {isLoading ? "Réinitialisation..." : "Réinitialiser"}
               </Button>
             </DialogFooter>
           </DialogContent>

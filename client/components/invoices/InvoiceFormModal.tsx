@@ -144,13 +144,19 @@ export default function InvoiceFormModal({
         prix_unitaire: item.prix_unitaire,
         nom_bien: item.nom_bien,
       }));
-
       setFormData({
         CIN: invoice.CIN,
         date: new Date(invoice.date).toISOString().slice(0, 16),
         statut: invoice.statut,
         notes: invoice.notes,
         Cree_par: invoice.Cree_par || user.CIN,
+        date_paiement: invoice.date_paiement
+          ? new Date(invoice.date_paiement).toISOString().slice(0, 16)
+          : undefined,
+        methode_paiement: invoice.methode_paiement,
+        cheque_numero: invoice.cheque_numero,
+        cheque_banque: invoice.cheque_banque,
+        cheque_date_tirage: invoice.cheque_date_tirage,
         items,
       });
     } else {
@@ -163,10 +169,38 @@ export default function InvoiceFormModal({
     field: keyof Omit<FactureFormData, "items">,
     value: any,
   ) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+    setFormData((prev) => {
+      const next = { ...prev, [field]: value } as FactureFormData;
+      // Clear cheque details when payment method changed away from cheque
+      if (field === "methode_paiement" && value !== "Par chéque") {
+        next.cheque_numero = undefined;
+        next.cheque_banque = undefined;
+        next.cheque_date_tirage = undefined;
+      }
+      // If statut changed away from PAYEE, clear date_paiement
+      if (field === "statut" && value !== FactureStatut.PAYEE) {
+        next.date_paiement = undefined;
+      }
+      return next;
+    });
     if (errors.length > 0) {
       setErrors([]);
     }
+  };
+
+  const isFormSubmittable = () => {
+    if (!formData.CIN || formData.items.length === 0) return false;
+    if (formData.statut === FactureStatut.PAYEE && !formData.date_paiement)
+      return false;
+    if (formData.methode_paiement === "Par chéque") {
+      if (
+        !formData.cheque_numero ||
+        !formData.cheque_banque ||
+        !formData.cheque_date_tirage
+      )
+        return false;
+    }
+    return true;
   };
 
   const addItem = () => {
@@ -192,7 +226,6 @@ export default function InvoiceFormModal({
       const newItems = [...prev.items];
       newItems[index] = { ...newItems[index], [field]: value };
 
-      // If changing the item selection, update price and name
       if (field === "id_bien" && value) {
         const itemId = parseInt(value);
         const currentItem = newItems[index];
@@ -208,7 +241,7 @@ export default function InvoiceFormModal({
           if (soin) {
             newItems[index].prix_unitaire = soin.prix;
             newItems[index].nom_bien = soin.Nom;
-            newItems[index].quantite = 1; // Services default to quantity 1
+            newItems[index].quantite = 1;
           }
         }
       }
@@ -246,7 +279,11 @@ export default function InvoiceFormModal({
     try {
       await onSubmit(formData);
     } catch (error) {
-      setErrors(["Une erreur s'est produite lors de l'enregistrement"]);
+      setErrors(
+        error.response.data.message || [
+          "Une erreur s'est produite lors de l'enregistrement",
+        ],
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -427,9 +464,18 @@ export default function InvoiceFormModal({
                 <Label htmlFor="statut">Statut</Label>
                 <Select
                   value={formData.statut}
-                  onValueChange={(value) =>
-                    handleInputChange("statut", value as FactureStatut)
-                  }
+                  onValueChange={(value) => {
+                    setFormData((prev) => ({
+                      ...prev,
+                      statut: value as FactureStatut,
+                      date_paiement:
+                        (value as FactureStatut) === FactureStatut.PAYEE
+                          ? prev.date_paiement ||
+                            new Date().toISOString().slice(0, 16)
+                          : undefined,
+                    }));
+                    if (errors.length > 0) setErrors([]);
+                  }}
                   disabled={isSubmitting}
                 >
                   <SelectTrigger>
@@ -473,6 +519,89 @@ export default function InvoiceFormModal({
                 </Select>
               </div>
             </div>
+
+            {formData.statut === FactureStatut.PAYEE && (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="date_paiement">Date de paiement</Label>
+                  <Input
+                    id="date_paiement"
+                    type="datetime-local"
+                    value={formData.date_paiement || ""}
+                    onChange={(e) =>
+                      handleInputChange("date_paiement", e.target.value)
+                    }
+                    disabled={isSubmitting}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="methode_paiement">Méthode de paiement</Label>
+                  <Select
+                    value={formData.methode_paiement || ""}
+                    onValueChange={(value) =>
+                      handleInputChange("methode_paiement", value)
+                    }
+                    disabled={isSubmitting}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Sélectionnez la méthode" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="En Espece">En Espece</SelectItem>
+                      <SelectItem value="Paiment Bancaire">
+                        Paiment Bancaire
+                      </SelectItem>
+                      <SelectItem value="Par chéque">Par chéque</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {formData.methode_paiement === "Par chéque" && (
+                  <>
+                    <div className="space-y-2">
+                      <Label htmlFor="cheque_numero">Numéro de chèque</Label>
+                      <Input
+                        id="cheque_numero"
+                        value={formData.cheque_numero || ""}
+                        onChange={(e) =>
+                          handleInputChange("cheque_numero", e.target.value)
+                        }
+                        disabled={isSubmitting}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="cheque_banque">Nom de la banque</Label>
+                      <Input
+                        id="cheque_banque"
+                        value={formData.cheque_banque || ""}
+                        onChange={(e) =>
+                          handleInputChange("cheque_banque", e.target.value)
+                        }
+                        disabled={isSubmitting}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="cheque_date_tirage">Date de tirage</Label>
+                      <Input
+                        id="cheque_date_tirage"
+                        type="date"
+                        value={formData.cheque_date_tirage || ""}
+                        onChange={(e) =>
+                          handleInputChange(
+                            "cheque_date_tirage",
+                            e.target.value,
+                          )
+                        }
+                        disabled={isSubmitting}
+                      />
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
 
             <div className="space-y-2">
               <Label htmlFor="notes">Notes</Label>
@@ -716,9 +845,7 @@ export default function InvoiceFormModal({
             </Button>
             <Button
               type="submit"
-              disabled={
-                isSubmitting || formData.items.length === 0 || !formData.CIN
-              }
+              disabled={isSubmitting || !isFormSubmittable()}
               className="min-w-[120px]"
             >
               {isSubmitting ? (

@@ -159,6 +159,57 @@ export default function InvoiceDetailsModal({
                   {formatDate(invoice.created_at)}
                 </div>
               </div>
+
+              {invoice.date_paiement && (
+                <div className="space-y-2">
+                  <div className="text-sm font-medium text-muted-foreground">
+                    Date de paiement
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4" />
+                    {formatDate(invoice.date_paiement)}
+                  </div>
+                </div>
+              )}
+
+              {invoice.methode_paiement && (
+                <div className="space-y-2">
+                  <div className="text-sm font-medium text-muted-foreground">
+                    Méthode de paiement
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span>{invoice.methode_paiement}</span>
+                  </div>
+                </div>
+              )}
+
+              {invoice.methode_paiement === "Par chéque" && (
+                <div className="space-y-2">
+                  <div className="text-sm font-medium text-muted-foreground">
+                    Détails du chèque
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    {invoice.cheque_numero && (
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm text-muted-foreground">Numéro:</span>
+                        <span className="font-mono">{invoice.cheque_numero}</span>
+                      </div>
+                    )}
+                    {invoice.cheque_banque && (
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm text-muted-foreground">Banque:</span>
+                        <span>{invoice.cheque_banque}</span>
+                      </div>
+                    )}
+                    {invoice.cheque_date_tirage && (
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm text-muted-foreground">Date de tirage:</span>
+                        <span>{formatDateOnly(invoice.cheque_date_tirage)}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
 
             {invoice.notes && (

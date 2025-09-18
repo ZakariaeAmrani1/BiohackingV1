@@ -14,6 +14,10 @@ export interface Facture {
   statut: FactureStatut;
   notes: string;
   date_paiement?: string;
+  methode_paiement?: string;
+  cheque_numero?: string;
+  cheque_banque?: string;
+  cheque_date_tirage?: string;
   Cree_par: string;
   created_at: string;
 }
@@ -35,6 +39,11 @@ export interface FactureFormData {
   statut: FactureStatut;
   notes: string;
   Cree_par: string;
+  date_paiement?: string;
+  methode_paiement?: string;
+  cheque_numero?: string;
+  cheque_banque?: string;
+  cheque_date_tirage?: string;
   items: FactureItem[];
 }
 
@@ -97,24 +106,29 @@ export class InvoicesService {
                 : FactureStatut.EN_RETARD,
       notes: facture.notes,
       date_paiement: facture.date_paiement,
+      methode_paiement: facture.methode_paiement,
+      cheque_numero: facture.cheque_numero,
+      cheque_banque: facture.cheque_banque,
+      cheque_date_tirage: new Date(facture.cheque_date_tirage)
+        .toISOString()
+        .slice(0, 10),
       Cree_par: facture.Cree_par,
       created_at: facture.created_at,
     }));
 
     const result1 = await api.get(`facture-bien`);
     const data1 = result1.data;
-    data1.map((facture) => {
-      mockFactureBiens.push({
-        id: facture.id,
-        id_facture: facture.id_facture,
-        id_bien: facture.id_bien,
-        type_bien: facture.type_bien,
-        quantite: facture.quantite,
-        Cree_par: facture.Cree_par,
-        nom_bien: facture.bien.Nom,
-        prix_unitaire: facture.bien.prix,
-      });
-    });
+
+    mockFactureBiens = data1.map((facture) => ({
+      id: facture.id,
+      id_facture: facture.id_facture,
+      id_bien: facture.id_bien,
+      type_bien: facture.type_bien,
+      quantite: facture.quantite,
+      Cree_par: facture.Cree_par,
+      nom_bien: facture.bien.Nom,
+      prix_unitaire: facture.bien.prix,
+    }));
 
     return mockFactures;
   }
@@ -157,7 +171,16 @@ export class InvoicesService {
       date: data.date,
       prix_total: prix_total,
       statut: data.statut,
-      notes: data.notes,
+      notes: data.notes ? data.notes : null,
+      date_paiement: data.date_paiement
+        ? new Date(data.date_paiement).toISOString()
+        : null,
+      methode_paiement: data.methode_paiement ? data.methode_paiement : null,
+      cheque_numero: data.cheque_numero ? data.cheque_numero : null,
+      cheque_banque: data.cheque_banque ? data.cheque_banque : null,
+      cheque_date_tirage: data.cheque_date_tirage
+        ? new Date(data.cheque_date_tirage).toISOString()
+        : null,
       Cree_par: currentUser.CIN,
     });
     const facture_id = result.data.id;
@@ -173,6 +196,11 @@ export class InvoicesService {
       notes: data.notes,
       Cree_par: data.Cree_par,
       created_at: new Date().toISOString(),
+      date_paiement: data.date_paiement,
+      methode_paiement: data.methode_paiement,
+      cheque_numero: data.cheque_numero,
+      cheque_banque: data.cheque_banque,
+      cheque_date_tirage: data.cheque_date_tirage,
     };
 
     mockFactures.push(newFacture);
@@ -228,7 +256,16 @@ export class InvoicesService {
       date: data.date,
       prix_total: prix_total,
       statut: data.statut,
-      notes: data.notes,
+      notes: data.notes ? data.notes : null,
+      date_paiement: data.date_paiement
+        ? new Date(data.date_paiement).toISOString()
+        : null,
+      methode_paiement: data.methode_paiement ? data.methode_paiement : null,
+      cheque_numero: data.cheque_numero ? data.cheque_numero : null,
+      cheque_banque: data.cheque_banque ? data.cheque_banque : null,
+      cheque_date_tirage: data.cheque_date_tirage
+        ? new Date(data.cheque_date_tirage).toISOString()
+        : null,
       Cree_par: currentUser.CIN,
     });
 
@@ -243,6 +280,13 @@ export class InvoicesService {
       statut: data.statut,
       notes: data.notes,
       Cree_par: data.Cree_par,
+      date_paiement: data.date_paiement,
+      methode_paiement: data.methode_paiement,
+      cheque_numero: data.cheque_numero,
+      cheque_banque: data.cheque_banque,
+      cheque_date_tirage: new Date(data.cheque_date_tirage)
+        .toISOString()
+        .slice(0, 16),
     };
 
     mockFactures[index] = updatedFacture;
@@ -313,13 +357,31 @@ export class InvoicesService {
   static async updateStatus(
     id: number,
     status: FactureStatut,
+    date_paiement?: string,
+    methode_paiement?: string,
+    cheque_numero?: string,
+    cheque_banque?: string,
+    cheque_date_tirage?: string,
   ): Promise<Facture | null> {
     const index = mockFactures.findIndex((facture) => facture.id === id);
     if (index === -1) return null;
-    await api.patch(`facture/${id}`, {
-      statut: status,
-    });
+    const payload: any = { statut: status };
+    if (date_paiement)
+      payload.date_paiement = new Date(date_paiement).toISOString();
+    if (methode_paiement) payload.methode_paiement = methode_paiement;
+    if (cheque_numero) payload.cheque_numero = cheque_numero;
+    if (cheque_banque) payload.cheque_banque = cheque_banque;
+    if (cheque_date_tirage)
+      payload.cheque_date_tirage = new Date(cheque_date_tirage).toISOString();
+    await api.patch(`facture/${id}`, payload);
     mockFactures[index].statut = status;
+    mockFactures[index].date_paiement = date_paiement;
+    if (methode_paiement)
+      mockFactures[index].methode_paiement = methode_paiement;
+    if (cheque_numero) mockFactures[index].cheque_numero = cheque_numero;
+    if (cheque_banque) mockFactures[index].cheque_banque = cheque_banque;
+    if (cheque_date_tirage)
+      mockFactures[index].cheque_date_tirage = cheque_date_tirage;
     return mockFactures[index];
   }
 }
@@ -338,6 +400,28 @@ export const validateFactureData = (data: FactureFormData): string[] => {
 
   if (!data.Cree_par.trim()) {
     errors.push("Le créateur est obligatoire");
+  }
+
+  if (data.statut === FactureStatut.PAYEE && !data.date_paiement) {
+    errors.push("La date de paiement est obligatoire pour une facture payée");
+  }
+
+  if (data.methode_paiement === "Par chéque") {
+    if (!data.cheque_numero || !data.cheque_numero.trim()) {
+      errors.push(
+        "Le numéro de chèque est requis lorsque le paiement est par chèque",
+      );
+    }
+    if (!data.cheque_banque || !data.cheque_banque.trim()) {
+      errors.push(
+        "Le nom de la banque est requis lorsque le paiement est par chèque",
+      );
+    }
+    if (!data.cheque_date_tirage) {
+      errors.push(
+        "La date de tirage du chèque est requise lorsque le paiement est par chèque",
+      );
+    }
   }
 
   if (!data.items || data.items.length === 0) {
@@ -396,10 +480,15 @@ export const formatPrice = (price: number): string => {
 export const createEmptyFacture = (CIN?: string): FactureFormData => {
   return {
     CIN: "",
-    date: new Date().toISOString().slice(0, 16), // Current date/time for datetime-local input
+    date: new Date().toISOString().slice(0, 16),
     statut: FactureStatut.BROUILLON,
     notes: "",
     Cree_par: CIN,
+    date_paiement: undefined,
+    methode_paiement: undefined,
+    cheque_numero: undefined,
+    cheque_banque: undefined,
+    cheque_date_tirage: undefined,
     items: [],
   };
 };
