@@ -9,7 +9,8 @@ export interface ScannedDocument {
   createdAt: string; // ISO
   CIN: string; // patient CIN
   Cree_par: string; // creator CIN
-  file_url?: string; // preview/download URL (mock/runtime)
+  file_url?: string;
+  file_download_url?: string;
 }
 
 export interface ScannedDocumentFormData {
@@ -23,68 +24,49 @@ export interface ScannedDocumentFormData {
 let mockScannedDocs: ScannedDocument[] = [];
 let nextId = 1;
 
-const seedIfEmpty = () => {
-  if (mockScannedDocs.length > 0) return;
-  const now = new Date();
-  const base = (mins: number) => new Date(now.getTime() - mins * 60000).toISOString();
-  mockScannedDocs = [
-    {
-      id: nextId++,
-      title: "Analyse sanguine (scan)",
-      description: "Résultats d'analyse de routine",
-      filename: "dummy-1.pdf",
-      createdAt: base(1200),
-      CIN: "CN898989",
-      Cree_par: "BE123456789",
-      // Public dummy PDF for preview
-      file_url: 
-        "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
-    },
-    {
-      id: nextId++,
-      title: "Compte rendu radiologie",
-      description: "Rapport scanné fourni par le patient",
-      filename: "dummy-2.pdf",
-      createdAt: base(600),
-      CIN: "CN123456",
-      Cree_par: "BE987654321",
-      file_url: 
-        "https://www.orimi.com/pdf-test.pdf",
-    },
-  ];
-};
-
 export class ScannedDocumentsService {
   static async getAll(): Promise<ScannedDocument[]> {
-    seedIfEmpty();
-    // const result = await api.get(`scanned-documents`);
-    // return result.data;
-    return [...mockScannedDocs];
+    mockScannedDocs = [];
+    const baseURL = import.meta.env.VITE_API_URL;
+    const result = await api.get(`scanned-document`);
+    const data = result.data;
+
+    mockScannedDocs = data.map((document) => ({
+      id: document.id,
+      title: document.title,
+      description: document.description,
+      filename: document.filePath,
+      createdAt: document.createdAt,
+      CIN: document.CIN,
+      Cree_par: document.Cree_par,
+      file_url: `${baseURL}/scanned-document/${document.id}/preview`,
+      file_download_url: `${baseURL}/scanned-document/${document.id}/download`,
+    }));
+
+    return mockScannedDocs;
   }
 
   static async getById(id: number): Promise<ScannedDocument | null> {
-    seedIfEmpty();
+    this.getAll();
     return mockScannedDocs.find((d) => d.id === id) || null;
   }
 
   static async getByPatientCIN(cin: string): Promise<ScannedDocument[]> {
-    seedIfEmpty();
+    await this.getAll();
     return mockScannedDocs.filter((d) => d.CIN === cin);
   }
 
   static async create(data: ScannedDocumentFormData): Promise<ScannedDocument> {
-    seedIfEmpty();
     const currentUser = AuthService.getCurrentUser();
     const now = new Date().toISOString();
 
-    // In real app: upload file to server/storage, backend returns filename/url
-    // const form = new FormData();
-    // form.append("title", data.title);
-    // if (data.description) form.append("description", data.description);
-    // form.append("CIN", data.CIN);
-    // form.append("Cree_par", currentUser?.CIN || data.Cree_par);
-    // if (data.file) form.append("file", data.file);
-    // const result = await api.post(`scanned-documents`, form);
+    const form = new FormData();
+    form.append("title", data.title);
+    if (data.description) form.append("description", data.description);
+    form.append("CIN", data.CIN);
+    form.append("Cree_par", currentUser?.CIN || data.Cree_par);
+    if (data.file) form.append("file", data.file);
+    const result = await api.post(`scanned-document`, form);
 
     let fileUrl: string | undefined;
     let filename = "fichier.pdf";
@@ -98,7 +80,7 @@ export class ScannedDocumentsService {
     }
 
     const newDoc: ScannedDocument = {
-      id: nextId++,
+      id: result.data.id,
       title: data.title,
       description: data.description || null,
       filename,
@@ -116,15 +98,22 @@ export class ScannedDocumentsService {
     id: number,
     data: Partial<ScannedDocumentFormData>,
   ): Promise<ScannedDocument | null> {
-    seedIfEmpty();
     const index = mockScannedDocs.findIndex((d) => d.id === id);
     if (index === -1) return null;
 
+    const form = new FormData();
+    form.append("title", data.title);
+    if (data.description) form.append("description", data.description);
+    form.append("CIN", data.CIN);
+    if (data.file) form.append("file", data.file);
+    await api.patch(`scanned-document/${id}`, form);
     let fileUrl = mockScannedDocs[index].file_url;
     let filename = mockScannedDocs[index].filename;
+
+    const baseURL = import.meta.env.VITE_API_URL;
     if (data.file) {
       try {
-        fileUrl = URL.createObjectURL(data.file);
+        fileUrl = `${baseURL}/scanned-document/${id}/preview`;
         filename = data.file.name || filename;
       } catch {}
     }
@@ -140,13 +129,12 @@ export class ScannedDocumentsService {
     };
 
     mockScannedDocs[index] = updated;
-    // await api.patch(`scanned-documents/${id}`, ...) // commented for now
+
     return updated;
   }
 
   static async delete(id: number): Promise<boolean> {
-    seedIfEmpty();
-    // await api.delete(`scanned-documents/${id}`);
+    await api.delete(`scanned-document/${id}`);
     const index = mockScannedDocs.findIndex((d) => d.id === id);
     if (index === -1) return false;
     mockScannedDocs.splice(index, 1);
@@ -154,7 +142,6 @@ export class ScannedDocumentsService {
   }
 
   static async search(query: string, cin?: string): Promise<ScannedDocument[]> {
-    seedIfEmpty();
     const q = query.toLowerCase();
     return mockScannedDocs.filter((d) => {
       if (cin && d.CIN !== cin) return false;
@@ -171,7 +158,13 @@ export class ScannedDocumentsService {
 
 export const createEmptyScannedDocData = (): ScannedDocumentFormData => {
   const user = AuthService.getCurrentUser();
-  return { title: "", description: "", file: null, CIN: "", Cree_par: user?.CIN || "" };
+  return {
+    title: "",
+    description: "",
+    file: null,
+    CIN: "",
+    Cree_par: user?.CIN || "",
+  };
 };
 
 export const validateScannedDoc = (data: ScannedDocumentFormData): string[] => {
