@@ -127,9 +127,8 @@ export class InvoicesService {
       quantite: facture.quantite,
       Cree_par: facture.Cree_par,
       nom_bien: facture.bien.Nom,
-      prix_unitaire: facture.bien.prix,
+      prix_unitaire: facture.prix,
     }));
-
     return mockFactures;
   }
 
@@ -211,9 +210,9 @@ export class InvoicesService {
         id_bien: item.id_bien,
         type_bien: item.type_bien,
         quantite: item.quantite,
+        prix: item.prix_unitaire,
         Cree_par: currentUser.CIN,
       });
-
       newItems.push({
         id: res.data.id,
         id_facture: newFacture.id,
@@ -306,6 +305,7 @@ export class InvoicesService {
         id_bien: item.id_bien,
         type_bien: item.type_bien,
         quantite: item.quantite,
+        prix: item.prix_unitaire,
         Cree_par: currentUser.CIN,
       });
 
@@ -490,7 +490,7 @@ export const createEmptyFacture = (CIN?: string): FactureFormData => {
     methode_paiement: undefined,
     cheque_numero: undefined,
     cheque_banque: undefined,
-    cheque_date_tirage: undefined,
+    cheque_date_tirage: new Date().toISOString().slice(0, 16),
     items: [],
   };
 };
