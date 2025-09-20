@@ -13,7 +13,7 @@ export default function ScannedDocumentViewerModal({ isOpen, onClose, document }
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[900px] w-[95vw] max-h-[90vh]">
+      <DialogContent className="sm:max-w-[900px] w-[95vw] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <FileText className="h-5 w-5" />

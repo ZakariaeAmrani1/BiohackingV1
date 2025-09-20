@@ -1,4 +1,3 @@
-import { aM } from "vitest/dist/chunks/reporters.d.C-cu31ET.js";
 import { AppSettingsService } from "./appSettingsService";
 
 export class CurrencyService {
@@ -104,7 +103,7 @@ export class CurrencyService {
         return "0,00 €";
       case "$":
         return "$0.00";
-      case "£":
+      case "��":
         return "£0.00";
       case "C$":
         return "C$0.00";

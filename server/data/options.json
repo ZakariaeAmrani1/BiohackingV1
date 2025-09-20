@@ -1,4 +1,15 @@
 {
+  "bankNames": [
+    "Attijariwafa bank",
+    "BMCE Bank of Africa",
+    "CIH Bank",
+    "Banque Populaire",
+    "Société Générale",
+    "Crédit du Maroc",
+    "BMCI",
+    "Bank Al-Maghrib",
+    "Alexo's bank"
+  ],
   "appointmentTypes": [
     "Consultation Biohacking",
     "Thérapie IV",

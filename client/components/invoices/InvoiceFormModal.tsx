@@ -65,6 +65,7 @@ import {
 } from "@/services/invoicesService";
 import { ProductsService, Product } from "@/services/productsService";
 import { SoinsService, Soin } from "@/services/soinsService";
+import { OptionsService } from "@/services/optionsService";
 import {
   ClientsService,
   Client,
@@ -102,6 +103,7 @@ export default function InvoiceFormModal({
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [soins, setSoins] = useState<Soin[]>([]);
+  const [bankNames, setBankNames] = useState<string[]>([]);
   const [isLoadingData, setIsLoadingData] = useState(true);
 
   const isEditMode = !!invoice;
@@ -113,14 +115,16 @@ export default function InvoiceFormModal({
     const loadData = async () => {
       try {
         setIsLoadingData(true);
-        const [clientsData, productsData, soinsData] = await Promise.all([
+        const [clientsData, productsData, soinsData, bankNamesData] = await Promise.all([
           ClientsService.getAll(),
           ProductsService.getAll(),
           SoinsService.getAll(),
+          OptionsService.getBankNames(),
         ]);
         setClients(clientsData);
         setProducts(productsData);
         setSoins(soinsData);
+        setBankNames(bankNamesData);
       } catch (error) {
         console.error("Failed to load data:", error);
       } finally {
@@ -573,14 +577,22 @@ export default function InvoiceFormModal({
 
                     <div className="space-y-2">
                       <Label htmlFor="cheque_banque">Nom de la banque</Label>
-                      <Input
-                        id="cheque_banque"
+                      <Select
                         value={formData.cheque_banque || ""}
-                        onChange={(e) =>
-                          handleInputChange("cheque_banque", e.target.value)
-                        }
+                        onValueChange={(value) => handleInputChange("cheque_banque", value)}
                         disabled={isSubmitting}
-                      />
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Sélectionnez la banque" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {bankNames.map((name) => (
+                            <SelectItem key={name} value={name}>
+                              {name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
 
                     <div className="space-y-2">

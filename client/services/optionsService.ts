@@ -1,11 +1,22 @@
 import api from "@/api/axios";
 
 export interface OptionLists {
+  bankNames: string[];
   appointmentTypes: string[];
   soinTypes: string[];
 }
 
 const defaultOptions: OptionLists = {
+  bankNames: [
+    "Attijariwafa bank",
+    "BMCE Bank of Africa",
+    "CIH Bank",
+    "Banque Populaire",
+    "Société Générale",
+    "Crédit du Maroc",
+    "BMCI",
+    "Bank Al-Maghrib"
+  ],
   appointmentTypes: [
     "Consultation Biohacking",
     "Thérapie IV",
@@ -39,6 +50,9 @@ export class OptionsService {
       if (!res.ok) throw new Error("Failed");
       const data = (await res.json()) as OptionLists;
       return {
+        bankNames: Array.isArray(data.bankNames)
+          ? data.bankNames
+          : defaultOptions.bankNames,
         appointmentTypes: Array.isArray(data.appointmentTypes)
           ? data.appointmentTypes
           : defaultOptions.appointmentTypes,
@@ -54,6 +68,11 @@ export class OptionsService {
   static async getAppointmentTypes(): Promise<string[]> {
     const data = await this.getAll();
     return data.appointmentTypes;
+  }
+
+  static async getBankNames(): Promise<string[]> {
+    const data = await this.getAll();
+    return data.bankNames;
   }
 
   static async getSoinTypes(): Promise<string[]> {

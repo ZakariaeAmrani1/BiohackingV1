@@ -6,6 +6,16 @@ const dataDir = path.join(process.cwd(), "server", "data");
 const dataFile = path.join(dataDir, "options.json");
 
 const defaultOptions = {
+  bankNames: [
+    "Attijariwafa bank",
+    "BMCE Bank of Africa",
+    "CIH Bank",
+    "Banque Populaire",
+    "Société Générale",
+    "Crédit du Maroc",
+    "BMCI",
+    "Bank Al-Maghrib"
+  ],
   appointmentTypes: [
     "Consultation Biohacking",
     "Thérapie IV",
@@ -46,21 +56,26 @@ async function readOptions() {
   const raw = await fs.readFile(dataFile, "utf-8");
   const parsed = JSON.parse(raw);
   return {
+    bankNames: Array.isArray(parsed.bankNames)
+      ? parsed.bankNames
+      : defaultOptions.bankNames,
     appointmentTypes: Array.isArray(parsed.appointmentTypes)
       ? parsed.appointmentTypes
       : defaultOptions.appointmentTypes,
     soinTypes: Array.isArray(parsed.soinTypes)
       ? parsed.soinTypes
       : defaultOptions.soinTypes,
-  } as { appointmentTypes: string[]; soinTypes: string[] };
+  } as { bankNames: string[]; appointmentTypes: string[]; soinTypes: string[] };
 }
 
 async function writeOptions(options: {
+  bankNames?: string[];
   appointmentTypes?: string[];
   soinTypes?: string[];
 }) {
   const current = await readOptions();
   const next = {
+    bankNames: options.bankNames ?? current.bankNames,
     appointmentTypes: options.appointmentTypes ?? current.appointmentTypes,
     soinTypes: options.soinTypes ?? current.soinTypes,
   };
@@ -79,7 +94,7 @@ export const getOptions: RequestHandler = async (_req, res) => {
 
 export const updateOptions: RequestHandler = async (req, res) => {
   try {
-    const { appointmentTypes, soinTypes } = req.body || {};
+    const { bankNames, appointmentTypes, soinTypes } = req.body || {};
 
     const sanitize = (arr: unknown) =>
       Array.isArray(arr)
@@ -93,6 +108,7 @@ export const updateOptions: RequestHandler = async (req, res) => {
         : undefined;
 
     const updated = await writeOptions({
+      bankNames: sanitize(bankNames),
       appointmentTypes: sanitize(appointmentTypes),
       soinTypes: sanitize(soinTypes),
     });

@@ -167,10 +167,13 @@ export const createEmptyScannedDocData = (): ScannedDocumentFormData => {
   };
 };
 
-export const validateScannedDoc = (data: ScannedDocumentFormData): string[] => {
+export const validateScannedDoc = (
+  data: ScannedDocumentFormData,
+  requireFile: boolean = true,
+): string[] => {
   const errors: string[] = [];
   if (!data.title.trim()) errors.push("Le titre est obligatoire");
   if (!data.CIN.trim()) errors.push("Le CIN du patient est obligatoire");
-  if (!data.file) errors.push("Le fichier PDF est obligatoire");
+  if (requireFile && !data.file) errors.push("Le fichier PDF est obligatoire");
   return errors;
 };

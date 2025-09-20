@@ -5,10 +5,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { Badge } from "@/components/ui/badge";
 import { CurrencyService } from "@/services/currencyService";
-import { ClientsService, Client } from "@/services/clientsService";
+import { ClientsService, Client, calculateAge } from "@/services/clientsService";
 import { AnalyticsService, AnalyticsData, AnalyticsFilters, ClientSummary } from "@/services/analyticsService";
-import { Calendar, Users, Receipt, TrendingUp, UserSearch, BadgeDollarSign, Briefcase } from "lucide-react";
+import { Calendar, Users, Receipt, TrendingUp, UserSearch, BadgeDollarSign, Briefcase, Search } from "lucide-react";
 
 const ALL_VALUE = "__all__";
 const toISODate = (d: Date) => new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
@@ -25,6 +28,8 @@ export default function Reports() {
     return { startDate: start.toISOString(), endDate: end.toISOString() };
   });
   const [selectedClientCIN, setSelectedClientCIN] = useState<string>("");
+  const [isClientSelectorOpen, setIsClientSelectorOpen] = useState(false);
+  const [clientSearchQuery, setClientSearchQuery] = useState("");
 
   useEffect(() => {
     let mounted = true;
@@ -62,6 +67,23 @@ export default function Reports() {
   const topServices = useMemo(() => (filtered ? AnalyticsService.topServices(filtered, 10) : []), [filtered]);
   const topProducts = useMemo(() => (filtered ? AnalyticsService.topProducts(filtered, 10) : []), [filtered]);
   const employeeProduction = useMemo(() => (filtered ? AnalyticsService.employeeProduction(filtered) : []), [filtered]);
+
+  const filteredClients = useMemo(() => {
+    const q = clientSearchQuery.trim().toLowerCase();
+    if (!q) return clients;
+    return clients.filter((c) =>
+      c.nom.toLowerCase().includes(q) ||
+      c.prenom.toLowerCase().includes(q) ||
+      c.CIN.toLowerCase().includes(q) ||
+      (c.email ? c.email.toLowerCase().includes(q) : false)
+    );
+  }, [clients, clientSearchQuery]);
+
+  const handleClientSelect = (client: Client) => {
+    setSelectedClientCIN(client.CIN);
+    setIsClientSelectorOpen(false);
+    setClientSearchQuery("");
+  };
 
   const clientsInPeriod = useMemo(() => {
     if (!filtered) return [] as {
@@ -351,18 +373,66 @@ export default function Reports() {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
               <div className="space-y-2 md:col-span-2">
                 <Label>Sélectionner un patient</Label>
-                <Select value={selectedClientCIN} onValueChange={setSelectedClientCIN}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Choisir un patient" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {clients.map((c) => (
-                      <SelectItem key={c.CIN} value={c.CIN}>
-                        {c.prenom} {c.nom} • {c.CIN}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Popover open={isClientSelectorOpen} onOpenChange={setIsClientSelectorOpen} modal={true as any}>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" role="combobox" aria-expanded={isClientSelectorOpen} className="w-full justify-between">
+                      {selectedClientCIN ? (
+                        <div className="flex items-center gap-2">
+                          <span>
+                            {(() => {
+                              const c = clients.find((cl) => cl.CIN === selectedClientCIN);
+                              return c ? `${c.prenom} ${c.nom}` : selectedClientCIN;
+                            })()}
+                          </span>
+                          <Badge variant="outline" className="text-xs">{selectedClientCIN}</Badge>
+                        </div>
+                      ) : (
+                        "Rechercher et sélectionner un patient..."
+                      )}
+                      <Search className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-[500px] p-0 z-[60] shadow-lg border-2" sideOffset={5} align="start">
+                    <Command>
+                      <CommandInput placeholder="Rechercher par nom, prénom, CIN, email..." value={clientSearchQuery} onValueChange={setClientSearchQuery} />
+                      <CommandList>
+                        <CommandEmpty>Aucun patient trouvé.</CommandEmpty>
+                        <CommandGroup>
+                          {filteredClients.map((c) => (
+                            <CommandItem key={c.id} value={`${c.prenom} ${c.nom} ${c.CIN} ${c.email || ""}`} onSelect={() => handleClientSelect(c)} className="flex items-center justify-between p-3">
+                              <div className="flex flex-col">
+                                <div className="font-medium">{c.prenom} {c.nom}</div>
+                                <div className="text-sm text-muted-foreground">{c.CIN}{c.date_naissance ? ` • Âge: ${calculateAge(c.date_naissance)} ans` : ""}{c.email ? ` • ${c.email}` : ""}</div>
+                              </div>
+                              {c.groupe_sanguin ? <Badge variant="outline">{c.groupe_sanguin}</Badge> : null}
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
+
+                {selectedClientCIN && (() => {
+                  const c = clients.find((cl) => cl.CIN === selectedClientCIN);
+                  if (!c) return null;
+                  return (
+                    <div className="p-3 bg-muted/50 rounded-lg mt-2">
+                      <div className="flex items-center justify-between">
+                        <div className="space-y-1">
+                          <div className="font-medium">{c.prenom} {c.nom}</div>
+                          <div className="text-sm text-muted-foreground">CIN: {c.CIN}</div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {c.groupe_sanguin ? <Badge variant="outline">{c.groupe_sanguin}</Badge> : null}
+                          {c.date_naissance ? (
+                            <span className="text-sm text-muted-foreground">Âge: {calculateAge(c.date_naissance)} ans</span>
+                          ) : null}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })()}
               </div>
             </div>
 

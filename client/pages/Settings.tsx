@@ -132,6 +132,7 @@ export default function Settings() {
 
   // Options (types) state
   const [options, setOptions] = useState<OptionLists>({
+    bankNames: [],
     appointmentTypes: [],
     soinTypes: [],
   });
@@ -147,7 +148,7 @@ export default function Settings() {
   useEffect(() => {
     OptionsService.getAll()
       .then(setOptions)
-      .catch(() => setOptions({ appointmentTypes: [], soinTypes: [] }));
+      .catch(() => setOptions({ bankNames: [], appointmentTypes: [], soinTypes: [] }));
   }, []);
 
   const loadUserProfile = async () => {
@@ -1235,7 +1236,7 @@ export default function Settings() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  <div className="grid md:grid-cols-2 gap-6">
+                  <div className="grid md:grid-cols-3 gap-6">
                     {/* Appointment Types */}
                     <div className="space-y-3">
                       <Label className="text-base font-medium">
@@ -1287,6 +1288,47 @@ export default function Settings() {
                                   ...options.appointmentTypes,
                                   "",
                                 ],
+                              })
+                            }
+                          >
+                            Ajouter
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Bank Names for cheques */}
+                    <div className="space-y-3">
+                      <Label className="text-base font-medium">Noms de banques (chèques)</Label>
+                      <div className="space-y-2">
+                        {options.bankNames.map((name, idx) => (
+                          <div key={idx} className="flex gap-2">
+                            <Input
+                              value={name}
+                              onChange={(e) => {
+                                const next = [...options.bankNames];
+                                next[idx] = e.target.value;
+                                setOptions({ ...options, bankNames: next });
+                              }}
+                            />
+                            <Button
+                              variant="outline"
+                              onClick={() => {
+                                const next = options.bankNames.filter((_, i) => i !== idx);
+                                setOptions({ ...options, bankNames: next });
+                              }}
+                            >
+                              Supprimer
+                            </Button>
+                          </div>
+                        ))}
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            onClick={() =>
+                              setOptions({
+                                ...options,
+                                bankNames: [...options.bankNames, ""],
                               })
                             }
                           >
@@ -1348,6 +1390,7 @@ export default function Settings() {
                         try {
                           setIsSavingOptions(true);
                           const cleaned = {
+                            bankNames: options.bankNames.filter((v) => v.trim().length > 0),
                             appointmentTypes: options.appointmentTypes.filter(
                               (v) => v.trim().length > 0,
                             ),

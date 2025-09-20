@@ -77,6 +77,7 @@ import { UserService } from "@/services/userService";
 import { EntrepriseService } from "@/services/entrepriseService";
 import { AppSettingsService } from "@/services/appSettingsService";
 import { CurrencyService } from "@/services/currencyService";
+import { OptionsService } from "@/services/optionsService";
 import {
   buildCompanyHeaderHtml,
   buildCompanyFooterHtml,
@@ -117,6 +118,7 @@ export default function Invoices() {
   const [markPaidChequeBanque, setMarkPaidChequeBanque] = useState<string>("");
   const [markPaidChequeDateTirage, setMarkPaidChequeDateTirage] =
     useState<string>("");
+  const [bankNames, setBankNames] = useState<string[]>([]);
 
   const openMarkPaidModal = (invoiceId: number) => {
     const inv = invoices.find((i) => i.id === invoiceId);
@@ -143,6 +145,12 @@ export default function Invoices() {
       setMarkPaidChequeDateTirage("");
     }
   }, [markPaidMethod]);
+
+  useEffect(() => {
+    OptionsService.getBankNames()
+      .then(setBankNames)
+      .catch(() => setBankNames([]));
+  }, []);
 
   const isMarkPaidSubmittable = () => {
     if (!markPaidDate) return false;
@@ -1244,14 +1252,21 @@ export default function Invoices() {
                       <Label htmlFor="mark_cheque_banque">
                         Nom de la banque
                       </Label>
-                      <Input
-                        id="mark_cheque_banque"
+                      <Select
                         value={markPaidChequeBanque}
-                        onChange={(e) =>
-                          setMarkPaidChequeBanque(e.target.value)
-                        }
-                        disabled={isSubmitting}
-                      />
+                        onValueChange={(v) => setMarkPaidChequeBanque(v)}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Sélectionnez la banque" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {bankNames.map((name) => (
+                            <SelectItem key={name} value={name}>
+                              {name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="mark_cheque_date">Date de tirage</Label>

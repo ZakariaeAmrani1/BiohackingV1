@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { FileText, Upload, AlertTriangle, User, Search } from "lucide-react";
+import { FileText, Upload, AlertTriangle, User, Search, Eye, Download } from "lucide-react";
+import ScannedDocumentViewerModal from "@/components/scannedDocuments/ScannedDocumentViewerModal";
 import {
   Dialog,
   DialogContent,
@@ -69,6 +70,7 @@ export default function ScannedDocumentFormModal({
   );
   const [errors, setErrors] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isViewerOpen, setIsViewerOpen] = useState(false);
   const [clients, setClients] = useState<Client[]>([]);
   const [isClientSelectorOpen, setIsClientSelectorOpen] = useState(false);
   const [clientSearchQuery, setClientSearchQuery] = useState("");
@@ -135,7 +137,7 @@ export default function ScannedDocumentFormModal({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const errs = validateScannedDoc({ ...form });
+    const errs = validateScannedDoc({ ...form }, !isEdit);
     if (errs.length > 0) {
       setErrors(errs);
       return;
@@ -152,7 +154,7 @@ export default function ScannedDocumentFormModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={() => !isSubmitting && onClose()}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <FileText className="h-5 w-5" />
@@ -337,6 +339,29 @@ export default function ScannedDocumentFormModal({
               <div className="text-xs text-muted-foreground">
                 Formats: PDF uniquement
               </div>
+
+              {isEdit && document && (
+                <div className="space-y-2 mt-2">
+                  <Label>Document existant</Label>
+                  <div className="border border-border rounded-md overflow-hidden">
+                    <div className="flex items-center justify-between p-3 bg-muted/50">
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-4 w-4 text-primary" />
+                        <span className="font-medium">{document.filename}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button variant="outline" size="sm" onClick={() => setIsViewerOpen(true)}>
+                          <Eye className="h-4 w-4 mr-1" /> Voir
+                        </Button>
+                        {/* Download removed as requested */}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    Un fichier est déjà associé. Vous pouvez le remplacer en sélectionnant un nouveau PDF ci-dessus.
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
@@ -368,6 +393,13 @@ export default function ScannedDocumentFormModal({
           </DialogFooter>
         </form>
       </DialogContent>
+      {document && (
+        <ScannedDocumentViewerModal
+          isOpen={isViewerOpen}
+          onClose={() => setIsViewerOpen(false)}
+          document={document}
+        />
+      )}
     </Dialog>
   );
 }
