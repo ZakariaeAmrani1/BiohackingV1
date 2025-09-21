@@ -1,14 +1,7 @@
 {
   "bankNames": [
     "Attijariwafa bank",
-    "BMCE Bank of Africa",
-    "CIH Bank",
-    "Banque Populaire",
-    "Société Générale",
-    "Crédit du Maroc",
-    "BMCI",
-    "Bank Al-Maghrib",
-    "Alexo's bank"
+    "BMCE Bank of Africasssssss"
   ],
   "appointmentTypes": [
     "Consultation Biohacking",
@@ -16,17 +9,18 @@
     "Séance de Cryothérapie",
     "Analyse du Bilan Sanguin",
     "Consultation Bien-être",
+    "Suivi Post-Traitement",
+    "Thérapie par Ondes de Choc",
     "Consultation Nutritionnelle",
-    "Consultation Hormonale"
+    "Examen Médical Complet",
+    "Thérapie par la Lumière",
+    "Consultation Hormonale",
+    "Séance de Récupération"
   ],
   "soinTypes": [
     "Consultation",
     "Diagnostic",
     "Préventif",
-    "Thérapeutique",
-    "Chirurgie",
-    "Rééducation",
-    "Urgence",
-    "Suivi"
+    "Thérapeutique"
   ]
 }

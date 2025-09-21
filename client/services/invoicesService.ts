@@ -129,7 +129,10 @@ export class InvoicesService {
       nom_bien: facture.bien.Nom,
       prix_unitaire: facture.prix,
     }));
-    return mockFactures;
+    return mockFactures.sort(
+      (a, b) =>
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+    );
   }
 
   static async getAllWithDetails(): Promise<FactureWithDetails[]> {

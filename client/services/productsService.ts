@@ -39,7 +39,10 @@ export class ProductsService {
       Cree_par: product.Cree_par,
       created_at: product.created_at,
     }));
-    return mockProducts;
+    return mockProducts.sort(
+      (a, b) =>
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+    );
   }
 
   // Get product by ID

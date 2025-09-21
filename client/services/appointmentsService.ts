@@ -62,7 +62,10 @@ export class AppointmentsService {
       email: appointment.client.email,
       Cabinet: appointment.cabinet,
     }));
-    return mockAppointments;
+    return mockAppointments.sort(
+      (a, b) =>
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+    );
   }
 
   // Get appointment by ID

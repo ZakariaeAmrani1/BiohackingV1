@@ -38,7 +38,10 @@ export class SoinsService {
       created_at: service.created_at,
       Cabinet: service.cabinet,
     }));
-    return mockSoins;
+    return mockSoins.sort(
+      (a, b) =>
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+    );
   }
 
   // Get soin by ID

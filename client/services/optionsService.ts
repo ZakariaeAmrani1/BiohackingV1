@@ -15,7 +15,7 @@ const defaultOptions: OptionLists = {
     "Société Générale",
     "Crédit du Maroc",
     "BMCI",
-    "Bank Al-Maghrib"
+    "Bank Al-Maghrib",
   ],
   appointmentTypes: [
     "Consultation Biohacking",
@@ -46,9 +46,10 @@ const defaultOptions: OptionLists = {
 export class OptionsService {
   static async getAll(): Promise<OptionLists> {
     try {
-      const res = await fetch("/api/options");
-      if (!res.ok) throw new Error("Failed");
-      const data = (await res.json()) as OptionLists;
+      const result = await api.get(`options`);
+
+      const data = result.data as OptionLists;
+      console.log(data);
       return {
         bankNames: Array.isArray(data.bankNames)
           ? data.bankNames
@@ -60,8 +61,8 @@ export class OptionsService {
           ? data.soinTypes
           : defaultOptions.soinTypes,
       };
-    } catch {
-      return defaultOptions;
+    } catch (error) {
+      throw Error("Erreur");
     }
   }
 
@@ -81,14 +82,13 @@ export class OptionsService {
   }
 
   static async update(partial: Partial<OptionLists>): Promise<OptionLists> {
-    const res = await fetch("/api/options", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(partial),
-    });
-    if (!res.ok) {
+    try {
+      const result = await api.put(`options`, partial);
+
+      return result.data as OptionLists;
+    } catch (error) {
+      console.log(error);
       throw new Error("Impossible de sauvegarder les options");
     }
-    return (await res.json()) as OptionLists;
   }
 }

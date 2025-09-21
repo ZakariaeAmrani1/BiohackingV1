@@ -50,7 +50,10 @@ export class DocumentTemplatesService {
       Cree_par: template.Cree_par,
       created_at: template.created_at,
     }));
-    return mockTemplates;
+    return mockTemplates.sort(
+      (a, b) =>
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+    );
   }
 
   // Get template by ID

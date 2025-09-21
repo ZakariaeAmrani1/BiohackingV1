@@ -66,7 +66,10 @@ export class ClientsService {
       created_at: client.created_at,
       Cree_par: client.Cree_par,
     }));
-    return mockClients;
+    return mockClients.sort(
+      (a, b) =>
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+    );
   }
 
   // Get client by ID
