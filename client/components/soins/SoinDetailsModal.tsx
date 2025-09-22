@@ -6,6 +6,7 @@ import {
   Trash2,
   Euro,
   Tag,
+  Building2,
 } from "lucide-react";
 import {
   Dialog,
@@ -17,8 +18,14 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
 import { Soin, formatPrice, getSoinTypeColor } from "@/services/soinsService";
 import { Utilisateur } from "@/services/clientsService";
+
+const cabinetColors: Record<string, string> = {
+  Biohacking: "bg-cyan-100 text-cyan-700 border-cyan-200",
+  Nassens: "bg-purple-100 text-purple-700 border-purple-200",
+};
 
 interface SoinDetailsModalProps {
   isOpen: boolean;
@@ -128,6 +135,24 @@ export default function SoinDetailsModal({
                   <div className="font-medium">Prix du service</div>
                   <div className="text-2xl font-bold text-primary">
                     {formatPrice(soin.prix)}
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Building2 className="h-4 w-4 text-muted-foreground" />
+                <div>
+                  <div className="font-medium">Cabinet</div>
+                  <div className="mt-1">
+                    <Badge
+                      variant="secondary"
+                      className={
+                        cabinetColors[soin.Cabinet || ""] ||
+                        "bg-amber-100 text-amber-700 border-amber-200"
+                      }
+                    >
+                      {soin.Cabinet}
+                    </Badge>
                   </div>
                 </div>
               </div>

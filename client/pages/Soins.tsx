@@ -16,6 +16,7 @@ import {
   TrendingUp,
   Activity,
   BarChart3,
+  Building2,
 } from "lucide-react";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -61,10 +62,16 @@ import { OptionsService } from "@/services/optionsService";
 import { Utilisateur } from "@/services/clientsService";
 import { UserService } from "@/services/userService";
 
+const cabinetColors: Record<string, string> = {
+  Biohacking: "bg-cyan-100 text-cyan-700 border-cyan-200",
+  Nassens: "bg-purple-100 text-purple-700 border-purple-200",
+};
+
 export default function Soins() {
   const [searchTerm, setSearchTerm] = useState("");
   const [creatorFilter, setCreatorFilter] = useState<string>("tous");
   const [typeFilter, setTypeFilter] = useState<string>("tous");
+  const [cabinetFilter, setCabinetFilter] = useState<string>("tous");
   const [viewMode, setViewMode] = useState<"table" | "cards">("table");
 
   // Data state
@@ -84,6 +91,9 @@ export default function Soins() {
 
   // Get unique creators for filter dropdown
   const creators = Array.from(new Set(soins.map((soin) => soin.Cree_par)));
+  const cabinets = Array.from(
+    new Set(soins.map((s) => s.Cabinet).filter((c): c is string => Boolean(c)))
+  );
 
   // Load soins on component mount
   useEffect(() => {
@@ -160,9 +170,12 @@ export default function Soins() {
 
       const matchesType = typeFilter === "tous" || soin.Type === typeFilter;
 
-      return matchesSearch && matchesCreator && matchesType;
+      const matchesCabinet =
+        cabinetFilter === "tous" || soin.Cabinet === cabinetFilter;
+
+      return matchesSearch && matchesCreator && matchesType && matchesCabinet;
     });
-  }, [searchTerm, creatorFilter, typeFilter, soins]);
+  }, [searchTerm, creatorFilter, typeFilter, cabinetFilter, soins]);
 
   // CRUD Operations
   const handleCreateSoin = async (data: SoinFormData) => {
@@ -402,7 +415,7 @@ export default function Soins() {
             <CardTitle className="text-lg">Rechercher et Filtrer</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
               {/* Search */}
               <div className="relative lg:col-span-1">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -439,6 +452,21 @@ export default function Soins() {
                   {creators.map((creator) => (
                     <SelectItem key={creator} value={creator}>
                       {getUserName(creator)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              {/* Cabinet Filter */}
+              <Select value={cabinetFilter} onValueChange={setCabinetFilter}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Cabinet" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="tous">Tous les cabinets</SelectItem>
+                  {cabinets.map((cab) => (
+                    <SelectItem key={cab} value={cab}>
+                      {cab}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -484,7 +512,7 @@ export default function Soins() {
             <CardContent className="p-0">
               <div className="overflow-x-auto">
                 {isLoading ? (
-                  <TableLoader columns={6} rows={6} />
+                  <TableLoader columns={7} rows={6} />
                 ) : (
                   <Table>
                     <TableHeader>
@@ -492,6 +520,7 @@ export default function Soins() {
                         <TableHead>Soin</TableHead>
                         <TableHead>Type</TableHead>
                         <TableHead>Prix</TableHead>
+                        <TableHead>Cabinet</TableHead>
                         <TableHead>Créé par</TableHead>
                         <TableHead>Créé le</TableHead>
                         <TableHead className="text-right">Actions</TableHead>
@@ -521,6 +550,17 @@ export default function Soins() {
                             </TableCell>
                             <TableCell className="font-mono">
                               {formatPrice(soin.prix)}
+                            </TableCell>
+                            <TableCell>
+                              <Badge
+                                variant="secondary"
+                                className={
+                                  cabinetColors[soin.Cabinet || ""] ||
+                                  "bg-amber-100 text-amber-700 border-amber-200"
+                                }
+                              >
+                                {soin.Cabinet}
+                              </Badge>
                             </TableCell>
                             <TableCell>{getUserName(soin.Cree_par)}</TableCell>
                             <TableCell>{formatDate(soin.created_at)}</TableCell>
@@ -563,7 +603,7 @@ export default function Soins() {
                         ))
                       ) : (
                         <TableRow>
-                          <TableCell colSpan={6} className="text-center py-8">
+                          <TableCell colSpan={7} className="text-center py-8">
                             <div className="flex flex-col items-center gap-2">
                               <Stethoscope className="h-8 w-8 text-muted-foreground" />
                               <p className="text-muted-foreground">
@@ -629,6 +669,19 @@ export default function Soins() {
                           <Clock className="h-4 w-4 text-muted-foreground" />
                           <span className="font-medium">Créé le:</span>
                           <span>{formatDate(soin.created_at)}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm">
+                          <Building2 className="h-4 w-4 text-muted-foreground" />
+                          <span className="font-medium">Cabinet:</span>
+                          <Badge
+                            variant="secondary"
+                            className={
+                              cabinetColors[soin.Cabinet || ""] ||
+                              "bg-amber-100 text-amber-700 border-amber-200"
+                            }
+                          >
+                            {soin.Cabinet}
+                          </Badge>
                         </div>
                       </div>
 

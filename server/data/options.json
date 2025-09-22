@@ -1,7 +1,13 @@
 {
   "bankNames": [
     "Attijariwafa bank",
-    "BMCE Bank of Africasssssss"
+    "BMCE Bank of Africa",
+    "CIH Bank",
+    "Banque Populaire",
+    "Société Générale",
+    "Crédit du Maroc",
+    "BMCI",
+    "Bank Al-Maghrib"
   ],
   "appointmentTypes": [
     "Consultation Biohacking",
@@ -21,6 +27,10 @@
     "Consultation",
     "Diagnostic",
     "Préventif",
-    "Thérapeutique"
+    "Thérapeutique",
+    "Chirurgie",
+    "Rééducation",
+    "Urgence",
+    "Suivi"
   ]
 }

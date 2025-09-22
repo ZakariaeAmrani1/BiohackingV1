@@ -13,6 +13,7 @@ import {
   Clock,
   User,
   MapPin,
+  Check,
 } from "lucide-react";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -60,11 +61,17 @@ const statusColors = {
   annulé: "bg-red-100 text-red-700 border-red-200",
 };
 
+const cabinetColors: Record<string, string> = {
+  Biohacking: "bg-cyan-100 text-cyan-700 border-cyan-200",
+  Nassens: "bg-purple-100 text-purple-700 border-purple-200",
+};
+
 export default function Appointments() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("tous");
   const [creatorFilter, setCreatorFilter] = useState<string>("tous");
   const [dateFilter, setDateFilter] = useState<string>("tous");
+  const [cabinetFilter, setCabinetFilter] = useState<string>("tous");
   const [viewMode, setViewMode] = useState<"table" | "cards">("table");
 
   // Data state
@@ -84,6 +91,13 @@ export default function Appointments() {
 
   // Get unique creators for filter dropdown
   const creators = Array.from(new Set(appointments.map((apt) => apt.Cree_par)));
+  const cabinets = Array.from(
+    new Set(
+      appointments
+        .map((apt) => apt.Cabinet)
+        .filter((c): c is string => Boolean(c))
+    )
+  );
 
   // Load appointments on component mount
   useEffect(() => {
@@ -163,6 +177,9 @@ export default function Appointments() {
       const matchesCreator =
         creatorFilter === "tous" || appointment.Cree_par === creatorFilter;
 
+      const matchesCabinet =
+        cabinetFilter === "tous" || appointment.Cabinet === cabinetFilter;
+
       let matchesDate = true;
       if (dateFilter !== "tous") {
         const appointmentDate = new Date(appointment.date_rendez_vous);
@@ -188,9 +205,15 @@ export default function Appointments() {
         }
       }
 
-      return matchesSearch && matchesStatus && matchesCreator && matchesDate;
+      return (
+        matchesSearch &&
+        matchesStatus &&
+        matchesCreator &&
+        matchesCabinet &&
+        matchesDate
+      );
     });
-  }, [searchTerm, statusFilter, creatorFilter, dateFilter, appointments]);
+  }, [searchTerm, statusFilter, creatorFilter, cabinetFilter, dateFilter, appointments]);
 
   // CRUD Operations
   const handleCreateAppointment = async (data: AppointmentFormData) => {
@@ -328,6 +351,36 @@ export default function Appointments() {
     setSelectedAppointment(null);
   };
 
+  const getNextStatus = (status?: RendezVous["status"]) => {
+    if (status === "programmé") return { next: "confirmé", label: "Marquer comme confirmé" } as const;
+    if (status === "confirmé") return { next: "terminé", label: "Marquer comme terminé" } as const;
+    return null;
+  };
+
+  const handleChangeStatus = async (appointment: RendezVous) => {
+    const transition = getNextStatus(appointment.status);
+    if (!transition) return;
+    try {
+      setIsSubmitting(true);
+      const payload: AppointmentFormData = {
+        client_id: appointment.client_id || 0,
+        CIN: appointment.CIN,
+        sujet: appointment.sujet,
+        date_rendez_vous: appointment.date_rendez_vous,
+        Cree_par: appointment.Cree_par,
+        status: transition.next,
+        Cabinet: appointment.Cabinet || "Biohacking",
+      };
+      await AppointmentsService.update(appointment.id, payload);
+      await loadAppointments();
+      toast({ title: "Statut mis à jour", description: `Rendez-vous ${transition.next}` });
+    } catch (error) {
+      toast({ title: "Erreur", description: "Impossible de mettre à jour le statut", variant: "destructive" });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const formatDateTime = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString("fr-FR", {
@@ -371,7 +424,7 @@ export default function Appointments() {
             <CardTitle className="text-lg">Rechercher et Filtrer</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-6">
               {/* Search */}
               <div className="relative lg:col-span-2">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -424,6 +477,21 @@ export default function Appointments() {
                   <SelectItem value="cette-semaine">Cette semaine</SelectItem>
                 </SelectContent>
               </Select>
+
+              {/* Cabinet Filter */}
+              <Select value={cabinetFilter} onValueChange={setCabinetFilter}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Cabinet" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="tous">Tous les cabinets</SelectItem>
+                  {cabinets.map((cab) => (
+                    <SelectItem key={cab} value={cab}>
+                      {cab}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </CardContent>
         </Card>
@@ -463,7 +531,7 @@ export default function Appointments() {
             <CardContent className="p-0">
               <div className="overflow-x-auto scrollbar-thin">
                 {isLoading ? (
-                  <TableLoader columns={8} rows={6} />
+                  <TableLoader columns={9} rows={6} />
                 ) : (
                   <Table>
                     <TableHeader>
@@ -472,6 +540,7 @@ export default function Appointments() {
                         <TableHead>CIN</TableHead>
                         <TableHead>Sujet</TableHead>
                         <TableHead>Date & Heure</TableHead>
+                        <TableHead>Cabinet</TableHead>
                         <TableHead>Statut</TableHead>
                         <TableHead>Créé par</TableHead>
                         <TableHead>Créé le</TableHead>
@@ -494,6 +563,17 @@ export default function Appointments() {
                             <TableCell>{appointment.sujet}</TableCell>
                             <TableCell>
                               {formatDateTime(appointment.date_rendez_vous)}
+                            </TableCell>
+                            <TableCell>
+                              <Badge
+                                variant="secondary"
+                                className={
+                                  cabinetColors[appointment.Cabinet || ""] ||
+                                  "bg-amber-100 text-amber-700 border-amber-200"
+                                }
+                              >
+                                {appointment.Cabinet}
+                              </Badge>
                             </TableCell>
                             <TableCell>
                               <Badge
@@ -524,6 +604,15 @@ export default function Appointments() {
                                   </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
+                                  {getNextStatus(appointment.status) && (
+                                    <DropdownMenuItem
+                                      className="gap-2"
+                                      onClick={() => handleChangeStatus(appointment)}
+                                    >
+                                      <Check className="h-4 w-4" />
+                                      {getNextStatus(appointment.status)!.label}
+                                    </DropdownMenuItem>
+                                  )}
                                   <DropdownMenuItem
                                     className="gap-2"
                                     onClick={() =>
@@ -554,7 +643,7 @@ export default function Appointments() {
                         ))
                       ) : (
                         <TableRow>
-                          <TableCell colSpan={8} className="text-center py-8">
+                          <TableCell colSpan={9} className="text-center py-8">
                             <div className="flex flex-col items-center gap-2">
                               <Calendar className="h-8 w-8 text-muted-foreground" />
                               <p className="text-muted-foreground">
@@ -624,6 +713,19 @@ export default function Appointments() {
                           <span className="font-medium">Créé par:</span>
                           <span>{getUserName(appointment.Cree_par)}</span>
                         </div>
+                        <div className="flex items-center gap-2 text-sm">
+                          <MapPin className="h-4 w-4 text-muted-foreground" />
+                          <span className="font-medium">Cabinet:</span>
+                          <Badge
+                            variant="secondary"
+                            className={
+                              cabinetColors[appointment.Cabinet || ""] ||
+                              "bg-amber-100 text-amber-700 border-amber-200"
+                            }
+                          >
+                            {appointment.Cabinet}
+                          </Badge>
+                        </div>
                       </div>
 
                       <div className="border-t pt-3">
@@ -642,6 +744,15 @@ export default function Appointments() {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
+                              {getNextStatus(appointment.status) && (
+                                <DropdownMenuItem
+                                  className="gap-2"
+                                  onClick={() => handleChangeStatus(appointment)}
+                                >
+                                  <Check className="h-4 w-4" />
+                                  {getNextStatus(appointment.status)!.label}
+                                </DropdownMenuItem>
+                              )}
                               <DropdownMenuItem
                                 className="gap-2"
                                 onClick={() => openDetailsModal(appointment)}

@@ -343,6 +343,17 @@ export const generateTimeSlotsForDate = (
   const startMinutes = WORKING_HOURS.start * 60; // 8 AM = 480 minutes
   const endMinutes = WORKING_HOURS.end * 60; // 6 PM = 1080 minutes
 
+  // Helper: local datetime string YYYY-MM-DDTHH:MM
+  const toLocalInputValue = (d: Date) => {
+    const pad = (n: number) => n.toString().padStart(2, "0");
+    const year = d.getFullYear();
+    const month = pad(d.getMonth() + 1);
+    const day = pad(d.getDate());
+    const hours = pad(d.getHours());
+    const mins = pad(d.getMinutes());
+    return `${year}-${month}-${day}T${hours}:${mins}`;
+  };
+
   // Generate slots at 30-minute intervals
   for (
     let minutes = startMinutes;
@@ -356,7 +367,7 @@ export const generateTimeSlotsForDate = (
 
     // All slots are available - no conflict checking
     slots.push({
-      datetime: slotDate.toISOString().slice(0, 16), // YYYY-MM-DDTHH:MM format
+      datetime: toLocalInputValue(slotDate), // Local datetime for datetime-local inputs
       time: slotDate.toLocaleTimeString("fr-FR", {
         hour: "2-digit",
         minute: "2-digit",

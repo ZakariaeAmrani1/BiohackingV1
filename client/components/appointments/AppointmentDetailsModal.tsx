@@ -8,6 +8,7 @@ import {
   Calendar,
   Edit,
   Trash2,
+  Building2,
 } from "lucide-react";
 import {
   Dialog,
@@ -37,6 +38,11 @@ const statusColors = {
   confirmé: "bg-green-100 text-green-700 border-green-200",
   terminé: "bg-gray-100 text-gray-700 border-gray-200",
   annulé: "bg-red-100 text-red-700 border-red-200",
+};
+
+const cabinetColors: Record<string, string> = {
+  Biohacking: "bg-cyan-100 text-cyan-700 border-cyan-200",
+  Nassens: "bg-purple-100 text-purple-700 border-purple-200",
 };
 
 const statusLabels = {
@@ -168,6 +174,24 @@ export default function AppointmentDetailsModal({
                 <Value className="text-lg font-medium text-primary">
                   {formatDateTime(appointment.date_rendez_vous)}
                 </Value>
+              </div>
+
+              <div>
+                <Label className="flex items-center gap-2">
+                  <Building2 className="h-4 w-4" />
+                  Cabinet
+                </Label>
+                <div className="mt-1">
+                  <Badge
+                    variant="secondary"
+                    className={
+                      cabinetColors[appointment.Cabinet || ""] ||
+                      "bg-amber-100 text-amber-700 border-amber-200"
+                    }
+                  >
+                    {appointment.Cabinet}
+                  </Badge>
+                </div>
               </div>
             </div>
           </div>

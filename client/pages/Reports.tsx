@@ -11,6 +11,8 @@ import { Badge } from "@/components/ui/badge";
 import { CurrencyService } from "@/services/currencyService";
 import { ClientsService, Client, calculateAge } from "@/services/clientsService";
 import { AnalyticsService, AnalyticsData, AnalyticsFilters, ClientSummary } from "@/services/analyticsService";
+import { SoinsService, Soin } from "@/services/soinsService";
+import { TypeBien } from "@/services/invoicesService";
 import { Calendar, Users, Receipt, TrendingUp, UserSearch, BadgeDollarSign, Briefcase, Search } from "lucide-react";
 
 const ALL_VALUE = "__all__";
@@ -21,6 +23,7 @@ export default function Reports() {
   const [loading, setLoading] = useState(true);
   const [clients, setClients] = useState<Client[]>([]);
   const [raw, setRaw] = useState<AnalyticsData | null>(null);
+  const [soinsList, setSoinsList] = useState<Soin[]>([]);
   const [filters, setFilters] = useState<AnalyticsFilters>(() => {
     const end = new Date();
     const start = new Date();
@@ -35,13 +38,15 @@ export default function Reports() {
     let mounted = true;
     (async () => {
       setLoading(true);
-      const [clientList, data] = await Promise.all([
+      const [clientList, data, soins] = await Promise.all([
         ClientsService.getAll(),
         AnalyticsService.loadAll(),
+        SoinsService.getAll(),
       ]);
       if (!mounted) return;
       setClients(clientList);
       setRaw(data);
+      setSoinsList(soins);
       setLoading(false);
     })();
     return () => {
@@ -65,6 +70,28 @@ export default function Reports() {
   }, [filtered, selectedClientCIN]);
 
   const topServices = useMemo(() => (filtered ? AnalyticsService.topServices(filtered, 10) : []), [filtered]);
+
+  const topServicesByCabinet = useMemo(() => {
+    if (!filtered) return [] as { name: string; quantity: number; revenue: number; cabinet: string }[];
+    const items = filtered.invoicesWithDetails.flatMap((f) => f.items);
+    const map = new Map<string, { name: string; quantity: number; revenue: number; cabinet: string }>();
+    items
+      .filter((it) => it.type_bien === TypeBien.SOIN)
+      .forEach((it) => {
+        const name = it.nom_bien || `soin-${it.id_bien}`;
+        const soin = soinsList.find((s) => s.id === it.id_bien);
+        const cabinet = soin?.Cabinet || "";
+        const key = `${name}__${cabinet}`;
+        const prev = map.get(key) || { name, quantity: 0, revenue: 0, cabinet };
+        map.set(key, {
+          name,
+          cabinet,
+          quantity: prev.quantity + it.quantite,
+          revenue: prev.revenue + it.prix_unitaire * it.quantite,
+        });
+      });
+    return Array.from(map.values()).sort((a, b) => b.quantity - a.quantity).slice(0, 10);
+  }, [filtered, soinsList]);
   const topProducts = useMemo(() => (filtered ? AnalyticsService.topProducts(filtered, 10) : []), [filtered]);
   const employeeProduction = useMemo(() => (filtered ? AnalyticsService.employeeProduction(filtered) : []), [filtered]);
 
@@ -539,21 +566,23 @@ export default function Reports() {
                   <thead className="bg-muted">
                     <tr>
                       <th className="text-left p-2">Service</th>
+                      <th className="text-left p-2">Cabinet</th>
                       <th className="text-right p-2">Qté</th>
                       <th className="text-right p-2">Revenu</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {topServices.map((s) => (
-                      <tr key={s.name} className="border-t border-border">
+                    {topServicesByCabinet.map((s) => (
+                      <tr key={`${s.name}-${s.cabinet}`} className="border-t border-border">
                         <td className="p-2">{s.name}</td>
+                        <td className="p-2">{s.cabinet}</td>
                         <td className="p-2 text-right">{s.quantity}</td>
                         <td className="p-2 text-right">{CurrencyService.formatForDisplay(s.revenue)}</td>
                       </tr>
                     ))}
-                    {topServices.length === 0 && (
+                    {topServicesByCabinet.length === 0 && (
                       <tr>
-                        <td colSpan={3} className="p-3 text-center text-muted-foreground">Aucune donnée</td>
+                        <td colSpan={4} className="p-3 text-center text-muted-foreground">Aucune donnée</td>
                       </tr>
                     )}
                   </tbody>

@@ -125,9 +125,13 @@ export default function AppointmentFormModal({
   useEffect(() => {
     const user = AuthService.getCurrentUser();
     if (appointment) {
-      // Convert ISO string to datetime-local format
+      // Convert stored ISO to local datetime-local string
+      const toLocalInputValue = (d: Date) => {
+        const pad = (n: number) => n.toString().padStart(2, "0");
+        return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+      };
       const dateTime = appointment.date_rendez_vous
-        ? new Date(appointment.date_rendez_vous).toISOString().slice(0, 16)
+        ? toLocalInputValue(new Date(appointment.date_rendez_vous))
         : "";
 
       setFormData({
@@ -672,32 +676,29 @@ export default function AppointmentFormModal({
             </Select>
           </div>
 
-          {/* Status - only show in edit mode */}
-          {isEditMode && (
-            <div className="space-y-2">
-              <Label htmlFor="status">Statut</Label>
-              <Select
-                value={formData.status}
-                onValueChange={(value) =>
-                  handleInputChange(
-                    "status",
-                    value as AppointmentFormData["status"],
-                  )
-                }
-                disabled={isSubmitting}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="programmé">Programmé</SelectItem>
-                  <SelectItem value="confirmé">Confirmé</SelectItem>
-                  <SelectItem value="terminé">Terminé</SelectItem>
-                  <SelectItem value="annulé">Annulé</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          )}
+          <div className="space-y-2">
+            <Label htmlFor="status">Statut</Label>
+            <Select
+              value={formData.status}
+              onValueChange={(value) =>
+                handleInputChange(
+                  "status",
+                  value as AppointmentFormData["status"],
+                )
+              }
+              disabled={isSubmitting}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="programmé">Programmé</SelectItem>
+                <SelectItem value="confirmé">Confirmé</SelectItem>
+                <SelectItem value="terminé">Terminé</SelectItem>
+                <SelectItem value="annulé">Annulé</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
           <DialogFooter className="gap-2">
             <Button
