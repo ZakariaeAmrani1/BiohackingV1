@@ -148,7 +148,9 @@ export default function Settings() {
   useEffect(() => {
     OptionsService.getAll()
       .then(setOptions)
-      .catch(() => setOptions({ bankNames: [], appointmentTypes: [], soinTypes: [] }));
+      .catch(() =>
+        setOptions({ bankNames: [], appointmentTypes: [], soinTypes: [] }),
+      );
   }, []);
 
   const loadUserProfile = async () => {
@@ -279,7 +281,6 @@ export default function Settings() {
         description: "Les informations ont été sauvegardées avec succès",
       });
     } catch (error) {
-      console.log(error);
       toast({
         title: "Erreur",
         description:
@@ -1299,7 +1300,9 @@ export default function Settings() {
 
                     {/* Bank Names for cheques */}
                     <div className="space-y-3">
-                      <Label className="text-base font-medium">Noms de banques (chèques)</Label>
+                      <Label className="text-base font-medium">
+                        Noms de banques (chèques)
+                      </Label>
                       <div className="space-y-2">
                         {options.bankNames.map((name, idx) => (
                           <div key={idx} className="flex gap-2">
@@ -1314,7 +1317,9 @@ export default function Settings() {
                             <Button
                               variant="outline"
                               onClick={() => {
-                                const next = options.bankNames.filter((_, i) => i !== idx);
+                                const next = options.bankNames.filter(
+                                  (_, i) => i !== idx,
+                                );
                                 setOptions({ ...options, bankNames: next });
                               }}
                             >
@@ -1390,7 +1395,9 @@ export default function Settings() {
                         try {
                           setIsSavingOptions(true);
                           const cleaned = {
-                            bankNames: options.bankNames.filter((v) => v.trim().length > 0),
+                            bankNames: options.bankNames.filter(
+                              (v) => v.trim().length > 0,
+                            ),
                             appointmentTypes: options.appointmentTypes.filter(
                               (v) => v.trim().length > 0,
                             ),

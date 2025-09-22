@@ -1,5 +1,13 @@
 import { useEffect, useState } from "react";
-import { FileText, Upload, AlertTriangle, User, Search, Eye, Download } from "lucide-react";
+import {
+  FileText,
+  Upload,
+  AlertTriangle,
+  User,
+  Search,
+  Eye,
+  Download,
+} from "lucide-react";
 import ScannedDocumentViewerModal from "@/components/scannedDocuments/ScannedDocumentViewerModal";
 import {
   Dialog,
@@ -349,16 +357,11 @@ export default function ScannedDocumentFormModal({
                         <FileText className="h-4 w-4 text-primary" />
                         <span className="font-medium">{document.filename}</span>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Button variant="outline" size="sm" onClick={() => setIsViewerOpen(true)}>
-                          <Eye className="h-4 w-4 mr-1" /> Voir
-                        </Button>
-                        {/* Download removed as requested */}
-                      </div>
                     </div>
                   </div>
                   <div className="text-xs text-muted-foreground">
-                    Un fichier est déjà associé. Vous pouvez le remplacer en sélectionnant un nouveau PDF ci-dessus.
+                    Un fichier est déjà associé. Vous pouvez le remplacer en
+                    sélectionnant un nouveau PDF ci-dessus.
                   </div>
                 </div>
               )}
