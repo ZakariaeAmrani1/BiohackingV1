@@ -153,8 +153,12 @@ export default function ScannedDocumentFormModal({
     setIsSubmitting(true);
     try {
       await onSubmit(form);
-    } catch {
-      setErrors(["Une erreur s'est produite lors de l'enregistrement"]);
+    } catch (error) {
+      setErrors(
+        error?.response?.data?.message ?? [
+          "Une erreur s'est produite lors de l'enregistrement",
+        ],
+      );
     } finally {
       setIsSubmitting(false);
     }

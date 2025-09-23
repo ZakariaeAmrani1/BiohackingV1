@@ -188,6 +188,7 @@ export default function Products() {
         description: "Le produit a été créé avec succès",
       });
     } catch (error) {
+      console.log(error);
       toast({
         title: "Erreur",
         description: "Impossible de créer le produit",

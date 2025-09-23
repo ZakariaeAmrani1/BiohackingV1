@@ -153,10 +153,11 @@ export default function ClientFormModal({
       await onSubmit(formData);
       // Don't call onClose here - let the parent handle it
     } catch (error) {
-      setErrors([
-        error.response.data.message ||
+      setErrors(
+        error?.response?.data?.message ?? [
           "Une erreur s'est produite lors de l'enregistrement",
-      ]);
+        ],
+      );
     } finally {
       setIsSubmitting(false);
     }

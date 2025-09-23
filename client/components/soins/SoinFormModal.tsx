@@ -1,5 +1,12 @@
 import { useState, useEffect } from "react";
-import { Stethoscope, AlertTriangle, User, Euro, Tag, Building2 } from "lucide-react";
+import {
+  Stethoscope,
+  AlertTriangle,
+  User,
+  Euro,
+  Tag,
+  Building2,
+} from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -19,7 +26,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { SoinFormData, Soin, validateSoinData, getAvailableDoctors, createEmptySoin } from "@/services/soinsService";
+import {
+  SoinFormData,
+  Soin,
+  validateSoinData,
+  getAvailableDoctors,
+  createEmptySoin,
+} from "@/services/soinsService";
 import { Utilisateur } from "@/services/clientsService";
 import { AuthService } from "@/services/authService";
 import { OptionsService } from "@/services/optionsService";
@@ -50,7 +63,9 @@ export default function SoinFormModal({
   const availableDoctors = getAvailableDoctors();
 
   useEffect(() => {
-    OptionsService.getSoinTypes().then(setSoinTypes).catch(() => setSoinTypes([]));
+    OptionsService.getSoinTypes()
+      .then(setSoinTypes)
+      .catch(() => setSoinTypes([]));
   }, []);
 
   // Initialize form data when soin changes
@@ -90,7 +105,11 @@ export default function SoinFormModal({
     try {
       await onSubmit(formData);
     } catch (error) {
-      setErrors(["Une erreur s'est produite lors de l'enregistrement"]);
+      setErrors(
+        error?.response?.data?.message ?? [
+          "Une erreur s'est produite lors de l'enregistrement",
+        ],
+      );
     } finally {
       setIsSubmitting(false);
     }

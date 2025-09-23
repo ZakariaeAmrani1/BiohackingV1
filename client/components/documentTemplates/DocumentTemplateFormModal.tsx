@@ -205,7 +205,11 @@ export default function DocumentTemplateFormModal({
     try {
       await onSubmit(formData);
     } catch (error) {
-      setErrors(["Une erreur s'est produite lors de l'enregistrement"]);
+      setErrors(
+        error?.response?.data?.message ?? [
+          "Une erreur s'est produite lors de l'enregistrement",
+        ],
+      );
     } finally {
       setIsSubmitting(false);
     }

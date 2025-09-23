@@ -115,12 +115,13 @@ export default function InvoiceFormModal({
     const loadData = async () => {
       try {
         setIsLoadingData(true);
-        const [clientsData, productsData, soinsData, bankNamesData] = await Promise.all([
-          ClientsService.getAll(),
-          ProductsService.getAll(),
-          SoinsService.getAll(),
-          OptionsService.getBankNames(),
-        ]);
+        const [clientsData, productsData, soinsData, bankNamesData] =
+          await Promise.all([
+            ClientsService.getAll(),
+            ProductsService.getAll(),
+            SoinsService.getAll(),
+            OptionsService.getBankNames(),
+          ]);
         setClients(clientsData);
         setProducts(productsData);
         setSoins(soinsData);
@@ -284,9 +285,9 @@ export default function InvoiceFormModal({
       await onSubmit(formData);
     } catch (error) {
       setErrors(
-        error.response?.data.message !== null
-          ? error.response.data.message
-          : ["Une erreur s'est produite lors de l'enregistrement"],
+        error?.response?.data?.message ?? [
+          "Une erreur s'est produite lors de l'enregistrement",
+        ],
       );
     } finally {
       setIsSubmitting(false);
@@ -579,7 +580,9 @@ export default function InvoiceFormModal({
                       <Label htmlFor="cheque_banque">Nom de la banque</Label>
                       <Select
                         value={formData.cheque_banque || ""}
-                        onValueChange={(value) => handleInputChange("cheque_banque", value)}
+                        onValueChange={(value) =>
+                          handleInputChange("cheque_banque", value)
+                        }
                         disabled={isSubmitting}
                       >
                         <SelectTrigger>
