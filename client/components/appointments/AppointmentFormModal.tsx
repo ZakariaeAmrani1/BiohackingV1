@@ -178,9 +178,10 @@ export default function AppointmentFormModal({
       setClients(clientsData);
     } catch (error) {
       setErrors(
-        error?.response?.data?.message ?? [
-          "Erreur lors du chargement des patients",
-        ],
+        Array.isArray(error?.response?.data?.message) &&
+          error.response.data.message.length > 0
+          ? error.response.data.message
+          : ["Erreur lors du chargement des patients"],
       );
     }
   };
@@ -279,9 +280,10 @@ export default function AppointmentFormModal({
       } catch (error) {
         console.error(error);
         setErrors(
-          error?.response?.data?.message ?? [
-            "Erreur lors de la création du patient",
-          ],
+          Array.isArray(error?.response?.data?.message) &&
+            error.response.data.message.length > 0
+            ? error.response.data.message
+            : ["Erreur lors de la création du patient"],
         );
         return;
       }
@@ -306,9 +308,10 @@ export default function AppointmentFormModal({
       // Don't call onClose here - let the parent handle it
     } catch (error) {
       setErrors(
-        error?.response?.data?.message ?? [
-          "Une erreur s'est produite lors de l'enregistrement",
-        ],
+        Array.isArray(error?.response?.data?.message) &&
+          error.response.data.message.length > 0
+          ? error.response.data.message
+          : ["Une erreur s'est produite lors de l'enregistrement"],
       );
     } finally {
       setIsSubmitting(false);
