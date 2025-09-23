@@ -181,7 +181,10 @@ export default function AppointmentFormModal({
         Array.isArray(error?.response?.data?.message) &&
           error.response.data.message.length > 0
           ? error.response.data.message
-          : ["Erreur lors du chargement des patients"],
+          : [
+              error?.response?.data?.message ??
+                "Erreur lors du chargement des patients",
+            ],
       );
     }
   };
@@ -240,15 +243,15 @@ export default function AppointmentFormModal({
       const requiredPatientData: ClientFormData = {
         nom: newPatientData.nom || "",
         prenom: newPatientData.prenom || "",
-        date_naissance: "2025-09-02T19:30",
-        adresse: "dazzdzazd",
+        date_naissance: "2009-09-02T19:30",
+        adresse: "",
         numero_telephone: newPatientData.numero_telephone || "",
         groupe_sanguin: "A+",
-        email: "test@gmail.com",
-        commentaire: "dzadazdazd",
+        email: "",
+        commentaire: "",
         CIN: newPatientData.CIN || "",
-        allergies: "dzadad",
-        antecedents: "dazdzad",
+        allergies: "",
+        antecedents: "",
         Cree_par: currentUser.CIN,
       };
 
@@ -278,12 +281,14 @@ export default function AppointmentFormModal({
         const newClient = await ClientsService.create(requiredPatientData);
         clientId = newClient.id;
       } catch (error) {
-        console.error(error);
         setErrors(
           Array.isArray(error?.response?.data?.message) &&
             error.response.data.message.length > 0
             ? error.response.data.message
-            : ["Erreur lors de la création du patient"],
+            : [
+                error?.response?.data?.message ??
+                  "Erreur lors de la création du patient",
+              ],
         );
         return;
       }
@@ -311,7 +316,10 @@ export default function AppointmentFormModal({
         Array.isArray(error?.response?.data?.message) &&
           error.response.data.message.length > 0
           ? error.response.data.message
-          : ["Une erreur s'est produite lors de l'enregistrement"],
+          : [
+              error?.response?.data?.message ??
+                "Une erreur s'est produite lors de l'enregistrement",
+            ],
       );
     } finally {
       setIsSubmitting(false);

@@ -209,7 +209,10 @@ export default function DocumentTemplateFormModal({
         Array.isArray(error?.response?.data?.message) &&
           error.response.data.message.length > 0
           ? error.response.data.message
-          : ["Une erreur s'est produite lors de l'enregistrement"],
+          : [
+              error?.response?.data?.message ??
+                "Une erreur s'est produite lors de l'enregistrement",
+            ],
       );
     } finally {
       setIsSubmitting(false);
