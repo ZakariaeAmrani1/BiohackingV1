@@ -451,6 +451,8 @@ export default function Settings() {
     }
   };
 
+  const isAdmin = user?.role === "admin";
+
   return (
     <DashboardLayout>
       <div className="flex-1 space-y-6 p-4 md:p-6">
@@ -503,31 +505,35 @@ export default function Settings() {
           </div>
         ) : (
           <Tabs defaultValue="profile" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-6">
+            <TabsList className={`grid w-full ${isAdmin ? "grid-cols-6" : "grid-cols-1"}`}>
               <TabsTrigger value="profile" className="gap-2">
                 <User className="h-4 w-4" />
                 Profil
               </TabsTrigger>
-              <TabsTrigger value="entreprise" className="gap-2">
-                <Building2 className="h-4 w-4" />
-                Entreprise
-              </TabsTrigger>
-              <TabsTrigger value="appearance" className="gap-2">
-                <Palette className="h-4 w-4" />
-                Apparence
-              </TabsTrigger>
-              <TabsTrigger value="notifications" className="gap-2">
-                <Bell className="h-4 w-4" />
-                Notifications
-              </TabsTrigger>
-              <TabsTrigger value="advanced" className="gap-2">
-                <SettingsIcon className="h-4 w-4" />
-                Avancé
-              </TabsTrigger>
-              <TabsTrigger value="options" className="gap-2">
-                <List className="h-4 w-4" />
-                Options
-              </TabsTrigger>
+              {isAdmin && (
+                <>
+                  <TabsTrigger value="entreprise" className="gap-2">
+                    <Building2 className="h-4 w-4" />
+                    Entreprise
+                  </TabsTrigger>
+                  <TabsTrigger value="appearance" className="gap-2">
+                    <Palette className="h-4 w-4" />
+                    Apparence
+                  </TabsTrigger>
+                  <TabsTrigger value="notifications" className="gap-2">
+                    <Bell className="h-4 w-4" />
+                    Notifications
+                  </TabsTrigger>
+                  <TabsTrigger value="advanced" className="gap-2">
+                    <SettingsIcon className="h-4 w-4" />
+                    Avancé
+                  </TabsTrigger>
+                  <TabsTrigger value="options" className="gap-2">
+                    <List className="h-4 w-4" />
+                    Options
+                  </TabsTrigger>
+                </>
+              )}
             </TabsList>
 
             {/* Profile Tab */}
@@ -561,7 +567,7 @@ export default function Settings() {
                         onChange={(e) =>
                           handleUserFormChange("CIN", e.target.value)
                         }
-                        placeholder="Numéro CIN"
+                        placeholder="Num��ro CIN"
                       />
                     </div>
 
@@ -576,7 +582,7 @@ export default function Settings() {
                           )
                         }
                       >
-                        <SelectTrigger>
+                        <SelectTrigger disabled>
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>

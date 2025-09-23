@@ -3,38 +3,27 @@ import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import {
-  Calendar,
-  Users,
-  Activity,
-  FileText,
-  Settings,
-  Home,
-  Stethoscope,
-  TestTube,
-  Menu,
-  LogOut,
-} from "lucide-react";
+import { Menu, LogOut, ChevronDown, ChevronRight } from "lucide-react";
+import { navigation } from "./navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { UserService } from "@/services/userService";
 import { useTheme } from "@/hooks/use-theme";
 
-const navigation = [
-  { name: "Tableau de Bord", href: "/", icon: Home },
-  { name: "Rendez-vous", href: "/appointments", icon: Calendar },
-  { name: "Patients", href: "/patients", icon: Users },
-  { name: "Traitements", href: "/treatments", icon: Stethoscope },
-  { name: "Biohacking", href: "/biohacking", icon: TestTube },
-  { name: "Métriques de Santé", href: "/metrics", icon: Activity },
-  { name: "Rapports", href: "/reports", icon: FileText },
-  { name: "Paramètres", href: "/settings", icon: Settings },
-];
 
 export default function MobileNav() {
   const [open, setOpen] = useState(false);
   const location = useLocation();
   const { user, logout } = useAuth();
   const { isDark } = useTheme();
+  const [expandedDropdowns, setExpandedDropdowns] = useState<string[]>(["Biens"]);
+  const toggleDropdown = (itemName: string) => {
+    setExpandedDropdowns((prev) =>
+      prev.includes(itemName)
+        ? prev.filter((name) => name !== itemName)
+        : [...prev, itemName],
+    );
+  };
+  const isChildActive = (children: any[]) => children.some((child) => location.pathname === child.href);
 
   return (
     <div className="lg:hidden border-b border-border bg-card">
@@ -42,11 +31,7 @@ export default function MobileNav() {
         <div className="flex items-center">
           <div className="flex h-10 w-20 items-center justify-center">
             <img
-              src={
-                isDark
-                  ? "https://cdn.builder.io/api/v1/image/assets%2Fd10fa76c4c4f4ba5b5e5c227a43b88a3%2F0959c370406340f6bd9464107f56613b?format=webp&width=800"
-                  : "https://cdn.builder.io/api/v1/image/assets%2F7fd7290220b94e06a6f7cd5d150de493%2Fce1def9ea6774ec0bb2758b12ced93f9?format=webp&width=300"
-              }
+              src="https://cdn.builder.io/api/v1/image/assets%2F16493a39c179465f9ca598ede9454dc8%2Fcceedcfad29a48b9a90d85058157ec8d?format=webp&width=800"
               alt="BioHacking Logo"
               className="w-full h-full object-contain"
             />
@@ -66,14 +51,10 @@ export default function MobileNav() {
                 <div className="flex items-center justify-center w-full">
                   <div className="flex h-12 w-24 items-center justify-center">
                     <img
-                      src={
-                        isDark
-                          ? "https://cdn.builder.io/api/v1/image/assets%2Fd10fa76c4c4f4ba5b5e5c227a43b88a3%2F0959c370406340f6bd9464107f56613b?format=webp&width=800"
-                          : "https://cdn.builder.io/api/v1/image/assets%2F7fd7290220b94e06a6f7cd5d150de493%2Fce1def9ea6774ec0bb2758b12ced93f9?format=webp&width=300"
-                      }
-                      alt="BioHacking Logo"
-                      className="w-full h-full object-contain"
-                    />
+              src="https://cdn.builder.io/api/v1/image/assets%2F16493a39c179465f9ca598ede9454dc8%2Fcceedcfad29a48b9a90d85058157ec8d?format=webp&width=800"
+              alt="BioHacking Logo"
+              className="w-full h-full object-contain"
+            />
                   </div>
                 </div>
               </div>
@@ -81,23 +62,74 @@ export default function MobileNav() {
               {/* Navigation */}
               <nav className="flex-1 space-y-1 px-3 py-4">
                 {navigation.map((item) => {
-                  const isActive = location.pathname === item.href;
-                  return (
-                    <Link
-                      key={item.name}
-                      to={item.href}
-                      onClick={() => setOpen(false)}
-                      className={cn(
-                        "group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-                        isActive
-                          ? "bg-primary text-primary-foreground"
-                          : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
-                      )}
-                    >
-                      <item.icon className="h-5 w-5" />
-                      {item.name}
-                    </Link>
-                  );
+                  if (item.dropdown && item.children) {
+                    const isExpanded = expandedDropdowns.includes(item.name);
+                    const hasActiveChild = isChildActive(item.children);
+
+                    return (
+                      <div key={item.name}>
+                        <button
+                          onClick={() => toggleDropdown(item.name)}
+                          className={cn(
+                            "group flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                            hasActiveChild
+                              ? "bg-accent text-accent-foreground"
+                              : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
+                          )}
+                        >
+                          <item.icon className="h-5 w-5" />
+                          {item.name}
+                          {isExpanded ? (
+                            <ChevronDown className="h-4 w-4 ml-auto" />
+                          ) : (
+                            <ChevronRight className="h-4 w-4 ml-auto" />
+                          )}
+                        </button>
+
+                        {isExpanded && (
+                          <div className="ml-6 mt-1 space-y-1">
+                            {item.children.map((child) => {
+                              const isChildActiveItem = location.pathname === child.href;
+                              return (
+                                <Link
+                                  key={child.name}
+                                  to={child.href}
+                                  onClick={() => setOpen(false)}
+                                  className={cn(
+                                    "group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                                    isChildActiveItem
+                                      ? "bg-primary text-primary-foreground"
+                                      : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
+                                  )}
+                                >
+                                  <child.icon className="h-4 w-4" />
+                                  {child.name}
+                                </Link>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  } else {
+                    const isActive = location.pathname === item.href;
+                    return (
+                      <Link
+                        key={item.name}
+                        to={item.href as string}
+                        onClick={() => setOpen(false)}
+                        className={cn(
+                          "group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                          isActive
+                            ? "bg-primary text-primary-foreground"
+                            : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
+                        )}
+                      >
+                        <item.icon className="h-5 w-5" />
+                        {item.name}
+                      </Link>
+                    );
+                  }
                 })}
               </nav>
 

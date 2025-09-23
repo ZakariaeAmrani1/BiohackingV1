@@ -28,6 +28,7 @@ import {
 } from "@/services/productsService";
 import { Utilisateur } from "@/services/clientsService";
 import { AuthService } from "@/services/authService";
+import { CurrencyService } from "@/services/currencyService";
 
 interface ProductFormModalProps {
   isOpen: boolean;
@@ -53,6 +54,22 @@ export default function ProductFormModal({
 
   const isEditMode = !!product;
   const availableDoctors = getAvailableDoctors();
+  const [currencySymbol, setCurrencySymbol] = useState<string>(
+    CurrencyService.getCurrentSymbol(),
+  );
+
+  useEffect(() => {
+    const handleCurrencyChange = () => {
+      setCurrencySymbol(CurrencyService.getCurrentSymbol());
+    };
+    window.addEventListener("currencyChanged", handleCurrencyChange as EventListener);
+    return () => {
+      window.removeEventListener(
+        "currencyChanged",
+        handleCurrencyChange as EventListener,
+      );
+    };
+  }, []);
 
   // Initialize form data when product changes
   useEffect(() => {
@@ -160,7 +177,7 @@ export default function ProductFormModal({
             <div className="space-y-2">
               <Label htmlFor="prix" className="flex items-center gap-2">
                 <Euro className="h-4 w-4" />
-                Prix (€)
+                {`Prix (${currencySymbol})`}
               </Label>
               <Input
                 id="prix"
@@ -171,7 +188,7 @@ export default function ProductFormModal({
                 onChange={(e) =>
                   handleInputChange("prix", parseFloat(e.target.value) || 0)
                 }
-                placeholder="0.00"
+                placeholder={CurrencyService.getCurrencyPlaceholder()}
                 disabled={isSubmitting}
               />
             </div>

@@ -72,7 +72,7 @@ export function buildPdfBaseStyles(): string {
 
 export function buildCompanyHeaderHtml(entreprise: Entreprise | null, opts?: { logoUrl?: string; title?: string; subtitle?: string }): string {
   const logoUrl = opts?.logoUrl ||
-    "https://cdn.builder.io/api/v1/image/assets%2F7fd7290220b94e06a6f7cd5d150de493%2Fce1def9ea6774ec0bb2758b12ced93f9?format=webp&width=500";
+    "https://cdn.builder.io/api/v1/image/assets%2F16493a39c179465f9ca598ede9454dc8%2Fcceedcfad29a48b9a90d85058157ec8d?format=webp&width=800";
 
   const lines: string[] = [];
   if (entreprise?.adresse) lines.push(escapeHtml(entreprise.adresse));

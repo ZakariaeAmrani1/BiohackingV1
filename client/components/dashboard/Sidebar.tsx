@@ -30,27 +30,8 @@ import {
   TooltipProvider,
 } from "@/components/ui/tooltip";
 import { useTheme } from "@/hooks/use-theme";
+import { navigation } from "./navigation";
 
-const navigation = [
-  { name: "Tableau de Bord", href: "/", icon: Home },
-  { name: "Rendez-vous", href: "/appointments", icon: Calendar },
-  { name: "Patients", href: "/patients", icon: Users },
-  { name: "Documents", href: "/documents", icon: FileText },
-  { name: "Types de Documents", href: "/document-types", icon: FolderOpen },
-  {
-    name: "Biens",
-    icon: Package,
-    dropdown: true,
-    children: [
-      { name: "Produits", href: "/products", icon: Package },
-      { name: "Soins", href: "/soins", icon: Stethoscope },
-    ],
-  },
-  { name: "Factures", href: "/invoices", icon: Receipt },
-  { name: "Paiements", href: "/payments", icon: DollarSign },
-  { name: "Rapports", href: "/reports", icon: TrendingUp },
-  { name: "Paramètres", href: "/settings", icon: Settings },
-];
 
 export default function Sidebar() {
   const location = useLocation();
@@ -111,15 +92,7 @@ export default function Sidebar() {
               )}
             >
               <img
-                src={
-                  isCollapsed && isDark
-                    ? "https://cdn.builder.io/api/v1/image/assets%2Fd10fa76c4c4f4ba5b5e5c227a43b88a3%2F3f9200fdbe85411c888de06f4fddabc4?format=webp&width=800"
-                    : isDark
-                      ? "https://cdn.builder.io/api/v1/image/assets%2Fd10fa76c4c4f4ba5b5e5c227a43b88a3%2F0959c370406340f6bd9464107f56613b?format=webp&width=800"
-                      : isCollapsed
-                        ? "https://cdn.builder.io/api/v1/image/assets%2F7aa559df90fe4ddaa64a743a97acfd66%2F0e48021fb78c480987c1e833adc83cec?format=webp&width=800"
-                        : "https://cdn.builder.io/api/v1/image/assets%2F7fd7290220b94e06a6f7cd5d150de493%2Fce1def9ea6774ec0bb2758b12ced93f9?format=webp&width=500"
-                }
+                src="https://cdn.builder.io/api/v1/image/assets%2F16493a39c179465f9ca598ede9454dc8%2Fcceedcfad29a48b9a90d85058157ec8d?format=webp&width=800"
                 alt="BioHacking Logo"
                 className="w-full h-full object-contain"
               />

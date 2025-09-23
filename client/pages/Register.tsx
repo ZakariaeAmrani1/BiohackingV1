@@ -80,7 +80,7 @@ export default function Register() {
       <div className="flex justify-center">
         <div className="flex h-40 w-80 items-center justify-center">
           <img
-            src="https://cdn.builder.io/api/v1/image/assets%2F7fd7290220b94e06a6f7cd5d150de493%2Fce1def9ea6774ec0bb2758b12ced93f9?format=webp&width=600"
+            src="https://cdn.builder.io/api/v1/image/assets%2F16493a39c179465f9ca598ede9454dc8%2Fcceedcfad29a48b9a90d85058157ec8d?format=webp&width=800"
             alt="BioHacking Logo"
             className="w-full h-full object-contain"
           />

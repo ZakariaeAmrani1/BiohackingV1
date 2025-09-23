@@ -89,11 +89,7 @@ export default function Login() {
       <div className="flex justify-center">
         <div className="flex h-40 w-80 items-center justify-center">
           <img
-            src={
-              isDark
-                ? "https://cdn.builder.io/api/v1/image/assets%2Fd10fa76c4c4f4ba5b5e5c227a43b88a3%2F0959c370406340f6bd9464107f56613b?format=webp&width=800"
-                : "https://cdn.builder.io/api/v1/image/assets%2F7fd7290220b94e06a6f7cd5d150de493%2Fce1def9ea6774ec0bb2758b12ced93f9?format=webp&width=800"
-            }
+            src="https://cdn.builder.io/api/v1/image/assets%2F16493a39c179465f9ca598ede9454dc8%2Fcceedcfad29a48b9a90d85058157ec8d?format=webp&width=800"
             alt="BioHacking Logo"
             className="w-full h-full object-contain"
           />

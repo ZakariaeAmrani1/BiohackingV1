@@ -1,6 +1,7 @@
 import api from "../api/axios"; // Soin types
 import { ActivitiesService } from "./activitiesService";
 import { AuthService } from "./authService";
+import { CurrencyService } from "./currencyService";
 export interface Soin {
   id: number;
   Nom: string;
@@ -208,10 +209,7 @@ export const getSoinTypeColor = (type: string): string => {
 };
 
 export const formatPrice = (price: number): string => {
-  return new Intl.NumberFormat("fr-FR", {
-    style: "currency",
-    currency: "EUR",
-  }).format(price);
+  return CurrencyService.formatCurrency(price);
 };
 
 export const createEmptySoin = (CIN?: string): SoinFormData => {
