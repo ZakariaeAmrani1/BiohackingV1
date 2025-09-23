@@ -200,12 +200,13 @@ export class AuthService {
     return updatedUser;
   }
 
-  // Validate registration data
   static validateRegistrationData(data: RegisterData): string[] {
     const errors: string[] = [];
 
     if (!data.CIN.trim()) {
       errors.push("Le CIN est obligatoire");
+    } else if (!/^[A-Z]{1,2}\d{5,}$/.test(data.CIN)) {
+      errors.push("Le CIN doit suivre le format B1234567 ou BR54657");
     }
 
     if (!data.nom.trim()) {
@@ -218,6 +219,13 @@ export class AuthService {
 
     if (!data.date_naissance) {
       errors.push("La date de naissance est obligatoire");
+    } else {
+      const birthDate = new Date(data.date_naissance);
+      const now = new Date();
+      const age = now.getFullYear() - birthDate.getFullYear();
+      if (age < 0 || age > 120) {
+        errors.push("La date de naissance n'est pas valide");
+      }
     }
 
     if (!data.adresse.trim()) {
@@ -226,6 +234,12 @@ export class AuthService {
 
     if (!data.numero_telephone.trim()) {
       errors.push("Le numéro de téléphone est obligatoire");
+    } else if (
+      !/^(\+212|0|\+33)[1-9]\d{7,8}$/.test(
+        data.numero_telephone.replace(/\s/g, ""),
+      )
+    ) {
+      errors.push("Le numéro de téléphone n'est pas au format belge valide");
     }
 
     if (!data.email.trim()) {

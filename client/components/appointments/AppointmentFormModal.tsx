@@ -267,8 +267,17 @@ export default function AppointmentFormModal({
       } else if (!/^[A-Z]{1,2}\d{5,}$/.test(newPatientData.CIN)) {
         allErrors.push("Le CIN doit suivre le format B1234567 ou BR54657");
       }
-      if (!newPatientData.numero_telephone?.trim()) {
-        allErrors.push("Le numéro de téléphone du patient est obligatoire");
+
+      if (!newPatientData.numero_telephone.trim()) {
+        allErrors.push("Le numéro de téléphone est obligatoire");
+      } else if (
+        !/^(\+212|0|\+33)[1-9]\d{7,8}$/.test(
+          newPatientData.numero_telephone.replace(/\s/g, ""),
+        )
+      ) {
+        allErrors.push(
+          "Le numéro de téléphone n'est pas au format belge valide",
+        );
       }
 
       if (allErrors.length > 0) {

@@ -65,7 +65,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const authUser = await AuthService.register(data);
       setUser(authUser);
     } catch (error) {
-      throw error; // Re-throw for component error handling
+      throw error;
     }
   };
 

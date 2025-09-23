@@ -294,24 +294,24 @@ export const validateClientData = (data: ClientFormData): string[] => {
   //   errors.push("L'adresse est obligatoire");
   // }
 
-  // if (!data.numero_telephone.trim()) {
-  //   errors.push("Le numéro de téléphone est obligatoire");
-  // } else if (
-  //   !/^(\+212|0|\+33)[1-9]\d{7,8}$/.test(
-  //     data.numero_telephone.replace(/\s/g, ""),
-  //   )
-  // ) {
-  //   errors.push("Le numéro de téléphone n'est pas au format belge valide");
-  // }
-
-  if (
-    data.numero_telephone.trim() &&
+  if (!data.numero_telephone.trim()) {
+    errors.push("Le numéro de téléphone est obligatoire");
+  } else if (
     !/^(\+212|0|\+33)[1-9]\d{7,8}$/.test(
       data.numero_telephone.replace(/\s/g, ""),
     )
   ) {
     errors.push("Le numéro de téléphone n'est pas au format belge valide");
   }
+
+  // if (
+  //   data.numero_telephone.trim() &&
+  //   !/^(\+212|0|\+33)[1-9]\d{7,8}$/.test(
+  //     data.numero_telephone.replace(/\s/g, ""),
+  //   )
+  // ) {
+  //   errors.push("Le numéro de téléphone n'est pas au format belge valide");
+  // }
 
   // if (!data.email.trim()) {
   //   errors.push("L'email est obligatoire");
