@@ -649,7 +649,7 @@ export default function Settings() {
                             e.target.value,
                           )
                         }
-                        placeholder="+32 2 123 45 67"
+                        placeholder="+212 6 123 45 676"
                       />
                     </div>
                   </div>
@@ -849,7 +849,7 @@ export default function Settings() {
                             e.target.value,
                           )
                         }
-                        placeholder="+32 2 123 45 67"
+                        placeholder="+212 6 123 45 676"
                       />
                     </div>
                   </div>

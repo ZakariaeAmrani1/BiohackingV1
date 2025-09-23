@@ -336,7 +336,7 @@ export default function ClientFormModal({
                     onChange={(e) =>
                       handleInputChange("numero_telephone", e.target.value)
                     }
-                    placeholder="+32 2 123 45 67"
+                    placeholder="+212 6 123 45 676"
                     disabled={isSubmitting}
                   />
                 </div>

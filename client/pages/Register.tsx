@@ -232,7 +232,7 @@ export default function Register() {
                         <Phone className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                         <Input
                           id="numero_telephone"
-                          placeholder="+32 2 123 45 67"
+                          placeholder="+212 6 123 45 676"
                           value={formData.numero_telephone}
                           onChange={(e) =>
                             handleInputChange(
