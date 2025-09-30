@@ -1,4 +1,17 @@
-import { type LucideIcon, Calendar, Users, FileText, Settings, Home, Stethoscope, FolderOpen, Package, Receipt, DollarSign, TrendingUp } from "lucide-react";
+import {
+  type LucideIcon,
+  Calendar,
+  Users,
+  FileText,
+  Settings,
+  Home,
+  Stethoscope,
+  FolderOpen,
+  Package,
+  Receipt,
+  DollarSign,
+  TrendingUp,
+} from "lucide-react";
 
 export interface NavChildItem {
   name: string;
@@ -18,6 +31,7 @@ export const navigation: NavItem[] = [
   { name: "Tableau de Bord", href: "/", icon: Home },
   { name: "Rendez-vous", href: "/appointments", icon: Calendar },
   { name: "Patients", href: "/patients", icon: Users },
+  { name: "Employés", href: "/employees", icon: Users },
   { name: "Documents", href: "/documents", icon: FileText },
   { name: "Types de Documents", href: "/document-types", icon: FolderOpen },
   {

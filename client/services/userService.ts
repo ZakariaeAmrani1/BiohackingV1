@@ -87,7 +87,6 @@ export class UserService {
         ...data,
       };
       currentUser = updatedUser;
-      // Return user without password
       const { password, ...userWithoutPassword } = updatedUser;
       localStorage.setItem(
         "biohacking-clinic-user",

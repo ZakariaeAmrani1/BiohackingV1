@@ -16,6 +16,7 @@ import PatientOperations from "./pages/PatientOperations";
 import Documents from "./pages/Documents";
 import Treatments from "./pages/Treatments";
 import Products from "./pages/Products";
+import Employees from "./pages/Employees";
 import Soins from "./pages/Soins";
 import Invoices from "./pages/Invoices";
 import Payments from "./pages/Payments";
@@ -121,6 +122,14 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <Products />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/employees"
+        element={
+          <ProtectedRoute allowedRoles={["admin"]}>
+            <Employees />
           </ProtectedRoute>
         }
       />

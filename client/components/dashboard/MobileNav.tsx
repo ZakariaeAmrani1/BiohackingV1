@@ -9,13 +9,14 @@ import { useAuth } from "@/contexts/AuthContext";
 import { UserService } from "@/services/userService";
 import { useTheme } from "@/hooks/use-theme";
 
-
 export default function MobileNav() {
   const [open, setOpen] = useState(false);
   const location = useLocation();
   const { user, logout } = useAuth();
   const { isDark } = useTheme();
-  const [expandedDropdowns, setExpandedDropdowns] = useState<string[]>(["Biens"]);
+  const [expandedDropdowns, setExpandedDropdowns] = useState<string[]>([
+    "Biens",
+  ]);
   const toggleDropdown = (itemName: string) => {
     setExpandedDropdowns((prev) =>
       prev.includes(itemName)
@@ -23,7 +24,13 @@ export default function MobileNav() {
         : [...prev, itemName],
     );
   };
-  const isChildActive = (children: any[]) => children.some((child) => location.pathname === child.href);
+  const isChildActive = (children: any[]) =>
+    children.some((child) => location.pathname === child.href);
+
+  const items = navigation.filter((item) => {
+    if (item.href === "/employees" && user?.role !== "admin") return false;
+    return true;
+  });
 
   return (
     <div className="lg:hidden border-b border-border bg-card">
@@ -51,17 +58,17 @@ export default function MobileNav() {
                 <div className="flex items-center justify-center w-full">
                   <div className="flex h-12 w-24 items-center justify-center">
                     <img
-              src="https://cdn.builder.io/api/v1/image/assets%2F16493a39c179465f9ca598ede9454dc8%2Fcceedcfad29a48b9a90d85058157ec8d?format=webp&width=800"
-              alt="BioHacking Logo"
-              className="w-full h-full object-contain"
-            />
+                      src="https://cdn.builder.io/api/v1/image/assets%2F16493a39c179465f9ca598ede9454dc8%2Fcceedcfad29a48b9a90d85058157ec8d?format=webp&width=800"
+                      alt="BioHacking Logo"
+                      className="w-full h-full object-contain"
+                    />
                   </div>
                 </div>
               </div>
 
               {/* Navigation */}
               <nav className="flex-1 space-y-1 px-3 py-4">
-                {navigation.map((item) => {
+                {items.map((item) => {
                   if (item.dropdown && item.children) {
                     const isExpanded = expandedDropdowns.includes(item.name);
                     const hasActiveChild = isChildActive(item.children);
@@ -89,7 +96,8 @@ export default function MobileNav() {
                         {isExpanded && (
                           <div className="ml-6 mt-1 space-y-1">
                             {item.children.map((child) => {
-                              const isChildActiveItem = location.pathname === child.href;
+                              const isChildActiveItem =
+                                location.pathname === child.href;
                               return (
                                 <Link
                                   key={child.name}

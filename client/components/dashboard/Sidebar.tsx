@@ -32,7 +32,6 @@ import {
 import { useTheme } from "@/hooks/use-theme";
 import { navigation } from "./navigation";
 
-
 export default function Sidebar() {
   const location = useLocation();
   const { user, logout } = useAuth();
@@ -68,6 +67,11 @@ export default function Sidebar() {
   const isChildActive = (children: any[]) => {
     return children.some((child) => location.pathname === child.href);
   };
+
+  const items = navigation.filter((item) => {
+    if (item.href === "/employees" && user?.role !== "admin") return false;
+    return true;
+  });
 
   return (
     <TooltipProvider>
@@ -127,7 +131,7 @@ export default function Sidebar() {
             isCollapsed ? "px-2" : "px-3",
           )}
         >
-          {navigation.map((item) => {
+          {items.map((item) => {
             if (item.dropdown && item.children) {
               const isExpanded = expandedDropdowns.includes(item.name);
               const hasActiveChild = isChildActive(item.children);
