@@ -7,6 +7,7 @@ import {
   Euro,
   Tag,
   Building2,
+  Activity,
 } from "lucide-react";
 import {
   Dialog,
@@ -81,8 +82,14 @@ export default function SoinDetailsModal({
   };
 
   const getUserName = (CIN: string) => {
-    const user = users.find((user) => user.CIN === CIN);
-    return user.nom || CIN;
+    const user = users?.find((user) => user.CIN === CIN);
+    return user?.nom || CIN;
+  };
+
+  const getTherapeuteName = (cin?: string | null) => {
+    if (!cin) return "Non assigné";
+    const user = users?.find((user) => user.CIN === cin);
+    return user?.nom || cin;
   };
 
   return (
@@ -180,6 +187,12 @@ export default function SoinDetailsModal({
                 <User className="h-4 w-4 text-muted-foreground" />
                 <span className="font-medium">Créé par:</span>
                 <span>{getUserName(soin.Cree_par)}</span>
+              </div>
+
+              <div className="flex items-center gap-2 text-sm">
+                <Activity className="h-4 w-4 text-muted-foreground" />
+                <span className="font-medium">Thérapeute:</span>
+                <span>{getTherapeuteName(soin.therapeute)}</span>
               </div>
 
               <div className="flex items-center gap-2 text-sm">

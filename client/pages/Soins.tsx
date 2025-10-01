@@ -53,7 +53,6 @@ import {
   SoinsService,
   Soin,
   SoinFormData,
-  getAvailableDoctors,
   formatPrice,
   getSoinTypeColor,
   getRevenueStatistics,
@@ -61,6 +60,8 @@ import {
 import { OptionsService } from "@/services/optionsService";
 import { Utilisateur } from "@/services/clientsService";
 import { UserService } from "@/services/userService";
+import { EmployeesService } from "@/services/employeesService";
+import type { Employee } from "@/services/employeesService";
 
 const cabinetColors: Record<string, string> = {
   Biohacking: "bg-cyan-100 text-cyan-700 border-cyan-200",
@@ -72,11 +73,13 @@ export default function Soins() {
   const [creatorFilter, setCreatorFilter] = useState<string>("tous");
   const [typeFilter, setTypeFilter] = useState<string>("tous");
   const [cabinetFilter, setCabinetFilter] = useState<string>("tous");
+  const [therapeuteFilter, setTherapeuteFilter] = useState<string>("tous");
   const [viewMode, setViewMode] = useState<"table" | "cards">("table");
 
   // Data state
   const [soins, setSoins] = useState<Soin[]>([]);
   const [users, setUsers] = useState<Utilisateur[]>([]);
+  const [therapeutes, setTherapeutes] = useState<Employee[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   // Modal states
@@ -92,13 +95,28 @@ export default function Soins() {
   // Get unique creators for filter dropdown
   const creators = Array.from(new Set(soins.map((soin) => soin.Cree_par)));
   const cabinets = Array.from(
-    new Set(soins.map((s) => s.Cabinet).filter((c): c is string => Boolean(c)))
+    new Set(soins.map((s) => s.Cabinet).filter((c): c is string => Boolean(c))),
   );
+  const therapeuteOptions = useMemo(() => {
+    const unique = new Map<string, Employee>();
+    therapeutes.forEach((employee) => {
+      if (!unique.has(employee.CIN)) {
+        unique.set(employee.CIN, employee);
+      }
+    });
+    return Array.from(unique.values()).sort((a, b) => {
+      const nameA = `${a.prenom} ${a.nom}`.trim();
+      const nameB = `${b.prenom} ${b.nom}`.trim();
+      return nameA.localeCompare(nameB, "fr");
+    });
+  }, [therapeutes]);
 
   // Load soins on component mount
   useEffect(() => {
     loadSoins();
-    OptionsService.getSoinTypes().then(setSoinTypes).catch(() => setSoinTypes([]));
+    OptionsService.getSoinTypes()
+      .then(setSoinTypes)
+      .catch(() => setSoinTypes([]));
   }, []);
 
   useEffect(() => {
@@ -137,17 +155,21 @@ export default function Soins() {
 
   const loadUsers = async () => {
     try {
-      setIsLoading(true);
-      const data = await UserService.getCurrentAllUsers();
-      setUsers(data);
+      const [userData, employeeData] = await Promise.all([
+        UserService.getCurrentAllUsers(),
+        EmployeesService.getAll(),
+      ]);
+      setUsers(userData);
+      setTherapeutes(
+        employeeData.filter((employee) => employee.role === "therapeute"),
+      );
     } catch (error) {
       toast({
         title: "Erreur",
-        description: "Impossible de charger les utilisateurs",
+        description:
+          "Impossible de charger les utilisateurs ou les thérapeutes",
         variant: "destructive",
       });
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -155,6 +177,20 @@ export default function Soins() {
     const user = users.find((user) => user.CIN === CIN);
     if (user && user.nom) return user.nom;
     return CIN;
+  };
+
+  const getTherapeuteName = (cin?: string | null) => {
+    if (!cin) return "Non assigné";
+    const therapeute = therapeutes.find((employee) => employee.CIN === cin);
+    if (therapeute) {
+      const fullName = `${therapeute.prenom} ${therapeute.nom}`.trim();
+      if (fullName.length > 0) {
+        return fullName;
+      }
+    }
+    const user = users.find((user) => user.CIN === cin);
+    if (user && user.nom) return user.nom;
+    return cin;
   };
 
   // Filter and search logic
@@ -173,9 +209,26 @@ export default function Soins() {
       const matchesCabinet =
         cabinetFilter === "tous" || soin.Cabinet === cabinetFilter;
 
-      return matchesSearch && matchesCreator && matchesType && matchesCabinet;
+      const matchesTherapeute =
+        therapeuteFilter === "tous" ||
+        (soin.therapeute ?? "") === therapeuteFilter;
+
+      return (
+        matchesSearch &&
+        matchesCreator &&
+        matchesType &&
+        matchesCabinet &&
+        matchesTherapeute
+      );
     });
-  }, [searchTerm, creatorFilter, typeFilter, cabinetFilter, soins]);
+  }, [
+    searchTerm,
+    creatorFilter,
+    typeFilter,
+    cabinetFilter,
+    therapeuteFilter,
+    soins,
+  ]);
 
   // CRUD Operations
   const handleCreateSoin = async (data: SoinFormData) => {
@@ -415,7 +468,7 @@ export default function Soins() {
             <CardTitle className="text-lg">Rechercher et Filtrer</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-6">
               {/* Search */}
               <div className="relative lg:col-span-1">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -454,6 +507,28 @@ export default function Soins() {
                       {getUserName(creator)}
                     </SelectItem>
                   ))}
+                </SelectContent>
+              </Select>
+
+              {/* Therapeute Filter */}
+              <Select
+                value={therapeuteFilter}
+                onValueChange={setTherapeuteFilter}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Thérapeute" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="tous">Tous les thérapeutes</SelectItem>
+                  {therapeuteOptions.map((therapeute) => {
+                    const fullName =
+                      `${therapeute.prenom} ${therapeute.nom}`.trim();
+                    return (
+                      <SelectItem key={therapeute.CIN} value={therapeute.CIN}>
+                        {fullName.length > 0 ? fullName : therapeute.CIN}
+                      </SelectItem>
+                    );
+                  })}
                 </SelectContent>
               </Select>
 
@@ -512,7 +587,7 @@ export default function Soins() {
             <CardContent className="p-0">
               <div className="overflow-x-auto">
                 {isLoading ? (
-                  <TableLoader columns={7} rows={6} />
+                  <TableLoader columns={8} rows={6} />
                 ) : (
                   <Table>
                     <TableHeader>
@@ -522,6 +597,7 @@ export default function Soins() {
                         <TableHead>Prix</TableHead>
                         <TableHead>Cabinet</TableHead>
                         <TableHead>Créé par</TableHead>
+                        <TableHead>Thérapeute</TableHead>
                         <TableHead>Créé le</TableHead>
                         <TableHead className="text-right">Actions</TableHead>
                       </TableRow>
@@ -563,6 +639,9 @@ export default function Soins() {
                               </Badge>
                             </TableCell>
                             <TableCell>{getUserName(soin.Cree_par)}</TableCell>
+                            <TableCell>
+                              {getTherapeuteName(soin.therapeute)}
+                            </TableCell>
                             <TableCell>{formatDate(soin.created_at)}</TableCell>
                             <TableCell className="text-right">
                               <DropdownMenu>
@@ -603,7 +682,7 @@ export default function Soins() {
                         ))
                       ) : (
                         <TableRow>
-                          <TableCell colSpan={7} className="text-center py-8">
+                          <TableCell colSpan={8} className="text-center py-8">
                             <div className="flex flex-col items-center gap-2">
                               <Stethoscope className="h-8 w-8 text-muted-foreground" />
                               <p className="text-muted-foreground">
@@ -664,6 +743,11 @@ export default function Soins() {
                           <User className="h-4 w-4 text-muted-foreground" />
                           <span className="font-medium">Créé par:</span>
                           <span>{getUserName(soin.Cree_par)}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm">
+                          <Activity className="h-4 w-4 text-muted-foreground" />
+                          <span className="font-medium">Thérapeute:</span>
+                          <span>{getTherapeuteName(soin.therapeute)}</span>
                         </div>
                         <div className="flex items-center gap-2 text-sm">
                           <Clock className="h-4 w-4 text-muted-foreground" />
@@ -753,6 +837,7 @@ export default function Soins() {
           soin={selectedSoin}
           isLoading={isSubmitting}
           users={users}
+          therapeutes={therapeutes}
         />
 
         <SoinDetailsModal

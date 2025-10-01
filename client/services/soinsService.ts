@@ -10,6 +10,7 @@ export interface Soin {
   Cree_par: string;
   created_at: string;
   Cabinet?: string;
+  therapeute?: string | null;
 }
 
 export interface SoinFormData {
@@ -18,6 +19,7 @@ export interface SoinFormData {
   prix: number;
   Cree_par: string;
   Cabinet: string;
+  therapeute: string;
 }
 
 // Mock data storage
@@ -38,6 +40,7 @@ export class SoinsService {
       Cree_par: service.Cree_par,
       created_at: service.created_at,
       Cabinet: service.cabinet,
+      therapeute: service.therapeute ?? null,
     }));
     return mockSoins.sort(
       (a, b) =>
@@ -62,6 +65,7 @@ export class SoinsService {
       stock: 1,
       cabinet: data.Cabinet,
       Cree_par: currentUser.CIN,
+      therapeute: data.therapeute,
     });
 
     const newSoin: Soin = {
@@ -96,6 +100,7 @@ export class SoinsService {
       cabinet: data.Cabinet,
       stock: 1,
       Cree_par: currentUser.CIN,
+      therapeute: data.therapeute,
       // Cabinet intentionally not sent if backend doesn't support it
     });
 
@@ -177,6 +182,10 @@ export const validateSoinData = (data: SoinFormData): string[] => {
     errors.push("Le cabinet est obligatoire");
   }
 
+  if (!data.therapeute || !data.therapeute.trim()) {
+    errors.push("Le thérapeute est obligatoire");
+  }
+
   return errors;
 };
 
@@ -219,6 +228,7 @@ export const createEmptySoin = (CIN?: string): SoinFormData => {
     prix: 0,
     Cree_par: CIN || "",
     Cabinet: "Biohacking",
+    therapeute: "",
   };
 };
 

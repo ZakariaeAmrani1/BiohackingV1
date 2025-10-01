@@ -30,13 +30,13 @@ import {
   SoinFormData,
   Soin,
   validateSoinData,
-  getAvailableDoctors,
   createEmptySoin,
 } from "@/services/soinsService";
 import { Utilisateur } from "@/services/clientsService";
 import { AuthService } from "@/services/authService";
 import { OptionsService } from "@/services/optionsService";
 import { CurrencyService } from "@/services/currencyService";
+import type { Employee } from "@/services/employeesService";
 
 interface SoinFormModalProps {
   isOpen: boolean;
@@ -45,6 +45,7 @@ interface SoinFormModalProps {
   soin?: Soin | null;
   isLoading?: boolean;
   users: Utilisateur[] | null;
+  therapeutes: Employee[];
 }
 
 export default function SoinFormModal({
@@ -54,6 +55,7 @@ export default function SoinFormModal({
   soin,
   isLoading = false,
   users,
+  therapeutes,
 }: SoinFormModalProps) {
   const [formData, setFormData] = useState<SoinFormData>(createEmptySoin());
   const [errors, setErrors] = useState<string[]>([]);
@@ -61,7 +63,6 @@ export default function SoinFormModal({
   const [soinTypes, setSoinTypes] = useState<string[]>([]);
 
   const isEditMode = !!soin;
-  const availableDoctors = getAvailableDoctors();
   const [currencySymbol, setCurrencySymbol] = useState<string>(
     CurrencyService.getCurrentSymbol(),
   );
@@ -70,7 +71,10 @@ export default function SoinFormModal({
     const handleCurrencyChange = () => {
       setCurrencySymbol(CurrencyService.getCurrentSymbol());
     };
-    window.addEventListener("currencyChanged", handleCurrencyChange as EventListener);
+    window.addEventListener(
+      "currencyChanged",
+      handleCurrencyChange as EventListener,
+    );
     return () => {
       window.removeEventListener(
         "currencyChanged",
@@ -95,6 +99,7 @@ export default function SoinFormModal({
         prix: soin.prix,
         Cree_par: soin.Cree_par || user.CIN,
         Cabinet: soin.Cabinet || "Biohacking",
+        therapeute: soin.therapeute || "",
       });
     } else {
       setFormData(createEmptySoin(user.CIN));
@@ -249,6 +254,37 @@ export default function SoinFormModal({
               <SelectContent>
                 <SelectItem value="Biohacking">Biohacking</SelectItem>
                 <SelectItem value="Nassens">Nassens</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Therapeute */}
+          <div className="space-y-2">
+            <Label htmlFor="therapeute" className="flex items-center gap-2">
+              <User className="h-4 w-4" />
+              Thérapeute
+            </Label>
+            <Select
+              value={formData.therapeute}
+              onValueChange={(value) => handleInputChange("therapeute", value)}
+              disabled={isSubmitting}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Sélectionnez le thérapeute" />
+              </SelectTrigger>
+              <SelectContent>
+                {therapeutes.length > 0 ? (
+                  therapeutes.map((employee) => (
+                    <SelectItem key={employee.CIN} value={employee.CIN}>
+                      {`${employee.prenom} ${employee.nom}`.trim() ||
+                        employee.CIN}
+                    </SelectItem>
+                  ))
+                ) : (
+                  <div className="p-2 text-sm text-gray-500">
+                    Aucun thérapeute disponible
+                  </div>
+                )}
               </SelectContent>
             </Select>
           </div>
