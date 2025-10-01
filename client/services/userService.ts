@@ -11,7 +11,7 @@ export interface User {
   numero_telephone: string;
   email: string;
   password?: string; // Optional for security
-  role: "admin" | "doctor" | "nurse" | "receptionist";
+  role: "admin" | "therapeute";
   created_at: string;
 }
 
@@ -171,9 +171,7 @@ export class UserService {
   static getAvailableRoles(): { value: User["role"]; label: string }[] {
     return [
       { value: "admin", label: "Administrateur" },
-      { value: "doctor", label: "Médecin" },
-      { value: "nurse", label: "Infirmier/ère" },
-      { value: "receptionist", label: "Réceptionniste" },
+      { value: "therapeute", label: "Thérapeute" },
     ];
   }
 

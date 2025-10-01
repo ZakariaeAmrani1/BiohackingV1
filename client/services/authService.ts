@@ -24,36 +24,6 @@ export interface AuthUser extends Omit<User, "password"> {
   token: string;
 }
 
-// Mock users for authentication
-const mockUsers: (User & { password: string })[] = [
-  {
-    id: 1,
-    CIN: "BE123456789",
-    nom: "Smith",
-    prenom: "Dr. John",
-    date_naissance: "1980-05-15T00:00:00",
-    adresse: "123 Avenue de la Santé, Bruxelles, 1000",
-    numero_telephone: "+212 6 123 45 676",
-    email: "admin@biohacking-clinic.be",
-    password: "admin123",
-    role: "admin",
-    created_at: "2023-01-01T10:00:00",
-  },
-  {
-    id: 2,
-    CIN: "BE987654321",
-    nom: "Martin",
-    prenom: "Dr. Sarah",
-    date_naissance: "1985-03-20T00:00:00",
-    adresse: "456 Rue des Médecins, Liège, 4000",
-    numero_telephone: "+212 6 123 45 676",
-    email: "doctor@biohacking-clinic.be",
-    password: "doctor123",
-    role: "doctor",
-    created_at: "2023-01-01T10:00:00",
-  },
-];
-
 // Storage keys
 const TOKEN_KEY = "biohacking-clinic-token";
 const USER_KEY = "biohacking-clinic-user";

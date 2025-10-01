@@ -44,7 +44,7 @@ export default function Register() {
     email: "",
     password: "",
     confirmPassword: "",
-    role: "doctor",
+    role: "therapeute",
   });
   const [errors, setErrors] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
