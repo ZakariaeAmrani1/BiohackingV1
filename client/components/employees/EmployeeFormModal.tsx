@@ -67,7 +67,7 @@ export default function EmployeeFormModal({
     adresse: "",
     numero_telephone: "",
     email: "",
-    role: "receptionist",
+    role: "therapeute",
     // create only
     // @ts-ignore
     password: "",
@@ -99,7 +99,7 @@ export default function EmployeeFormModal({
         adresse: "",
         numero_telephone: "",
         email: "",
-        role: "receptionist",
+        role: "therapeute",
         // @ts-ignore
         password: "",
         // @ts-ignore
@@ -234,7 +234,7 @@ export default function EmployeeFormModal({
               <Select
                 value={(formData as any).role}
                 onValueChange={(v) => handleChange("role", v)}
-                disabled={isSubmitting}
+                disabled={isEditMode ? true : isSubmitting}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Sélectionnez un rôle" />
