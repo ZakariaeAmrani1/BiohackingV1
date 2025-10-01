@@ -1,6 +1,7 @@
 import { CurrencyService } from "./currencyService";
 import api from "../api/axios";
 import { AuthService } from "./authService";
+import { ProductsService } from "./productsService";
 
 // Invoice types
 export interface Facture {
@@ -78,6 +79,46 @@ export enum TypeBien {
 let mockFactures: Facture[] = [];
 
 let mockFactureBiens: FactureBien[] = [];
+
+// Helpers for stock adjustments
+const buildProductQtyMap = (
+  items: Array<FactureItem | FactureBien>,
+): Map<number, number> => {
+  const map = new Map<number, number>();
+  for (const it of items) {
+    // @ts-ignore - both types have type_bien, id_bien, quantite
+    if ((it as any).type_bien === TypeBien.PRODUIT) {
+      const id = (it as any).id_bien as number;
+      const qty = (it as any).quantite as number;
+      map.set(id, (map.get(id) || 0) + qty);
+    }
+  }
+  return map;
+};
+
+const clamp = (n: number, min: number) => (n < min ? min : n);
+
+const adjustProductStocks = async (
+  qtyMap: Map<number, number>,
+  sign: -1 | 1,
+) => {
+  for (const [productId, qty] of qtyMap) {
+    let product = await ProductsService.getById(productId);
+    if (!product) {
+      await ProductsService.getAll();
+      product = await ProductsService.getById(productId);
+    }
+    if (!product) continue;
+    const delta = qty * sign;
+    const newStock = clamp(product.stock + delta, 0);
+    await ProductsService.update(productId, {
+      Nom: product.Nom,
+      prix: product.prix,
+      stock: newStock,
+      Cree_par: AuthService.getCurrentUser().CIN,
+    });
+  }
+};
 
 export class InvoicesService {
   static async getAll(): Promise<Facture[]> {
@@ -230,6 +271,12 @@ export class InvoicesService {
 
     mockFactureBiens.push(...newItems);
 
+    // Adjust stock if invoice is paid at creation
+    if (data.statut === FactureStatut.PAYEE) {
+      const qtyMap = buildProductQtyMap(data.items);
+      await adjustProductStocks(qtyMap, -1);
+    }
+
     return {
       ...newFacture,
       items: newItems,
@@ -293,6 +340,11 @@ export class InvoicesService {
         : null,
     };
 
+    const oldStatus = mockFactures[index].statut;
+    const oldItems = mockFactureBiens.filter((item) => item.id_facture === id);
+    const oldQtyMap = buildProductQtyMap(oldItems);
+    const newQtyMap = buildProductQtyMap(data.items);
+
     mockFactures[index] = updatedFacture;
 
     await api.delete(`facture-bien/${id}`);
@@ -326,6 +378,41 @@ export class InvoicesService {
 
     mockFactureBiens.push(...newItems);
 
+    // Stock adjustment logic on update
+    if (
+      oldStatus !== FactureStatut.PAYEE &&
+      data.statut === FactureStatut.PAYEE
+    ) {
+      // became paid: decrement by new quantities
+      await adjustProductStocks(newQtyMap, -1);
+    } else if (
+      oldStatus === FactureStatut.PAYEE &&
+      data.statut !== FactureStatut.PAYEE
+    ) {
+      // became non-paid: restock old quantities
+      await adjustProductStocks(oldQtyMap, 1);
+    } else if (
+      oldStatus === FactureStatut.PAYEE &&
+      data.statut === FactureStatut.PAYEE
+    ) {
+      // still paid: adjust by delta between new and old
+      const deltaMap = new Map<number, number>();
+      const keys = new Set<number>([...oldQtyMap.keys(), ...newQtyMap.keys()]);
+      for (const k of keys) {
+        const delta = (newQtyMap.get(k) || 0) - (oldQtyMap.get(k) || 0);
+        if (delta !== 0) deltaMap.set(k, delta);
+      }
+      // For positive delta, decrement; for negative delta, increment
+      const decMap = new Map<number, number>();
+      const incMap = new Map<number, number>();
+      for (const [k, v] of deltaMap) {
+        if (v > 0) decMap.set(k, v);
+        else incMap.set(k, -v);
+      }
+      if (decMap.size > 0) await adjustProductStocks(decMap, -1);
+      if (incMap.size > 0) await adjustProductStocks(incMap, 1);
+    }
+
     return {
       ...updatedFacture,
       items: newItems,
@@ -337,6 +424,9 @@ export class InvoicesService {
     const index = mockFactures.findIndex((facture) => facture.id === id);
     if (index === -1) return false;
 
+    const wasPaid = mockFactures[index].statut === FactureStatut.PAYEE;
+    const itemsToRevert = mockFactureBiens.filter((i) => i.id_facture === id);
+
     await api.delete(`facture-bien/${id}`);
     await api.delete(`facture/${id}`);
 
@@ -344,6 +434,12 @@ export class InvoicesService {
     mockFactureBiens = mockFactureBiens.filter(
       (item) => item.id_facture !== id,
     );
+
+    if (wasPaid) {
+      const qtyMap = buildProductQtyMap(itemsToRevert);
+      await adjustProductStocks(qtyMap, 1);
+    }
+
     return true;
   }
 
@@ -378,6 +474,8 @@ export class InvoicesService {
     if (cheque_banque) payload.cheque_banque = cheque_banque;
     if (cheque_date_tirage)
       payload.cheque_date_tirage = new Date(cheque_date_tirage).toISOString();
+    const prevStatus = mockFactures[index].statut;
+
     await api.patch(`facture/${id}`, payload);
     mockFactures[index].statut = status;
     mockFactures[index].date_paiement = date_paiement;
@@ -387,6 +485,20 @@ export class InvoicesService {
     if (cheque_banque) mockFactures[index].cheque_banque = cheque_banque;
     if (cheque_date_tirage)
       mockFactures[index].cheque_date_tirage = cheque_date_tirage;
+
+    if (prevStatus !== FactureStatut.PAYEE && status === FactureStatut.PAYEE) {
+      const items = mockFactureBiens.filter((i) => i.id_facture === id);
+      const qtyMap = buildProductQtyMap(items);
+      await adjustProductStocks(qtyMap, -1);
+    } else if (
+      prevStatus === FactureStatut.PAYEE &&
+      status !== FactureStatut.PAYEE
+    ) {
+      const items = mockFactureBiens.filter((i) => i.id_facture === id);
+      const qtyMap = buildProductQtyMap(items);
+      await adjustProductStocks(qtyMap, 1);
+    }
+
     return mockFactures[index];
   }
 }

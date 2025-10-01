@@ -174,6 +174,15 @@ export default function ClientFormModal({
     }
   };
 
+  const generateRandomCIN = (): string => {
+    const bytes = crypto.getRandomValues(new Uint8Array(6));
+    let digits = "";
+    for (let i = 0; i < bytes.length; i++) {
+      digits += String(bytes[i] % 10);
+    }
+    return `BH${digits}`;
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
@@ -217,15 +226,31 @@ export default function ClientFormModal({
                   <FileText className="h-4 w-4" />
                   CIN
                 </Label>
-                <Input
-                  id="CIN"
-                  value={formData.CIN}
-                  onChange={(e) =>
-                    handleInputChange("CIN", e.target.value.toUpperCase())
-                  }
-                  placeholder="BE123456"
-                  disabled={isEditMode ? true : isSubmitting}
-                />
+                <div className="flex gap-2">
+                  <Input
+                    id="CIN"
+                    value={formData.CIN}
+                    onChange={(e) =>
+                      handleInputChange("CIN", e.target.value.toUpperCase())
+                    }
+                    placeholder="BH123456"
+                    disabled={isEditMode ? true : isSubmitting}
+                    className="font-mono"
+                  />
+                  {!isEditMode && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() =>
+                        handleInputChange("CIN", generateRandomCIN())
+                      }
+                      disabled={isSubmitting}
+                    >
+                      Générer
+                    </Button>
+                  )}
+                </div>
               </div>
 
               {/* Last Name */}

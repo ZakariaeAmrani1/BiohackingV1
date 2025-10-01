@@ -751,8 +751,21 @@ export default function InvoiceFormModal({
                                     key={availableItem.id}
                                     value={availableItem.id.toString()}
                                   >
-                                    {availableItem.Nom} -{" "}
-                                    {formatPrice(availableItem.prix)}
+                                    <div className="flex items-center justify-between gap-3 w-full">
+                                      <span>
+                                        {availableItem.Nom} -{" "}
+                                        {formatPrice(availableItem.prix)}
+                                      </span>
+                                      {"stock" in availableItem &&
+                                        availableItem.stock === 0 && (
+                                          <Badge
+                                            variant="destructive"
+                                            className="text-xs"
+                                          >
+                                            Rupture
+                                          </Badge>
+                                        )}
+                                    </div>
                                   </SelectItem>
                                 ),
                               )}
