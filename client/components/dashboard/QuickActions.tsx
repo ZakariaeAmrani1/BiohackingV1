@@ -45,6 +45,7 @@ import {
   DocumentTemplate,
 } from "@/services/documentTemplatesService";
 import { UserService } from "@/services/userService";
+import { Employee, EmployeesService } from "@/services/employeesService";
 
 interface QuickAction {
   title: string;
@@ -74,6 +75,7 @@ export default function QuickActions() {
   >([]);
 
   const [users, setUsers] = useState<Utilisateur[]>([]);
+  const [therapeutes, setTherapeutes] = useState<Employee[]>([]);
 
   // Load document templates when component mounts
   useEffect(() => {
@@ -95,15 +97,21 @@ export default function QuickActions() {
 
   const loadUsers = async () => {
     try {
-      const data = await UserService.getCurrentAllUsers();
-      setUsers(data);
+      const [userData, employeeData] = await Promise.all([
+        UserService.getCurrentAllUsers(),
+        EmployeesService.getAll(),
+      ]);
+      setUsers(userData);
+      setTherapeutes(
+        employeeData.filter((employee) => employee.role === "therapeute"),
+      );
     } catch (error) {
       toast({
         title: "Erreur",
-        description: "Impossible de charger les utilisateurs",
+        description:
+          "Impossible de charger les utilisateurs ou les thérapeutes",
         variant: "destructive",
       });
-    } finally {
     }
   };
 
@@ -387,6 +395,7 @@ export default function QuickActions() {
         onSubmit={handleCreateSoin}
         isLoading={isSubmitting.soin}
         users={users}
+        therapeutes={therapeutes}
       />
 
       <InvoiceFormModal
