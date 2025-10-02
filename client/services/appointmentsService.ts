@@ -2,6 +2,7 @@ import { ClientsService, Client } from "./clientsService";
 import { ActivitiesService } from "./activitiesService";
 import api from "../api/axios";
 import { AuthService } from "./authService";
+import { SoinsService } from "./soinsService";
 
 // Type matching your database structure
 export interface RendezVous {
@@ -16,6 +17,8 @@ export interface RendezVous {
   email?: string;
   client_id?: number; // Reference to client table
   Cabinet?: string;
+  soin_id?: number;
+  soin_nom?: string;
 }
 
 // Create/Update form data interface
@@ -27,6 +30,7 @@ export interface AppointmentFormData {
   Cree_par: string;
   status: "programmé" | "confirmé" | "terminé" | "annulé";
   Cabinet: string;
+  soin_id: number;
 }
 
 // Helper function to get dates relative to today
@@ -61,6 +65,8 @@ export class AppointmentsService {
       client_id: appointment.client.id,
       email: appointment.client.email,
       Cabinet: appointment.cabinet,
+      soin_id: appointment.soin_id,
+      soin_nom: appointment.soin?.Nom || appointment.soin_nom || undefined,
     }));
     return mockAppointments.sort(
       (a, b) =>
@@ -92,7 +98,18 @@ export class AppointmentsService {
       status: data.status,
       cabinet: data.Cabinet,
       Cree_par: currentUser.CIN,
+      soin_id: data.soin_id,
     });
+
+    // Try to resolve soin name for display
+    let soinName: string | undefined = undefined;
+    try {
+      const soin = await SoinsService.getById(data.soin_id);
+      soinName = soin?.Nom;
+    } catch (err) {
+      // ignore
+    }
+
     const newAppointment: RendezVous = {
       id: response.data.id,
       CIN: client.CIN,
@@ -104,6 +121,8 @@ export class AppointmentsService {
       client_id: data.client_id,
       created_at: new Date().toISOString(),
       Cabinet: data.Cabinet,
+      soin_id: data.soin_id,
+      soin_nom: soinName,
     };
 
     mockAppointments.push(newAppointment);
@@ -150,8 +169,18 @@ export class AppointmentsService {
       status: data.status,
       cabinet: data.Cabinet,
       Cree_par: currentUser.CIN,
+      soin_id: data.soin_id,
       // Cabinet not sent if backend doesn't support it
     });
+
+    // Try to resolve soin name
+    let soinName: string | undefined = undefined;
+    try {
+      const soin = await SoinsService.getById(data.soin_id);
+      soinName = soin?.Nom;
+    } catch (err) {
+      // ignore
+    }
 
     const updatedAppointment: RendezVous = {
       ...mockAppointments[index],
@@ -163,6 +192,8 @@ export class AppointmentsService {
       status: data.status,
       client_id: data.client_id,
       Cabinet: data.Cabinet,
+      soin_id: data.soin_id,
+      soin_nom: soinName,
     };
 
     mockAppointments[index] = updatedAppointment;
@@ -289,6 +320,10 @@ export const validateAppointmentData = (
 
   if (!data.Cabinet || !data.Cabinet.trim()) {
     errors.push("Le cabinet est obligatoire");
+  }
+
+  if (!data.soin_id || data.soin_id <= 0) {
+    errors.push("Veuillez sélectionner un soin");
   }
 
   return errors;

@@ -51,8 +51,18 @@ import {
   RendezVous,
   AppointmentFormData,
 } from "@/services/appointmentsService";
+import { SoinsService, Soin } from "@/services/soinsService";
 import { Utilisateur } from "@/services/clientsService";
 import { UserService } from "@/services/userService";
+import InvoiceFormModal from "@/components/invoices/InvoiceFormModal";
+import {
+  InvoicesService,
+  FactureWithDetails,
+  FactureItem,
+  FactureStatut,
+  TypeBien,
+  FactureFormData,
+} from "@/services/invoicesService";
 
 const statusColors = {
   programmé: "bg-blue-100 text-blue-700 border-blue-200",
@@ -76,6 +86,7 @@ export default function Appointments() {
 
   // Data state
   const [appointments, setAppointments] = useState<RendezVous[]>([]);
+  const [soins, setSoins] = useState<Soin[]>([]);
   const [users, setUsers] = useState<Utilisateur[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -87,6 +98,13 @@ export default function Appointments() {
     useState<RendezVous | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Invoice modal state
+  const [isInvoiceModalOpen, setIsInvoiceModalOpen] = useState(false);
+  const [invoiceDraft, setInvoiceDraft] = useState<FactureWithDetails | null>(
+    null,
+  );
+  const [isInvoiceSubmitting, setIsInvoiceSubmitting] = useState(false);
+
   const { toast } = useToast();
 
   // Get unique creators for filter dropdown
@@ -95,13 +113,14 @@ export default function Appointments() {
     new Set(
       appointments
         .map((apt) => apt.Cabinet)
-        .filter((c): c is string => Boolean(c))
-    )
+        .filter((c): c is string => Boolean(c)),
+    ),
   );
 
   // Load appointments on component mount
   useEffect(() => {
     loadAppointments();
+    loadSoins();
   }, []);
 
   useEffect(() => {
@@ -139,6 +158,15 @@ export default function Appointments() {
     }
   };
 
+  const loadSoins = async () => {
+    try {
+      const data = await SoinsService.getAll();
+      setSoins(data);
+    } catch (error) {
+      console.error("Erreur lors du chargement des soins", error);
+    }
+  };
+
   const loadUsers = async () => {
     try {
       setIsLoading(true);
@@ -159,6 +187,13 @@ export default function Appointments() {
     const user = users.find((user) => user.CIN === CIN);
     if (user && user.nom) return user.nom;
     return CIN;
+  };
+
+  const getSoinName = (id?: number, fallback?: string) => {
+    if (fallback) return fallback;
+    if (!id) return "-";
+    const s = soins.find((soin) => soin.id === id);
+    return s ? s.Nom : String(id);
   };
 
   // Filter and search logic
@@ -213,7 +248,14 @@ export default function Appointments() {
         matchesDate
       );
     });
-  }, [searchTerm, statusFilter, creatorFilter, cabinetFilter, dateFilter, appointments]);
+  }, [
+    searchTerm,
+    statusFilter,
+    creatorFilter,
+    cabinetFilter,
+    dateFilter,
+    appointments,
+  ]);
 
   // CRUD Operations
   const handleCreateAppointment = async (data: AppointmentFormData) => {
@@ -352,9 +394,72 @@ export default function Appointments() {
   };
 
   const getNextStatus = (status?: RendezVous["status"]) => {
-    if (status === "programmé") return { next: "confirmé", label: "Marquer comme confirmé" } as const;
-    if (status === "confirmé") return { next: "terminé", label: "Marquer comme terminé" } as const;
+    if (status === "programmé")
+      return { next: "confirmé", label: "Marquer comme confirmé" } as const;
+    if (status === "confirmé")
+      return { next: "terminé", label: "Marquer comme terminé" } as const;
     return null;
+  };
+
+  // Open invoice modal prefilled from appointment
+  const openInvoicePrefill = (appointment: RendezVous) => {
+    // find soin
+    const soin = soins.find((s) => s.id === appointment.soin_id);
+    const item: FactureItem = {
+      id_bien: soin?.id || appointment.soin_id || 0,
+      type_bien: TypeBien.SOIN,
+      quantite: 1,
+      prix_unitaire: soin?.prix || 0,
+      nom_bien: soin?.Nom || appointment.soin_nom || appointment.sujet,
+    };
+
+    const draft: FactureWithDetails = {
+      id: 0,
+      CIN: appointment.CIN,
+      date: new Date().toISOString(),
+      prix_total: item.prix_unitaire,
+      prix_ht: item.prix_unitaire,
+      tva_amount: 0,
+      tva_rate: 0,
+      statut: FactureStatut.BROUILLON,
+      notes: `Facture préremplie depuis rendez-vous #${appointment.id}`,
+      Cree_par: appointment.Cree_par,
+      created_at: new Date().toISOString(),
+      items: [
+        {
+          id: 0,
+          id_facture: 0,
+          id_bien: item.id_bien,
+          type_bien: item.type_bien,
+          quantite: item.quantite,
+          Cree_par: appointment.Cree_par,
+          prix_unitaire: item.prix_unitaire,
+          nom_bien: item.nom_bien,
+        },
+      ],
+    };
+
+    setInvoiceDraft(draft);
+    setIsInvoiceModalOpen(true);
+  };
+
+  const handleCreateInvoice = async (data: FactureFormData) => {
+    try {
+      setIsInvoiceSubmitting(true);
+      await InvoicesService.create(data);
+      setIsInvoiceModalOpen(false);
+      setInvoiceDraft(null);
+      toast({ title: "Succès", description: "Facture créée avec succès" });
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: "Impossible de créer la facture",
+        variant: "destructive",
+      });
+      throw error;
+    } finally {
+      setIsInvoiceSubmitting(false);
+    }
   };
 
   const handleChangeStatus = async (appointment: RendezVous) => {
@@ -370,12 +475,20 @@ export default function Appointments() {
         Cree_par: appointment.Cree_par,
         status: transition.next,
         Cabinet: appointment.Cabinet || "Biohacking",
+        soin_id: appointment.soin_id || 0,
       };
       await AppointmentsService.update(appointment.id, payload);
       await loadAppointments();
-      toast({ title: "Statut mis à jour", description: `Rendez-vous ${transition.next}` });
+      toast({
+        title: "Statut mis à jour",
+        description: `Rendez-vous ${transition.next}`,
+      });
     } catch (error) {
-      toast({ title: "Erreur", description: "Impossible de mettre à jour le statut", variant: "destructive" });
+      toast({
+        title: "Erreur",
+        description: "Impossible de mettre à jour le statut",
+        variant: "destructive",
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -531,7 +644,7 @@ export default function Appointments() {
             <CardContent className="p-0">
               <div className="overflow-x-auto scrollbar-thin">
                 {isLoading ? (
-                  <TableLoader columns={9} rows={6} />
+                  <TableLoader columns={10} rows={6} />
                 ) : (
                   <Table>
                     <TableHeader>
@@ -539,6 +652,7 @@ export default function Appointments() {
                         <TableHead>Patient</TableHead>
                         <TableHead>CIN</TableHead>
                         <TableHead>Sujet</TableHead>
+                        <TableHead>Soin</TableHead>
                         <TableHead>Date & Heure</TableHead>
                         <TableHead>Cabinet</TableHead>
                         <TableHead>Statut</TableHead>
@@ -561,6 +675,12 @@ export default function Appointments() {
                               {appointment.CIN}
                             </TableCell>
                             <TableCell>{appointment.sujet}</TableCell>
+                            <TableCell>
+                              {getSoinName(
+                                appointment.soin_id,
+                                appointment.soin_nom,
+                              )}
+                            </TableCell>
                             <TableCell>
                               {formatDateTime(appointment.date_rendez_vous)}
                             </TableCell>
@@ -607,7 +727,9 @@ export default function Appointments() {
                                   {getNextStatus(appointment.status) && (
                                     <DropdownMenuItem
                                       className="gap-2"
-                                      onClick={() => handleChangeStatus(appointment)}
+                                      onClick={() =>
+                                        handleChangeStatus(appointment)
+                                      }
                                     >
                                       <Check className="h-4 w-4" />
                                       {getNextStatus(appointment.status)!.label}
@@ -643,7 +765,7 @@ export default function Appointments() {
                         ))
                       ) : (
                         <TableRow>
-                          <TableCell colSpan={9} className="text-center py-8">
+                          <TableCell colSpan={10} className="text-center py-8">
                             <div className="flex flex-col items-center gap-2">
                               <Calendar className="h-8 w-8 text-muted-foreground" />
                               <p className="text-muted-foreground">
@@ -702,6 +824,15 @@ export default function Appointments() {
                           <span>{appointment.sujet}</span>
                         </div>
                         <div className="flex items-center gap-2 text-sm">
+                          <span className="font-medium">Soin:</span>
+                          <span>
+                            {getSoinName(
+                              appointment.soin_id,
+                              appointment.soin_nom,
+                            )}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm">
                           <Clock className="h-4 w-4 text-muted-foreground" />
                           <span className="font-medium">Date:</span>
                           <span>
@@ -747,7 +878,9 @@ export default function Appointments() {
                               {getNextStatus(appointment.status) && (
                                 <DropdownMenuItem
                                   className="gap-2"
-                                  onClick={() => handleChangeStatus(appointment)}
+                                  onClick={() =>
+                                    handleChangeStatus(appointment)
+                                  }
                                 >
                                   <Check className="h-4 w-4" />
                                   {getNextStatus(appointment.status)!.label}
@@ -823,7 +956,9 @@ export default function Appointments() {
           appointment={selectedAppointment}
           onEdit={openEditModal}
           onDelete={openDeleteModal}
+          onPrefillInvoice={openInvoicePrefill}
           users={users}
+          soins={soins}
         />
 
         <DeleteConfirmationModal
@@ -832,6 +967,18 @@ export default function Appointments() {
           onConfirm={handleDeleteAppointment}
           appointment={selectedAppointment}
           isLoading={isSubmitting}
+        />
+
+        <InvoiceFormModal
+          isOpen={isInvoiceModalOpen}
+          onClose={() => {
+            setIsInvoiceModalOpen(false);
+            setInvoiceDraft(null);
+          }}
+          onSubmit={handleCreateInvoice}
+          invoice={invoiceDraft}
+          isLoading={isInvoiceSubmitting}
+          users={users}
         />
       </div>
     </DashboardLayout>

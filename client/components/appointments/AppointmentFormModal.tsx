@@ -61,6 +61,7 @@ import {
   validateClientData,
   Utilisateur,
 } from "@/services/clientsService";
+import { SoinsService, Soin } from "@/services/soinsService";
 import { AuthService } from "@/services/authService";
 import { OptionsService } from "@/services/optionsService";
 
@@ -89,11 +90,13 @@ export default function AppointmentFormModal({
     Cree_par: "",
     status: "programmé",
     Cabinet: "Biohacking",
+    soin_id: 0,
   });
 
   const [errors, setErrors] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [clients, setClients] = useState<Client[]>([]);
+  const [soins, setSoins] = useState<Soin[]>([]);
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [isClientSelectorOpen, setIsClientSelectorOpen] = useState(false);
   const [clientSearchQuery, setClientSearchQuery] = useState("");
@@ -115,6 +118,7 @@ export default function AppointmentFormModal({
   useEffect(() => {
     if (isOpen) {
       loadClients();
+      loadSoins();
       OptionsService.getAppointmentTypes()
         .then(setAppointmentTypes)
         .catch(() => setAppointmentTypes([]));
@@ -142,6 +146,7 @@ export default function AppointmentFormModal({
         Cree_par: appointment.Cree_par || "",
         status: appointment.status || "programmé",
         Cabinet: appointment.Cabinet || "Biohacking",
+        soin_id: appointment.soin_id || 0,
       });
 
       // Find and set the selected client if we have a client_id
@@ -158,6 +163,7 @@ export default function AppointmentFormModal({
         Cree_par: user.CIN,
         status: "programmé",
         Cabinet: "Biohacking",
+        soin_id: 0,
       });
       setSelectedClient(null);
       setIsNewPatientMode(false);
@@ -186,6 +192,15 @@ export default function AppointmentFormModal({
                 "Erreur lors du chargement des patients",
             ],
       );
+    }
+  };
+
+  const loadSoins = async () => {
+    try {
+      const soinsData = await SoinsService.getAll();
+      setSoins(soinsData);
+    } catch (error) {
+      console.error("Erreur lors du chargement des soins", error);
     }
   };
 
@@ -671,6 +686,43 @@ export default function AppointmentFormModal({
               <SelectContent>
                 <SelectItem value="Biohacking">Biohacking</SelectItem>
                 <SelectItem value="Nassens">Nassens</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Soin */}
+          <div className="space-y-2">
+            <Label htmlFor="soin" className="flex items-center gap-2">
+              <Stethoscope className="h-4 w-4" />
+              Soin
+            </Label>
+            <Select
+              value={formData.soin_id ? String(formData.soin_id) : "0"}
+              onValueChange={(value) => {
+                const id = parseInt(value, 10) || 0;
+                handleInputChange("soin_id", id);
+                const selected = soins.find((s) => s.id === id);
+                if (selected && selected.Cabinet) {
+                  // auto-fill cabinet from soin
+                  handleInputChange("Cabinet", selected.Cabinet);
+                }
+              }}
+              disabled={isSubmitting}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Sélectionnez un soin" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="0">Aucun</SelectItem>
+                {soins
+                  .filter(
+                    (s) => !formData.Cabinet || s.Cabinet === formData.Cabinet,
+                  )
+                  .map((s) => (
+                    <SelectItem key={s.id} value={String(s.id)}>
+                      {s.Nom}
+                    </SelectItem>
+                  ))}
               </SelectContent>
             </Select>
           </div>

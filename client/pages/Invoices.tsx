@@ -72,7 +72,7 @@ import {
   formatPrice,
   getInvoiceStatistics,
 } from "@/services/invoicesService";
-import { Utilisateur } from "@/services/clientsService";
+import { Utilisateur, ClientsService } from "@/services/clientsService";
 import { UserService } from "@/services/userService";
 import { EntrepriseService } from "@/services/entrepriseService";
 import { AppSettingsService } from "@/services/appSettingsService";
@@ -624,6 +624,8 @@ export default function Invoices() {
       () => null,
     );
 
+    const client = await ClientsService.getByCIN(invoice.CIN).catch(() => null);
+
     const headerHtml = buildCompanyHeaderHtml(entreprise, {
       title: "FACTURE",
       subtitle: `#${invoice.id.toString().padStart(4, "0")}`,
@@ -634,11 +636,23 @@ export default function Invoices() {
         <div class="pdf-grid pdf-grid-2">
           <div class="pdf-card">
             <div class="pdf-section-title">Facturé à</div>
-            <div class="pdf-row"><span class="pdf-label">Patient:</span><span class="pdf-value">${invoice.CIN}</span></div>
             ${
-              invoice.patient_name
-                ? `<div class="pdf-row"><span class="pdf-label">Nom:</span><span class="pdf-value">${invoice.patient_name}</span></div>`
-                : ""
+              client
+                ? `
+              <div class="pdf-row"><span class="pdf-label">Nom:</span><span class="pdf-value">${client.prenom} ${client.nom}</span></div>
+              <div class="pdf-row"><span class="pdf-label">CIN:</span><span class="pdf-value">${invoice.CIN}</span></div>
+              ${client.adresse ? `<div class="pdf-row"><span class="pdf-label">Adresse:</span><span class="pdf-value">${client.adresse}</span></div>` : ""}
+              ${client.numero_telephone ? `<div class="pdf-row"><span class="pdf-label">Téléphone:</span><span class="pdf-value">${client.numero_telephone}</span></div>` : ""}
+              ${client.email ? `<div class="pdf-row"><span class="pdf-label">Email:</span><span class="pdf-value">${client.email}</span></div>` : ""}
+            `
+                : `
+              <div class="pdf-row"><span class="pdf-label">Patient:</span><span class="pdf-value">${invoice.CIN}</span></div>
+              ${
+                invoice.patient_name
+                  ? `<div class="pdf-row"><span class="pdf-label">Nom:</span><span class="pdf-value">${invoice.patient_name}</span></div>`
+                  : ""
+              }
+            `
             }
           </div>
           <div class="pdf-card">

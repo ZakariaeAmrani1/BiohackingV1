@@ -39,12 +39,12 @@ export function buildPdfBaseStyles(): string {
   body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;font-size:12px;line-height:1.5;color:hsl(var(--pdf-foreground));background:white;padding:20px}
   .pdf-container{max-width:800px;margin:0 auto;background:white}
   .pdf-header{display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid hsl(var(--pdf-primary));padding-bottom:16px;margin-bottom:24px}
-  .pdf-brand{display:flex;align-items:center;gap:12px}
-  .pdf-logo{width:64px;height:64px;border-radius:12px;border:1px solid hsl(var(--pdf-border));background:hsl(var(--pdf-secondary));display:flex;align-items:center;justify-content:center;overflow:hidden}
-  .pdf-logo img{width:100%;height:100%;object-fit:contain}
-  .pdf-company-lines{font-size:11px;color:hsl(var(--pdf-muted-foreground));text-align:right}
-  .pdf-title{font-size:28px;font-weight:700;color:hsl(var(--pdf-primary))}
-  .pdf-subtitle{font-size:14px;color:hsl(var(--pdf-muted-foreground))}
+  .pdf-brand{display:flex;align-items:center;gap:12px}.pdf-title-block{text-align:center;flex:1}
+  .pdf-logo{display:block}
+  .pdf-logo img{display:block;max-height:60px;width:auto;height:auto;object-fit:contain}
+  .pdf-company-lines{font-size:11px;color:hsl(var(--pdf-muted-foreground));text-align:right;max-width:40%}
+  .pdf-title{font-size:24px;font-weight:700;color:hsl(var(--pdf-primary))}
+  .pdf-subtitle{font-size:12px;color:hsl(var(--pdf-muted-foreground))}
   .pdf-section{margin-bottom:20px}
   .pdf-card{background:hsl(var(--pdf-muted));padding:16px;border-radius:8px}
   .pdf-section-title{font-weight:700;font-size:14px;color:hsl(var(--pdf-primary));margin-bottom:8px;border-bottom:1px solid hsl(var(--pdf-border));padding-bottom:6px}
@@ -66,27 +66,31 @@ export function buildPdfBaseStyles(): string {
   .pdf-note{margin-top:16px;padding:14px;background:hsl(var(--pdf-muted));border-left:4px solid hsl(var(--pdf-primary));border-radius:6px}
   .pdf-footer{margin-top:28px;text-align:center;color:hsl(var(--pdf-muted-foreground));font-size:10px;border-top:1px solid hsl(var(--pdf-border));padding-top:12px}
   .pdf-footer small{display:block;margin-top:6px}
-  @media print{body{padding:0;background:white}.pdf-container{box-shadow:none}}
+  @page{size:A4;margin:12mm}
+  @media print{body{padding:0;background:white}.pdf-container{box-shadow:none;padding-bottom:120px}.pdf-footer{position:fixed;bottom:12mm;left:0;right:0;margin:0 auto;max-width:800px;background:transparent;border-top:1px solid hsl(var(--pdf-border));padding-top:8px}}
   `;
 }
 
-export function buildCompanyHeaderHtml(entreprise: Entreprise | null, opts?: { logoUrl?: string; title?: string; subtitle?: string }): string {
-  const logoUrl = opts?.logoUrl ||
+export function buildCompanyHeaderHtml(
+  entreprise: Entreprise | null,
+  opts?: { logoUrl?: string; title?: string; subtitle?: string },
+): string {
+  const logoUrl =
+    opts?.logoUrl ||
     "https://cdn.builder.io/api/v1/image/assets%2F16493a39c179465f9ca598ede9454dc8%2Fcceedcfad29a48b9a90d85058157ec8d?format=webp&width=800";
 
   const lines: string[] = [];
   if (entreprise?.adresse) lines.push(escapeHtml(entreprise.adresse));
-  if (entreprise?.numero_telephone) lines.push(`Tél: ${escapeHtml(entreprise.numero_telephone)}`);
+  if (entreprise?.numero_telephone)
+    lines.push(`Tél: ${escapeHtml(entreprise.numero_telephone)}`);
   if (entreprise?.email) lines.push(`Email: ${escapeHtml(entreprise.email)}`);
 
   return `
   <div class="pdf-header">
-    <div class="pdf-brand">
-      <div class="pdf-logo"><img src="${logoUrl}" alt="Logo" /></div>
-      <div>
-        ${opts?.title ? `<div class="pdf-title">${escapeHtml(opts.title)}</div>` : ""}
-        ${opts?.subtitle ? `<div class="pdf-subtitle">${escapeHtml(opts.subtitle)}</div>` : ""}
-      </div>
+    <div class="pdf-logo"><img src="${logoUrl}" alt="Logo" /></div>
+    <div class="pdf-title-block">
+      ${opts?.title ? `<div class="pdf-title">${escapeHtml(opts.title)}</div>` : ""}
+      ${opts?.subtitle ? `<div class="pdf-subtitle">${escapeHtml(opts.subtitle)}</div>` : ""}
     </div>
     <div class="pdf-company-lines">${lines.join("<br>")}</div>
   </div>`;
@@ -99,10 +103,16 @@ export function buildCompanyFooterHtml(entreprise: Entreprise | null): string {
   if (entreprise?.IF !== undefined) details.push(`IF: ${entreprise.IF}`);
   if (entreprise?.CNSS !== undefined) details.push(`CNSS: ${entreprise.CNSS}`);
   if (entreprise?.RIB !== undefined) details.push(`RIB: ${entreprise.RIB}`);
-  if (entreprise?.patente !== undefined) details.push(`Patente: ${entreprise.patente}`);
+  if (entreprise?.patente !== undefined)
+    details.push(`Patente: ${entreprise.patente}`);
 
-  const addressLine = entreprise?.adresse ? `<div>${escapeHtml(entreprise.adresse)}</div>` : "";
-  const contactLine = entreprise?.numero_telephone || entreprise?.email ? `<div>${[entreprise?.numero_telephone ? `Tél: ${escapeHtml(entreprise.numero_telephone)}` : null, entreprise?.email ? `Email: ${escapeHtml(entreprise.email)}` : null].filter(Boolean).join(" ")}</div>` : "";
+  const addressLine = entreprise?.adresse
+    ? `<div>${escapeHtml(entreprise.adresse)}</div>`
+    : "";
+  const contactLine =
+    entreprise?.numero_telephone || entreprise?.email
+      ? `<div>${[entreprise?.numero_telephone ? `Tél: ${escapeHtml(entreprise.numero_telephone)}` : null, entreprise?.email ? `Email: ${escapeHtml(entreprise.email)}` : null].filter(Boolean).join(" ")}</div>`
+      : "";
 
   return `
   <div class="pdf-footer">
@@ -112,7 +122,11 @@ export function buildCompanyFooterHtml(entreprise: Entreprise | null): string {
   </div>`;
 }
 
-export function wrapPdfHtmlDocument(title: string, contentHtml: string, extraStyles?: string): string {
+export function wrapPdfHtmlDocument(
+  title: string,
+  contentHtml: string,
+  extraStyles?: string,
+): string {
   const styles = buildPdfBaseStyles() + (extraStyles || "");
   return `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${escapeHtml(title)}</title><style>${styles}</style></head><body><div class="pdf-container">${contentHtml}</div></body></html>`;
 }

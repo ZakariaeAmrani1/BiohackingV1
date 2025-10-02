@@ -9,6 +9,7 @@ import {
   Edit,
   Trash2,
   Building2,
+  Receipt,
 } from "lucide-react";
 import {
   Dialog,
@@ -23,6 +24,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { RendezVous } from "@/services/appointmentsService";
 import { Utilisateur } from "@/services/clientsService";
+import { Soin } from "@/services/soinsService";
 
 interface AppointmentDetailsModalProps {
   isOpen: boolean;
@@ -30,7 +32,9 @@ interface AppointmentDetailsModalProps {
   appointment: RendezVous | null;
   onEdit?: (appointment: RendezVous) => void;
   onDelete?: (appointment: RendezVous) => void;
+  onPrefillInvoice?: (appointment: RendezVous) => void;
   users: Utilisateur[] | null;
+  soins?: Soin[] | null;
 }
 
 const statusColors = {
@@ -58,7 +62,9 @@ export default function AppointmentDetailsModal({
   appointment,
   onEdit,
   onDelete,
+  onPrefillInvoice,
   users,
+  soins,
 }: AppointmentDetailsModalProps) {
   if (!appointment) return null;
 
@@ -88,6 +94,13 @@ export default function AppointmentDetailsModal({
   const getUserName = (CIN: string) => {
     const user = users.find((user) => user.CIN === CIN);
     return user.nom || CIN;
+  };
+
+  const getSoinName = (soinId?: number) => {
+    if (!soinId) return "-";
+    if (!soins || soins.length === 0) return String(soinId);
+    const s = soins.find((s) => s.id === soinId);
+    return s ? s.Nom : String(soinId);
   };
 
   const handleEdit = () => {
@@ -164,6 +177,11 @@ export default function AppointmentDetailsModal({
               <div>
                 <Label>Type de consultation</Label>
                 <Value>{appointment.sujet}</Value>
+              </div>
+
+              <div>
+                <Label>Soin</Label>
+                <Value>{getSoinName(appointment.soin_id)}</Value>
               </div>
 
               <div>
@@ -244,6 +262,20 @@ export default function AppointmentDetailsModal({
             <Button variant="outline" onClick={handleEdit} className="gap-2">
               <Edit className="h-4 w-4" />
               Modifier
+            </Button>
+          )}
+
+          {onPrefillInvoice && (
+            <Button
+              variant="default"
+              onClick={() => {
+                onPrefillInvoice(appointment);
+                onClose();
+              }}
+              className="gap-2"
+            >
+              <Receipt className="h-4 w-4" />
+              Pré-remplir facture
             </Button>
           )}
 
