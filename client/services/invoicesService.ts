@@ -168,6 +168,7 @@ export class InvoicesService {
       quantite: facture.quantite,
       Cree_par: facture.Cree_par,
       nom_bien: facture.bien.Nom,
+      movementType: facture.movementType,
       prix_unitaire: facture.prix,
     }));
     return mockFactures.sort(
