@@ -294,9 +294,12 @@ export const validateClientData = (data: ClientFormData): string[] => {
   //   errors.push("L'adresse est obligatoire");
   // }
 
-  if (!data.numero_telephone.trim()) {
-    errors.push("Le numéro de téléphone est obligatoire");
-  } else if (
+  // if (!data.numero_telephone.trim()) {
+  //   errors.push("Le numéro de téléphone est obligatoire");
+  // } else
+
+  if (
+    data.numero_telephone.trim() &&
     !/^(\+212|0|\+33)[1-9]\d{7,8}$/.test(
       data.numero_telephone.replace(/\s/g, ""),
     )
