@@ -102,7 +102,6 @@ export class InventoryService {
   static async createIN(data: InventoryFormData): Promise<InventoryMovement> {
     const current = AuthService.getCurrentUser();
     const res = await api.post(`facture-bien`, {
-      id_facture: null,
       id_bien: data.id_bien,
       type_bien: "produit",
       quantite: data.quantite,
@@ -141,7 +140,7 @@ export class InventoryService {
   }
 
   static async delete(id: number): Promise<boolean> {
-    await api.delete(`facture-bien/${id}`);
+    await api.delete(`facture-bien/IN/${id}`);
     return true;
   }
 }

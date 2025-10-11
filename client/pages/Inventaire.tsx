@@ -125,13 +125,13 @@ export default function Inventaire() {
       setIsFormOpen(false);
       await loadAll();
       toast({ title: "Succès", description: "Mouvement enregistré" });
-    } catch (e) {
+    } catch (error) {
       toast({
         title: "Erreur",
         description: "Impossible d'enregistrer le mouvement",
         variant: "destructive",
       });
-      throw e;
+      throw error;
     } finally {
       setSubmitting(false);
     }
