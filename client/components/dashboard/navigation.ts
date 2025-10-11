@@ -40,6 +40,7 @@ export const navigation: NavItem[] = [
     dropdown: true,
     children: [
       { name: "Produits", href: "/products", icon: Package },
+      { name: "Inventaire", href: "/inventaire", icon: Package },
       { name: "Soins", href: "/soins", icon: Stethoscope },
     ],
   },

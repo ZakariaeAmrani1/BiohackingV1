@@ -18,6 +18,7 @@ import Treatments from "./pages/Treatments";
 import Products from "./pages/Products";
 import Employees from "./pages/Employees";
 import Soins from "./pages/Soins";
+import Inventaire from "./pages/Inventaire";
 import Invoices from "./pages/Invoices";
 import Payments from "./pages/Payments";
 import Biohacking from "./pages/Biohacking";
@@ -122,6 +123,14 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <Products />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/inventaire"
+        element={
+          <ProtectedRoute>
+            <Inventaire />
           </ProtectedRoute>
         }
       />
