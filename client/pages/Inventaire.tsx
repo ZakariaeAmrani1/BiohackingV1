@@ -36,8 +36,8 @@ import {
 import { ProductsService, Product } from "@/services/productsService";
 import InventoryFormModal from "@/components/inventory/InventoryFormModal";
 import DeleteInventoryModal from "@/components/inventory/DeleteInventoryModal";
+import NewMovementTypeModal from "@/components/inventory/NewMovementTypeModal";
 import {
-  CalendarRange,
   ChevronDown,
   Plus,
   Package,
@@ -56,6 +56,8 @@ export default function Inventaire() {
   const [dateFrom, setDateFrom] = useState<string>("");
   const [dateTo, setDateTo] = useState<string>("");
 
+  const [isTypePickerOpen, setIsTypePickerOpen] = useState(false);
+  const [initialType, setInitialType] = useState<"IN" | "OUT">("IN");
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [selected, setSelected] = useState<InventoryMovement | null>(null);
@@ -103,7 +105,7 @@ export default function Inventaire() {
 
   const openCreate = () => {
     setSelected(null);
-    setIsFormOpen(true);
+    setIsTypePickerOpen(true);
   };
   const openEdit = (m: InventoryMovement) => {
     setSelected(m);
@@ -115,12 +117,72 @@ export default function Inventaire() {
   };
 
   const handleSubmit = async (data: InventoryFormData) => {
+    const ensureProduct = async (productId: number) => {
+      let p = await ProductsService.getById(productId);
+      if (!p) {
+        await ProductsService.getAll();
+        p = await ProductsService.getById(productId);
+      }
+      return p;
+    };
+
     try {
       setSubmitting(true);
       if (selected) {
-        await InventoryService.updateIN(selected.id, data);
+        const changingProduct = data.id_bien !== selected.id_bien;
+        if (selected.movementType === "IN") {
+          await InventoryService.updateIN(selected.id, data);
+        } else {
+          await InventoryService.updateOUT(selected.id, data);
+        }
+
+        if (changingProduct) {
+          const oldProd = await ensureProduct(selected.id_bien);
+          const newProd = await ensureProduct(data.id_bien);
+          if (oldProd) {
+            const sign = selected.movementType === "IN" ? "-" : "+";
+            toast({
+              title: "Stock mis à jour",
+              description: `${oldProd.Nom}: ${sign}${selected.quantite} → ${oldProd.stock}`,
+            });
+          }
+          if (newProd) {
+            const sign = selected.movementType === "IN" ? "+" : "-";
+            toast({
+              title: "Stock mis à jour",
+              description: `${newProd.Nom}: ${sign}${data.quantite} → ${newProd.stock}`,
+            });
+          }
+        } else {
+          const delta = data.quantite - selected.quantite;
+          if (delta !== 0) {
+            const prod = await ensureProduct(data.id_bien);
+            if (prod) {
+              let sign = "";
+              if (selected.movementType === "IN") sign = delta > 0 ? "+" : "";
+              else sign = delta > 0 ? "-" : "+";
+              const abs = Math.abs(delta);
+              toast({
+                title: "Stock mis à jour",
+                description: `${prod.Nom}: ${sign}${abs} → ${prod.stock}`,
+              });
+            }
+          }
+        }
       } else {
-        await InventoryService.createIN(data);
+        if (data.movementType === "IN") {
+          await InventoryService.createIN(data);
+        } else {
+          await InventoryService.createOUT(data);
+        }
+        const prod = await ensureProduct(data.id_bien);
+        if (prod) {
+          const sign = data.movementType === "IN" ? "+" : "-";
+          toast({
+            title: "Stock mis à jour",
+            description: `${prod.Nom}: ${sign}${data.quantite} → ${prod.stock}`,
+          });
+        }
       }
       setIsFormOpen(false);
       await loadAll();
@@ -139,9 +201,26 @@ export default function Inventaire() {
 
   const handleDelete = async () => {
     if (!selected) return;
+    const ensureProduct = async (productId: number) => {
+      let p = await ProductsService.getById(productId);
+      if (!p) {
+        await ProductsService.getAll();
+        p = await ProductsService.getById(productId);
+      }
+      return p;
+    };
+
     try {
       setSubmitting(true);
-      await InventoryService.delete(selected.id);
+      await InventoryService.deleteMovement(selected.id, selected.movementType);
+      const prod = await ensureProduct(selected.id_bien);
+      if (prod) {
+        const sign = selected.movementType === "IN" ? "-" : "+";
+        toast({
+          title: "Stock mis à jour",
+          description: `${prod.Nom}: ${sign}${selected.quantite} → ${prod.stock}`,
+        });
+      }
       setIsDeleteOpen(false);
       await loadAll();
       toast({ title: "Supprimé", description: "Mouvement supprimé" });
@@ -266,6 +345,8 @@ export default function Inventaire() {
                     {filtered.length > 0 ? (
                       filtered.map((m) => {
                         const isIn = m.movementType === "IN";
+                        const isManualOut =
+                          m.movementType === "OUT" && !m.id_facture;
                         return (
                           <TableRow
                             key={m.id}
@@ -323,7 +404,7 @@ export default function Inventaire() {
                             </TableCell>
                             <TableCell>{m.Cree_par}</TableCell>
                             <TableCell className="text-right">
-                              {isIn ? (
+                              {isIn || isManualOut ? (
                                 <DropdownMenu>
                                   <DropdownMenuTrigger asChild>
                                     <Button
@@ -336,13 +417,17 @@ export default function Inventaire() {
                                   <DropdownMenuContent align="end">
                                     <DropdownMenuItem
                                       className="gap-2"
-                                      onClick={() => openEdit(m)}
+                                      onSelect={() =>
+                                        setTimeout(() => openEdit(m), 0)
+                                      }
                                     >
                                       Modifier
                                     </DropdownMenuItem>
                                     <DropdownMenuItem
                                       className="gap-2 text-red-600"
-                                      onClick={() => openDelete(m)}
+                                      onSelect={() =>
+                                        setTimeout(() => openDelete(m), 0)
+                                      }
                                     >
                                       Supprimer
                                     </DropdownMenuItem>
@@ -367,6 +452,16 @@ export default function Inventaire() {
           </CardContent>
         </Card>
 
+        <NewMovementTypeModal
+          isOpen={isTypePickerOpen}
+          onClose={() => setIsTypePickerOpen(false)}
+          onChoose={(type) => {
+            setInitialType(type);
+            setIsTypePickerOpen(false);
+            setIsFormOpen(true);
+          }}
+        />
+
         <InventoryFormModal
           isOpen={isFormOpen}
           onClose={() => setIsFormOpen(false)}
@@ -374,6 +469,7 @@ export default function Inventaire() {
           isLoading={submitting}
           products={products}
           movement={selected}
+          initialType={selected ? selected.movementType : initialType}
         />
 
         <DeleteInventoryModal

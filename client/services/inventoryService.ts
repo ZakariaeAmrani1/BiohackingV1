@@ -36,7 +36,7 @@ export interface InventoryMovement {
   prix: number; // unit price
   total: number;
   movementType: MovementType;
-  date: string; // OUT -> facture.date, IN -> created_at
+  date: string; // OUT (invoice-linked) -> facture.date, otherwise -> created_at
   Cree_par: string;
   created_at: string;
 }
@@ -45,9 +45,24 @@ export interface InventoryFormData {
   id_bien: number;
   quantite: number;
   prix: number;
+  date?: string; // optional override, defaults to now
+  movementType: MovementType;
 }
 
+const clamp = (n: number, min: number) => (n < min ? min : n);
+
 export class InventoryService {
+  private static async ensureProduct(
+    productId: number,
+  ): Promise<Product | null> {
+    let p = await ProductsService.getById(productId);
+    if (!p) {
+      await ProductsService.getAll();
+      p = await ProductsService.getById(productId);
+    }
+    return p || null;
+  }
+
   static async getAll(): Promise<InventoryMovement[]> {
     const [factureRes, itemsRes] = await Promise.all([
       api.get<FactureRaw[]>(`facture`),
@@ -63,17 +78,23 @@ export class InventoryService {
 
     const result: InventoryMovement[] = [];
     for (const it of items) {
-      const isOut =
-        it.movementType === "OUT" ||
-        (!!it.id_facture && it.movementType !== "IN");
       const linkedFacture = it.id_facture
         ? facturesById.get(it.id_facture)
         : undefined;
 
-      // Only include OUT linked to a paid invoice
-      if (isOut) {
+      const isOut =
+        it.movementType === "OUT" ||
+        (!!it.id_facture && it.movementType !== "IN");
+
+      // Invoice-linked OUT should only show when paid
+      if (isOut && it.id_facture) {
         if (!linkedFacture) continue;
         if (linkedFacture.statut !== "Payée") continue;
+      }
+
+      // Manual OUT (no id_facture) should be included always
+      if (isOut && !it.id_facture) {
+        // ok
       }
 
       const nom_bien = it.bien?.Nom ?? "";
@@ -101,18 +122,35 @@ export class InventoryService {
 
   static async createIN(data: InventoryFormData): Promise<InventoryMovement> {
     const current = AuthService.getCurrentUser();
-    const res = await api.post(`facture-bien`, {
+    const payload: any = {
       id_bien: data.id_bien,
       type_bien: "produit",
       quantite: data.quantite,
       prix: data.prix,
       movementType: "IN",
       Cree_par: current?.CIN,
-    });
+    };
+    if (data.date) payload.created_at = new Date(data.date).toISOString();
 
-    const product = await ProductsService.getById(data.id_bien);
+    const res = await api.post(`facture-bien`, payload);
+
+    let product = await InventoryService.ensureProduct(data.id_bien);
+    if (product) {
+      const newStock = clamp(product.stock + data.quantite, 0);
+      await ProductsService.update(product.id, {
+        Nom: product.Nom,
+        prix: product.prix,
+        stock: newStock,
+        Cree_par: current?.CIN || "",
+      });
+      product = { ...product, stock: newStock };
+    }
+
     const nom_bien = product?.Nom || "";
 
+    const nowIso = data.date
+      ? new Date(data.date).toISOString()
+      : new Date().toISOString();
     return {
       id: res.data.id,
       id_facture: null,
@@ -122,25 +160,218 @@ export class InventoryService {
       prix: data.prix,
       total: data.prix * data.quantite,
       movementType: "IN",
-      date: new Date().toISOString(),
+      date: nowIso,
       Cree_par: current?.CIN || "",
-      created_at: new Date().toISOString(),
+      created_at: nowIso,
     };
   }
 
   static async updateIN(id: number, data: InventoryFormData): Promise<boolean> {
-    await api.patch(`facture-bien/${id}`, {
+    // Fetch previous IN movement to compute stock delta
+    const allRes = await api.get<InventoryMovementRaw[]>(`facture-bien`);
+    const prev = allRes.data.find(
+      (it) => it.id === id && (it.type_bien || "").toLowerCase() === "produit",
+    );
+
+    const payload: any = {
       id_bien: data.id_bien,
       type_bien: "produit",
       quantite: data.quantite,
       prix: data.prix,
       movementType: "IN",
-    });
+    };
+    if (data.date) payload.created_at = new Date(data.date).toISOString();
+
+    await api.patch(`facture-bien/${id}`, payload);
+
+    const current = AuthService.getCurrentUser();
+
+    if (prev) {
+      if (prev.id_bien === data.id_bien) {
+        // Same product: apply delta (IN adds stock)
+        let product = await InventoryService.ensureProduct(data.id_bien);
+        if (product) {
+          const delta = data.quantite - prev.quantite;
+          if (delta !== 0) {
+            const newStock = clamp(product.stock + delta, 0);
+            await ProductsService.update(product.id, {
+              Nom: product.Nom,
+              prix: product.prix,
+              stock: newStock,
+              Cree_par: current?.CIN || "",
+            });
+          }
+        }
+      } else {
+        // Product changed: revert old, apply new
+        const oldProduct = await InventoryService.ensureProduct(prev.id_bien);
+        if (oldProduct) {
+          const newStock = clamp(oldProduct.stock - prev.quantite, 0);
+          await ProductsService.update(oldProduct.id, {
+            Nom: oldProduct.Nom,
+            prix: oldProduct.prix,
+            stock: newStock,
+            Cree_par: current?.CIN || "",
+          });
+        }
+        const newProduct = await InventoryService.ensureProduct(data.id_bien);
+        if (newProduct) {
+          const newStock = clamp(newProduct.stock + data.quantite, 0);
+          await ProductsService.update(newProduct.id, {
+            Nom: newProduct.Nom,
+            prix: newProduct.prix,
+            stock: newStock,
+            Cree_par: current?.CIN || "",
+          });
+        }
+      }
+    }
+
     return true;
   }
 
-  static async delete(id: number): Promise<boolean> {
-    await api.delete(`facture-bien/IN/${id}`);
+  static async createOUT(data: InventoryFormData): Promise<InventoryMovement> {
+    const current = AuthService.getCurrentUser();
+    const payload: any = {
+      id_bien: data.id_bien,
+      type_bien: "produit",
+      quantite: data.quantite,
+      prix: data.prix,
+      movementType: "OUT",
+      Cree_par: current?.CIN,
+    };
+    if (data.date) payload.created_at = new Date(data.date).toISOString();
+
+    const res = await api.post(`facture-bien`, payload);
+
+    let product = await InventoryService.ensureProduct(data.id_bien);
+    if (product) {
+      const newStock = clamp(product.stock - data.quantite, 0);
+      await ProductsService.update(product.id, {
+        Nom: product.Nom,
+        prix: product.prix,
+        stock: newStock,
+        Cree_par: current?.CIN || "",
+      });
+      product = { ...product, stock: newStock };
+    }
+
+    const nom_bien = product?.Nom || "";
+    const nowIso = data.date
+      ? new Date(data.date).toISOString()
+      : new Date().toISOString();
+    return {
+      id: res.data.id,
+      id_facture: null,
+      id_bien: data.id_bien,
+      nom_bien,
+      quantite: data.quantite,
+      prix: data.prix,
+      total: data.prix * data.quantite,
+      movementType: "OUT",
+      date: nowIso,
+      Cree_par: current?.CIN || "",
+      created_at: nowIso,
+    };
+  }
+
+  static async updateOUT(
+    id: number,
+    data: InventoryFormData,
+  ): Promise<boolean> {
+    // Fetch previous OUT movement to compute stock delta
+    const allRes = await api.get<InventoryMovementRaw[]>(`facture-bien`);
+    const prev = allRes.data.find(
+      (it) => it.id === id && (it.type_bien || "").toLowerCase() === "produit",
+    );
+
+    const payload: any = {
+      id_bien: data.id_bien,
+      type_bien: "produit",
+      quantite: data.quantite,
+      prix: data.prix,
+      movementType: "OUT",
+    };
+    if (data.date) payload.created_at = new Date(data.date).toISOString();
+
+    await api.patch(`facture-bien/${id}`, payload);
+
+    const current = AuthService.getCurrentUser();
+
+    if (prev) {
+      if (prev.id_bien === data.id_bien) {
+        // Same product: OUT reduces stock; apply delta accordingly
+        let product = await InventoryService.ensureProduct(data.id_bien);
+        if (product) {
+          const deltaQty = data.quantite - prev.quantite; // positive means more OUT
+          if (deltaQty !== 0) {
+            const newStock = clamp(product.stock - deltaQty, 0);
+            await ProductsService.update(product.id, {
+              Nom: product.Nom,
+              prix: product.prix,
+              stock: newStock,
+              Cree_par: current?.CIN || "",
+            });
+          }
+        }
+      } else {
+        // Product changed: add back to old, subtract from new
+        const oldProduct = await InventoryService.ensureProduct(prev.id_bien);
+        if (oldProduct) {
+          const newStock = clamp(oldProduct.stock + prev.quantite, 0);
+          await ProductsService.update(oldProduct.id, {
+            Nom: oldProduct.Nom,
+            prix: oldProduct.prix,
+            stock: newStock,
+            Cree_par: current?.CIN || "",
+          });
+        }
+        const newProduct = await InventoryService.ensureProduct(data.id_bien);
+        if (newProduct) {
+          const newStock = clamp(newProduct.stock - data.quantite, 0);
+          await ProductsService.update(newProduct.id, {
+            Nom: newProduct.Nom,
+            prix: newProduct.prix,
+            stock: newStock,
+            Cree_par: current?.CIN || "",
+          });
+        }
+      }
+    }
+
+    return true;
+  }
+
+  static async deleteMovement(
+    id: number,
+    movementType: MovementType,
+  ): Promise<boolean> {
+    // Fetch movement to revert stock
+    const allRes = await api.get<InventoryMovementRaw[]>(`facture-bien`);
+    const prev = allRes.data.find(
+      (it) => it.id === id && (it.type_bien || "").toLowerCase() === "produit",
+    );
+
+    if (movementType === "IN") {
+      await api.delete(`facture-bien/IN/${id}`);
+    } else {
+      await api.delete(`facture-bien/OUT/${id}`);
+    }
+
+    if (prev) {
+      let product = await InventoryService.ensureProduct(prev.id_bien);
+      if (product) {
+        const delta = movementType === "IN" ? -prev.quantite : +prev.quantite;
+        const newStock = clamp(product.stock + delta, 0);
+        await ProductsService.update(product.id, {
+          Nom: product.Nom,
+          prix: product.prix,
+          stock: newStock,
+          Cree_par: AuthService.getCurrentUser()?.CIN || "",
+        });
+      }
+    }
+
     return true;
   }
 }

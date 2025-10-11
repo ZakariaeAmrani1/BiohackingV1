@@ -11,6 +11,7 @@ import {
   Receipt,
   DollarSign,
   TrendingUp,
+  Warehouse,
 } from "lucide-react";
 
 export interface NavChildItem {
@@ -40,7 +41,7 @@ export const navigation: NavItem[] = [
     dropdown: true,
     children: [
       { name: "Produits", href: "/products", icon: Package },
-      { name: "Inventaire", href: "/inventaire", icon: Package },
+      { name: "Inventaire", href: "/inventaire", icon: Warehouse },
       { name: "Soins", href: "/soins", icon: Stethoscope },
     ],
   },

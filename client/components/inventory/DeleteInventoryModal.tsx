@@ -23,6 +23,8 @@ export default function DeleteInventoryModal({
   movement,
   isLoading,
 }: Props) {
+  if (!isOpen) return null;
+
   return (
     <Dialog
       open={isOpen}
