@@ -355,7 +355,7 @@ export class InventoryService {
     if (movementType === "IN") {
       await api.delete(`facture-bien/IN/${id}`);
     } else {
-      await api.delete(`facture-bien/OUT/${id}`);
+      await api.delete(`facture-bien/IN/${id}`);
     }
 
     if (prev) {

@@ -112,10 +112,8 @@ export default function InventoryFormModal({
           <DialogTitle>{title}</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
-          <div
-            className={`grid grid-cols-1 ${movement ? "md:grid-cols-3" : "md:grid-cols-2"} gap-4`}
-          >
-            {movement && (
+          <div className={`grid grid-cols-1 md:grid-cols-2 gap-4`}>
+            {/* {movement && (
               <div className="space-y-2">
                 <Label>Type de mouvement</Label>
                 <Select
@@ -132,7 +130,7 @@ export default function InventoryFormModal({
                   </SelectContent>
                 </Select>
               </div>
-            )}
+            )} */}
             <div className="space-y-2">
               <Label>Date</Label>
               <Input
