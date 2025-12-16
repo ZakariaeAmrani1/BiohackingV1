@@ -41,12 +41,12 @@ export class EmployeesService {
       CIN: data.CIN,
       nom: data.nom,
       prenom: data.prenom,
-      date_naissance: data.date_naissance,
+      date_naissance: new Date(data.date_naissance),
       adresse: data.adresse,
       numero_telephone: data.numero_telephone,
       email: data.email,
       password: data.password,
-      confirmPassword: data.confirmPassword,
+      // confirmPassword: data.confirmPassword,
       role: data.role,
     };
 
